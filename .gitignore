@@ -1,0 +1,45 @@
+# Dependencies
+/node_modules
+/vendor
+
+# Environment
+.env
+
+# Laravel
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Build
+/public/hot
+/public/storage
+/public/build
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups (large)
+/backup_final
+/backup2
+
+# Media
+*.mp4
+*.jpeg
+*.jpg
+*.png
+*.gif
+*.svg
+!public/favicon.ico
+
+# Package locks (optional, remove if you want to track them)
+package-lock.json
+composer.lock

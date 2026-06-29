@@ -1,0 +1,2 @@
+[26-Mar-2025 14:37:06 Asia/Kolkata] PHP Fatal error:  Cannot declare class App\Http\Controllers\Admin\Servicecat\SkinsubconditionControllerInAdmin, because the name is already in use in /home/dslclinic/public_html/app/Http/Controllers/Admin/Skincondition/SkinsubconditionControllerInAdmin.php on line 13
+[03-Apr-2025 09:12:45 Asia/Kolkata] PHP Fatal error:  Cannot use Mail as Mail because the name is already in use in /home/dslclinic/public_html/app/Http/Controllers/Frontend/LoginController.php on line 18
