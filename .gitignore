@@ -1,6 +1,13 @@
 # Dependencies
 /node_modules
 /vendor
+node_modules/
+
+# Node.js backend
+nodejs-backend/node_modules/
+nodejs-backend/dist/
+nodejs-backend/.env
+nodejs-backend/coverage/
 
 # Environment
 .env

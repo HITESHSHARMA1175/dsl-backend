@@ -1,0 +1,13 @@
+export { default as authRoutes } from './auth/auth.routes';
+export { default as categoryRoutes } from './category/category.routes';
+export { default as serviceRoutes } from './service/service.routes';
+export { default as addonRoutes } from './addon/addon.routes';
+export { default as treatmentRoutes } from './treatment/treatment.routes';
+export { default as professionalRoutes } from './professional/professional.routes';
+export { default as slotRoutes } from './slot/slot.routes';
+export { default as bookingRoutes } from './booking/booking.routes';
+export { default as customerRoutes } from './customer/customer.routes';
+export { default as paymentRoutes } from './payment/payment.routes';
+export { default as clinicRoutes } from './clinic/clinic.routes';
+export { default as contentRoutes } from './content/content.routes';
+export { default as masterRoutes } from './master/master.routes';

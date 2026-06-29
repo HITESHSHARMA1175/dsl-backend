@@ -6,8 +6,8 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
 
 ## Tasks
 
-- [ ] 1. Project setup and configuration
-  - [ ] 1.1 Initialize Node.js project with TypeScript
+- [x] 1. Project setup and configuration
+  - [x] 1.1 Initialize Node.js project with TypeScript
     - Create `nodejs-backend/` directory
     - Initialize `package.json` with scripts: `dev`, `build`, `start`, `test`, `prisma:generate`, `prisma:pull`
     - Install dependencies: express, cors, helmet, jsonwebtoken, bcrypt, zod, stripe, axios, express-rate-limit, dotenv
@@ -16,29 +16,29 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - Create `jest.config.ts` configured for ts-jest with paths for unit, integration, and property tests
     - _Requirements: 21.1_
 
-  - [ ] 1.2 Set up environment configuration and validation
+  - [x] 1.2 Set up environment configuration and validation
     - Create `src/config/env.ts` with Zod schema validating all environment variables (DATABASE_URL, JWT secrets, Stripe keys, Klarna credentials, SendGrid key, Twilio optionals, CORS_ORIGINS, PORT, NODE_ENV)
     - Create `.env.example` with all required variables documented
     - _Requirements: 12.6, 13.4, 18.5, 21.1, 21.5_
 
-  - [ ] 1.3 Set up Prisma ORM and database connection
+  - [x] 1.3 Set up Prisma ORM and database connection
     - Install `prisma` and `@prisma/client`
     - Create `prisma/schema.prisma` with MySQL datasource and all models matching existing tables (User, Customer, CustomerAddress, PropertyCategory, Property, Addon, Treatment, Professional, KiBooking, Order, Clinic, MasterValue, Banner, Review, Faq, Blog, Seo, RefreshToken)
     - Create `src/config/database.ts` with PrismaClient singleton and connection pooling via DATABASE_URL parameter
     - _Requirements: 21.1, 21.2, 21.3, 21.5_
 
-  - [ ] 1.4 Create Express app entry point and server startup
+  - [x] 1.4 Create Express app entry point and server startup
     - Create `src/app.ts` with Express app setup: helmet, CORS, raw body for Stripe webhook, JSON parsing, URL-encoded parsing, route mounting, global error handler
     - Create `src/server.ts` as entry point that loads dotenv, validates env, connects Prisma, starts HTTP server
     - _Requirements: 21.4_
 
-- [ ] 2. Shared utilities and middleware
-  - [ ] 2.1 Implement standardized response utilities
+- [x] 2. Shared utilities and middleware
+  - [x] 2.1 Implement standardized response utilities
     - Create `src/shared/utils/response.util.ts` with `successResponse`, `errorResponse`, and `paginatedResponse` functions matching the design interfaces
     - Create `src/shared/types/api.types.ts` with SuccessResponse, ErrorResponse, PaginatedData interfaces
     - _Requirements: 19.1, 19.2, 19.3_
 
-  - [ ] 2.2 Implement shared utility modules
+  - [x] 2.2 Implement shared utility modules
     - Create `src/shared/utils/appError.ts` with AppError class (statusCode, message, isOperational)
     - Create `src/shared/utils/hash.util.ts` with bcrypt hash/compare wrappers (cost factor 10)
     - Create `src/shared/utils/otp.util.ts` with 4-digit OTP generation function
@@ -46,7 +46,7 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - Create `src/shared/types/express.d.ts` with Express Request augmentation for `req.user`
     - _Requirements: 1.3, 2.1, 19.4_
 
-  - [ ] 2.3 Implement middleware stack
+  - [x] 2.3 Implement middleware stack
     - Create `src/middleware/auth.middleware.ts` — JWT verification, role extraction into `req.user`
     - Create `src/middleware/adminGuard.middleware.ts` — Admin role enforcement returning 403
     - Create `src/middleware/validate.middleware.ts` — Zod schema validation, returns first error message with 400
@@ -60,26 +60,26 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 4: OTP generation produces valid 4-digit codes**
     - **Validates: Requirements 19.1, 19.2, 2.1**
 
-- [ ] 3. External service integrations
-  - [ ] 3.1 Implement SendGrid email service
+- [x] 3. External service integrations
+  - [x] 3.1 Implement SendGrid email service
     - Create `src/shared/services/sendgrid.service.ts` with methods: `sendOtpEmail`, `sendBookingConfirmation`, `sendOrderConfirmation`, `sendWelcomeEmail`
     - Use SendGrid HTTP API with Bearer token auth
     - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5_
 
-  - [ ] 3.2 Implement Twilio SMS service (stub for future OTP via SMS)
+  - [x] 3.2 Implement Twilio SMS service (stub for future OTP via SMS)
     - Create `src/shared/services/twilio.service.ts` with `sendSms` method using Twilio REST API
     - _Requirements: 2.1_
 
-- [ ] 4. Authentication module
-  - [ ] 4.1 Implement Token Service
+- [x] 4. Authentication module
+  - [x] 4.1 Implement Token Service
     - Create `src/modules/auth/token.service.ts` with methods: `generateAccessToken` (15m expiry), `generateRefreshToken` (crypto random), `storeRefreshToken`, `rotateRefreshToken` (revoke old + create new), `validateRefreshToken`
     - _Requirements: 1.1, 1.4, 1.6, 1.7, 2.7_
 
-  - [ ] 4.2 Implement Auth Service (admin login + customer OTP)
+  - [x] 4.2 Implement Auth Service (admin login + customer OTP)
     - Create `src/modules/auth/auth.service.ts` with methods: `adminLogin` (bcrypt compare, token generation), `requestOtp` (find/create customer, generate OTP, store with expiry, send email), `verifyOtp` (check blocked, check expiry, check match, increment attempts, block at 5, generate tokens on success), `refreshTokens` (validate + rotate)
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 4.3 Implement Auth Controller and Routes
+  - [x] 4.3 Implement Auth Controller and Routes
     - Create `src/modules/auth/auth.schema.ts` with Zod schemas for adminLogin, requestOtp, verifyOtp, refreshToken
     - Create `src/modules/auth/auth.controller.ts` with handlers for each auth endpoint
     - Create `src/modules/auth/auth.routes.ts` with route definitions: POST `/admin/login`, POST `/admin/refresh`, POST `/customer/request-otp`, POST `/customer/verify-otp`, POST `/customer/refresh`
@@ -91,43 +91,43 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 3: Refresh token rotation invalidates previous token**
     - **Validates: Requirements 1.1, 1.2, 1.5, 1.4, 1.7, 2.3, 2.4, 2.7**
 
-- [ ] 5. Checkpoint - Ensure auth module tests pass
+- [x] 5. Checkpoint - Ensure auth module tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Category module (CRUD)
-  - [ ] 6.1 Implement Category service, controller, and routes
+- [x] 6. Category module (CRUD)
+  - [x] 6.1 Implement Category service, controller, and routes
     - Create `src/modules/category/category.service.ts` with methods: `list` (filter by parent_id, default 0), `create`, `update`, `delete`
     - Create `src/modules/category/category.schema.ts` with Zod schemas for create (category_name required, parent_id), update
     - Create `src/modules/category/category.controller.ts` with CRUD handlers
     - Create `src/modules/category/category.routes.ts` — GET (public), POST/PUT/DELETE (admin-protected)
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 7. Service (Property) module (CRUD)
-  - [ ] 7.1 Implement Service module
+- [x] 7. Service (Property) module (CRUD)
+  - [x] 7.1 Implement Service module
     - Create `src/modules/service/service.service.ts` with methods: `list` (filter by property_category, property_sub_category), `create`, `update`, `delete`, `toggleStatus`
     - Create `src/modules/service/service.schema.ts` with Zod schemas
     - Create `src/modules/service/service.controller.ts` with CRUD + toggle handlers
     - Create `src/modules/service/service.routes.ts` — GET (public), POST/PUT/DELETE/PATCH toggle (admin)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-- [ ] 8. Addon module (CRUD)
-  - [ ] 8.1 Implement Addon module
+- [x] 8. Addon module (CRUD)
+  - [x] 8.1 Implement Addon module
     - Create `src/modules/addon/addon.service.ts` with methods: `list` (filter by parent_id, paginated 10/page), `create`, `update`, `delete`, `toggleStatus`
     - Create `src/modules/addon/addon.schema.ts` with Zod schemas
     - Create `src/modules/addon/addon.controller.ts` with CRUD + toggle handlers
     - Create `src/modules/addon/addon.routes.ts` — GET (public), POST/PUT/DELETE/PATCH toggle (admin)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
 
-- [ ] 9. Treatment module (CRUD)
-  - [ ] 9.1 Implement Treatment module
+- [x] 9. Treatment module (CRUD)
+  - [x] 9.1 Implement Treatment module
     - Create `src/modules/treatment/treatment.service.ts` with methods: `list` (filter by treatment_type), `create`, `update`, `delete`
     - Create `src/modules/treatment/treatment.schema.ts` with Zod schemas
     - Create `src/modules/treatment/treatment.controller.ts` with CRUD handlers
     - Create `src/modules/treatment/treatment.routes.ts` — all admin-protected
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 10. Professional module (CRUD)
-  - [ ] 10.1 Implement Professional module
+- [x] 10. Professional module (CRUD)
+  - [x] 10.1 Implement Professional module
     - Create `src/modules/professional/professional.service.ts` with methods: `list` (filter by parent_id/service_id), `create`, `update`, `delete`, `toggleStatus`
     - Create `src/modules/professional/professional.schema.ts` with Zod schemas
     - Create `src/modules/professional/professional.controller.ts` with CRUD + toggle handlers
@@ -141,11 +141,11 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 8: Status toggle is an involution**
     - **Validates: Requirements 3.1, 4.1, 5.1, 6.1, 14.1, 4.6, 5.6, 14.6, 15.5**
 
-- [ ] 11. Checkpoint - Ensure CRUD module tests pass
+- [x] 11. Checkpoint - Ensure CRUD module tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Slot availability module
-  - [ ] 12.1 Implement Slot Service
+- [x] 12. Slot availability module
+  - [x] 12.1 Implement Slot Service
     - Create `src/modules/slot/slot.service.ts` with `getAvailableSlots` method: generate 10-minute interval slots from 10:00–17:00, fetch existing bookings for professional+date, filter overlapping slots using interval overlap logic
     - Create `src/modules/slot/slot.schema.ts` with Zod schema validating professional_id, date, total_service_duration (all required)
     - Create `src/modules/slot/slot.controller.ts` with GET handler
@@ -157,8 +157,8 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 10: All generated slots are within operating hours**
     - **Validates: Requirements 7.1, 7.2, 7.3**
 
-- [ ] 13. Booking module
-  - [ ] 13.1 Implement Booking Service
+- [x] 13. Booking module
+  - [x] 13.1 Implement Booking Service
     - Create `src/modules/booking/booking.service.ts` with methods: `create` (find/create customer by email+mobile, create KiBooking record, send confirmation email), `list` (paginated), `search` (by first_name), `getById` (with relations), `updateStatus`
     - Create `src/modules/booking/booking.schema.ts` with Zod schemas for create (service_id, profession_id, slot_id, slot_date, first_name, last_name, email, mobile required), status update
     - Create `src/modules/booking/booking.controller.ts` with handlers
@@ -170,8 +170,8 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 12: Booking links to correct customer (existing or new)**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
-- [ ] 14. Customer module
-  - [ ] 14.1 Implement Customer Service
+- [x] 14. Customer module
+  - [x] 14.1 Implement Customer Service
     - Create `src/modules/customer/customer.service.ts` with methods: `getProfile`, `updateProfile` (with email uniqueness check excluding self), `listAddresses`, `createAddress`, `updateAddress`, `getBookingHistory`, `getOrderHistory`
     - Create `src/modules/customer/customer.schema.ts` with Zod schemas for profile update, address create/update
     - Create `src/modules/customer/customer.controller.ts` with handlers
@@ -183,19 +183,19 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 21: Email uniqueness constraint on customer profile update**
     - **Validates: Requirements 10.5, 10.6, 11.1, 11.2**
 
-- [ ] 15. Checkpoint - Ensure booking and customer tests pass
+- [x] 15. Checkpoint - Ensure booking and customer tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 16. Payment module (Stripe + Klarna)
-  - [ ] 16.1 Implement Stripe Service
+- [x] 16. Payment module (Stripe + Klarna)
+  - [x] 16.1 Implement Stripe Service
     - Create `src/modules/payment/stripe.service.ts` with methods: `createPaymentIntent` (GBP, confirm=true), `createCheckoutSession` (card payment method), `verifyWebhookSignature`, `retrieveSession`
     - _Requirements: 12.1, 12.2, 12.4, 12.6_
 
-  - [ ] 16.2 Implement Klarna Service
+  - [x] 16.2 Implement Klarna Service
     - Create `src/modules/payment/klarna.service.ts` with methods: `createSession`, `createOrder`, `cancelAuthorization`, `getSession` — all using axios with HTTP Basic Auth
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.6_
 
-  - [ ] 16.3 Implement Payment Controller and Routes
+  - [x] 16.3 Implement Payment Controller and Routes
     - Create `src/modules/payment/payment.schema.ts` with Zod schemas for payment intent, checkout session, Klarna session/order
     - Create `src/modules/payment/payment.controller.ts` with handlers for: Stripe payment intent, checkout session, webhook, success redirect, Klarna session, order, cancel auth, get session
     - Create `src/modules/payment/payment.routes.ts` with route definitions per design table
@@ -207,44 +207,44 @@ This plan converts the DSL Clinic backend from Laravel 10 to Express.js + TypeSc
     - **Property 22: Payment record creation stores correct payment metadata**
     - **Validates: Requirements 12.3, 12.4, 13.5**
 
-- [ ] 17. Clinic module (CRUD)
-  - [ ] 17.1 Implement Clinic module
+- [x] 17. Clinic module (CRUD)
+  - [x] 17.1 Implement Clinic module
     - Create `src/modules/clinic/clinic.service.ts` with methods: `list`, `create`, `update`, `delete`, `toggleStatus`
     - Create `src/modules/clinic/clinic.schema.ts` with Zod schemas
     - Create `src/modules/clinic/clinic.controller.ts` with CRUD + toggle handlers
     - Create `src/modules/clinic/clinic.routes.ts` — all admin-protected
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-- [ ] 18. Content module (Banners, Reviews, FAQ, Blog, SEO)
-  - [ ] 18.1 Implement Content module
+- [x] 18. Content module (Banners, Reviews, FAQ, Blog, SEO)
+  - [x] 18.1 Implement Content module
     - Create `src/modules/content/content.service.ts` with generic CRUD methods for Banner, Review, Faq, Blog, Seo entities; include `toggleStatus` and FAQ `updateSorting`
     - Create `src/modules/content/content.schema.ts` with Zod schemas for each entity type
     - Create `src/modules/content/content.controller.ts` with CRUD + toggle + sorting handlers for all 5 entity types
     - Create `src/modules/content/content.routes.ts` with all content sub-routes — all admin-protected
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5_
 
-- [ ] 19. Master values module
-  - [ ] 19.1 Implement Master module
+- [x] 19. Master values module
+  - [x] 19.1 Implement Master module
     - Create `src/modules/master/master.service.ts` with `getValues` method (filter by MasterHead ID)
     - Create `src/modules/master/master.schema.ts` with Zod query schema
     - Create `src/modules/master/master.controller.ts` with GET handler
     - Create `src/modules/master/master.routes.ts` — GET (public)
     - _Requirements: 17.1, 17.2, 17.3, 17.4_
 
-- [ ] 20. Route aggregation and final wiring
-  - [ ] 20.1 Wire all module routes into the main app
+- [x] 20. Route aggregation and final wiring
+  - [x] 20.1 Wire all module routes into the main app
     - Create `src/modules/index.ts` that imports and registers all module routers under their respective prefixes (/auth, /categories, /services, /addons, /treatments, /professionals, /slots, /bookings, /customers, /payments, /clinics, /content, /master)
     - Verify all routes are mounted on `/api/v1` prefix
     - _Requirements: 20.6_
 
-  - [ ]* 20.2 Write property tests for middleware and authorization
+  - [x] 20.2 Write property tests for middleware and authorization
     - **Property 16: Paginated responses contain correct metadata**
     - **Property 17: Protected endpoints reject unauthenticated requests**
     - **Property 18: Role-based access control enforces boundaries**
     - **Property 19: Validation rejects invalid request bodies**
     - **Validates: Requirements 19.3, 19.5, 20.1, 20.2, 20.3, 20.4, 20.5**
 
-- [ ] 21. Final checkpoint - Ensure all tests pass
+- [x] 21. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

@@ -1,0 +1,77 @@
+import { Request, Response, NextFunction } from 'express';
+import { CustomerService } from './customer.service';
+import { prisma } from '../../config/database';
+import { successResponse } from '../../shared/utils/response.util';
+
+const customerService = new CustomerService(prisma);
+
+export async function getProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const customer = await customerService.getProfile(customerId);
+    return res.status(200).json(successResponse(200, 'Success', customer));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const customer = await customerService.updateProfile(customerId, req.body);
+    return res.status(200).json(successResponse(200, 'Profile updated', customer));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listAddresses(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const addresses = await customerService.listAddresses(customerId);
+    return res.status(200).json(successResponse(200, 'Success', addresses));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createAddress(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const address = await customerService.createAddress(customerId, req.body);
+    return res.status(201).json(successResponse(201, 'Address created', address));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateAddress(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const addressId = Number(req.params.id);
+    const address = await customerService.updateAddress(customerId, addressId, req.body);
+    return res.status(200).json(successResponse(200, 'Address updated', address));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getBookingHistory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const bookings = await customerService.getBookingHistory(customerId);
+    return res.status(200).json(successResponse(200, 'Success', bookings));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getOrderHistory(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const orders = await customerService.getOrderHistory(customerId);
+    return res.status(200).json(successResponse(200, 'Success', orders));
+  } catch (error) {
+    next(error);
+  }
+}
