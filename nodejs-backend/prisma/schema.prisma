@@ -1,326 +1,2154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id                Int       @id @default(autoincrement())
-  name              String?
-  email             String    @unique
-  password          String
-  mobile_no         String?
-  first_name        String?
-  last_name         String?
-  profile           String?
-  gender            String?
-  status            String?   @default("1")
-  is_admin          Int?      @default(0)
-  is_sub_admin      Int?      @default(0)
-  country           Int?
-  state             Int?
-  city              Int?
-  designation       Int?
-  device_token      String?
-  device_type       String?
-  remember_token    String?
-  password_copy     String?
-  email_verified_at DateTime?
-  created_at        DateTime? @default(now())
-  updated_at        DateTime? @updatedAt
+  id                     BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  emp_id                 String?               @db.VarChar(255)
+  menu_permission        String?               @db.VarChar(400)
+  emp_type               String?               @db.VarChar(255)
+  reporting_boss         Int?
+  is_show_contact        users_is_show_contact @default(dbgenerated("0"))
+  designation            Int?
+  first_name             String                @db.VarChar(255)
+  last_name              String?               @db.VarChar(100)
+  email                  String?               @unique(map: "users_email_unique") @db.VarChar(255)
+  mobile_no              String?               @db.VarChar(20)
+  gender                 String?               @db.VarChar(50)
+  dob                    DateTime?             @db.Date
+  shop_name              String?               @db.VarChar(255)
+  shop_gst               String?               @db.VarChar(255)
+  shop_pan               String?               @db.VarChar(255)
+  shop_business_no       String?               @db.VarChar(255)
+  address                String?               @db.Text
+  country                String?               @db.VarChar(20)
+  state                  String?               @db.VarChar(20)
+  city                   String?               @db.VarChar(20)
+  pincode                Int?
+  date_of_joining        DateTime?             @db.Date
+  monthly_target         Int?                  @default(0)
+  monthly_meeting_target Int?                  @default(0)
+  daily_followup_target  Int?                  @default(0)
+  password               String?               @db.VarChar(500)
+  password_copy          String?               @db.VarChar(255)
+  type                   String?               @db.VarChar(255)
+  email_verified_at      DateTime?             @db.Timestamp(0)
+  account_name           String?               @db.VarChar(255)
+  account_no             String?               @db.VarChar(255)
+  bank_name              String?               @db.VarChar(255)
+  ifcs                   String?               @db.VarChar(255)
+  bank_address           String?               @db.VarChar(255)
+  profile                String?               @db.VarChar(255)
+  profile_aadhar         String?               @db.VarChar(255)
+  upload_aadhaar         String?               @db.VarChar(255)
+  aadhar_number          String?               @db.VarChar(255)
+  upload_pan             String?               @db.VarChar(255)
+  pan_number             String?               @db.VarChar(255)
+  upload_resume          String?               @db.VarChar(255)
+  upload_cancel_cheque   String?               @db.VarChar(255)
+  location_address       String?               @db.VarChar(255)
+  location_lat           String?               @db.VarChar(255)
+  location_lng           String?               @db.VarChar(255)
+  location_date          String?               @db.VarChar(255)
+  location_time          String?               @db.VarChar(255)
+  is_admin               Int                   @default(0)
+  is_sub_admin           users_is_sub_admin
+  is_seller              users_is_seller
+  is_kyc                 users_is_kyc
+  status                 Int                   @default(1) @db.TinyInt
+  remember_token         String?               @db.VarChar(100)
+  otp                    Int                   @default(1234)
+  business_name          String?               @db.VarChar(255)
+  business_type          String?               @db.VarChar(255)
+  business_category      String?               @db.VarChar(255)
+  business_email         String?               @db.VarChar(255)
+  created_at             DateTime?             @default(now()) @db.Timestamp(0)
+  updated_at             DateTime?             @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("users")
 }
 
 model Customer {
-  id                Int       @id @default(autoincrement())
-  first_name        String?
-  last_name         String?
-  mobile            String?
-  email             String?   @unique
-  password          String?
-  dob               String?
-  gender            String?
-  otp               String?
-  otp_expires_at    DateTime?
-  otp_attempts      Int?      @default(0)
-  otp_blocked_until DateTime?
-  device_token      String?
-  device_type       String?
-  remember_token    String?
-  status            String?   @default("1")
-  created_at        DateTime? @default(now())
-  updated_at        DateTime? @updatedAt
-
-  addresses         CustomerAddress[]
-  bookings          KiBooking[]
-  orders            Order[]
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  first_name     String?   @db.VarChar(255)
+  last_name      String?   @db.VarChar(255)
+  mobile         String?   @db.VarChar(255)
+  email          String?   @db.VarChar(255)
+  dob            String?   @db.VarChar(255)
+  gender         String?   @db.VarChar(255)
+  status         Int       @default(1) @db.TinyInt
+  otp            Int       @default(1234)
+  password       String    @default("$2y$10$uk4SBhAZKc/SwryaU8uKyeWeYfZxED5YcZXJYitCnBlAP4Mep9JpS") @db.VarChar(255)
+  remember_token String?   @db.VarChar(100)
+  device_token   String?   @db.Text
+  created_at     DateTime? @default(now()) @db.Timestamp(0)
+  updated_at     DateTime? @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("customers")
 }
 
 model CustomerAddress {
-  id           Int       @id @default(autoincrement())
-  user_id      Int
-  address_type String?
-  country      String?
-  state        String?
-  city         String?
-  address      String?
-  pincode      String?
-  created_at   DateTime? @default(now())
-  updated_at   DateTime? @updatedAt
-
-  customer     Customer  @relation(fields: [user_id], references: [id])
+  id           Int      @id @default(autoincrement())
+  user_id      String?  @db.VarChar(50)
+  address_type String?  @db.VarChar(255)
+  country      String?  @db.VarChar(255)
+  state        String?  @db.VarChar(255)
+  city         String?  @db.VarChar(255)
+  address      String?  @db.VarChar(255)
+  status       Int      @default(1) @db.TinyInt
+  addby        Int?
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("customer_addresses")
 }
 
 model PropertyCategory {
-  id            Int       @id @default(autoincrement())
-  parent_id     Int?      @default(0)
-  category_name String?
-  category_slug String?
-  main_category Int?
-  is_condition  Int?      @default(0)
-  is_top        Int?      @default(0)
-  sorting_order Int?      @default(0)
-  status        String?   @default("1")
-  created_at    DateTime? @default(now())
-  updated_at    DateTime? @updatedAt
-
-  properties    Property[]
+  id               BigInt                           @id @default(autoincrement()) @db.UnsignedBigInt
+  is_condition     property_categories_is_condition
+  main_category    Int?                             @default(0)
+  parent_id        Int                              @default(0) @db.UnsignedInt
+  parent_ids       Json?
+  parent_ids2      Json?
+  category_name    String?                          @db.VarChar(255)
+  category_slug    String?                          @db.VarChar(255)
+  icon             String?                          @db.VarChar(255)
+  why_us           String?                          @db.Text
+  benefits         String?                          @db.Text
+  youtube_link     String?                          @db.VarChar(400)
+  icon_large       String?                          @db.VarChar(255)
+  image1           String?                          @db.VarChar(255)
+  image2           String?                          @db.VarChar(255)
+  image3           String?                          @db.VarChar(255)
+  image4           String?                          @db.VarChar(255)
+  banner           String?                          @db.VarChar(255)
+  description      String?                          @db.Text
+  description1     String?                          @db.Text
+  description2     String?                          @db.Text
+  description3     String?                          @db.Text
+  description4     String?                          @db.Text
+  icon1            String?                          @db.VarChar(255)
+  icon2            String?                          @db.VarChar(255)
+  icon3            String?                          @db.VarChar(255)
+  icon4            String?                          @db.VarChar(255)
+  meta_keywords    String?                          @db.Text
+  meta_title       String?                          @db.VarChar(400)
+  meta_description String?                          @db.VarChar(400)
+  meta_scripts     String?                          @db.Text
+  category_name_cn String?                          @db.VarChar(255)
+  description_cn   String?                          @db.Text
+  description3_cn  String?                          @db.Text
+  youtube_link_cn  String?                          @db.VarChar(255)
+  icon_cn          String?                          @db.VarChar(255)
+  icon_large_cn    String?                          @db.VarChar(255)
+  icon2_cn         String?                          @db.VarChar(255)
+  category_name_ar String?                          @db.VarChar(255)
+  description_ar   String?                          @db.Text
+  description3_ar  String?                          @db.Text
+  youtube_link_ar  String?                          @db.VarChar(255)
+  icon_ar          String?                          @db.VarChar(255)
+  icon_large_ar    String?                          @db.VarChar(255)
+  icon2_ar         String?                          @db.VarChar(255)
+  sorting_order    Int                              @default(8888)
+  is_top           property_categories_is_top
+  status           Int?                             @default(1) @db.TinyInt
+  sort             Int?                             @default(8888)
+  created_at       DateTime                         @default(now()) @db.Timestamp(0)
+  updated_at       DateTime                         @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("property_categories")
 }
 
 model Property {
-  id                         Int       @id @default(autoincrement())
-  property_name              String?
-  description                String?   @db.Text
-  long_description           String?   @db.Text
-  price                      Decimal?  @db.Decimal(10, 2)
-  discounted_price           Decimal?  @db.Decimal(10, 2)
-  number_of_members_required Int?      @default(1)
+  id                         Int      @id @default(autoincrement())
+  parent_id                  Int      @default(0)
+  addon_ids                  String?  @db.VarChar(255)
+  property_name              String?  @db.VarChar(255)
+  skin_condition             Json?
+  skin_sub_condition         Json?
+  property_category          Json?
+  property_sub_category      Json?
+  description                String?  @db.Text
   duration                   Int?
-  sessions                   Int?
-  property_category          Int?
-  property_sub_category      Int?
-  parent_id                  Int?
-  profile                    String?
-  status                     String?   @default("1")
-  created_at                 DateTime? @default(now())
-  updated_at                 DateTime? @updatedAt
-
-  category                   PropertyCategory? @relation(fields: [property_category], references: [id])
+  number_of_members_required Int?
+  max_quantity_allowed       Int?
+  session1                   Int      @default(1)
+  price                      Float    @default(0.00)
+  discounted_price           Float    @default(0.00)
+  session2                   Int?
+  price2                     Float    @default(0.00)
+  discounted_price2          Float    @default(0.00)
+  session3                   Int?
+  price3                     Float    @default(0.00)
+  discounted_price3          Float    @default(0.00)
+  session4                   Int?
+  price4                     Float    @default(0.00)
+  discounted_price4          Float    @default(0.00)
+  offer_status               Int      @default(0)
+  long_description           String?  @db.LongText
+  profile                    String?  @db.VarChar(255)
+  offer_image                String?  @db.VarChar(255)
+  status                     Int      @default(1) @db.TinyInt
+  addby                      Int?
+  created_at                 DateTime @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("properties")
 }
 
 model Addon {
-  id                         Int       @id @default(autoincrement())
-  parent_id                  Int?
-  addon_name                 String?
-  description                String?   @db.Text
-  long_description           String?   @db.Text
-  price                      Decimal?  @db.Decimal(10, 2)
-  discounted_price           Decimal?  @db.Decimal(10, 2)
-  number_of_members_required Int?      @default(1)
+  id                         Int      @id @default(autoincrement())
+  parent_id                  Int      @default(0)
+  addon_name                 String?  @db.VarChar(255)
+  description                String?  @db.Text
   duration                   Int?
-  profile                    String?
-  status                     String?   @default("1")
-  created_at                 DateTime? @default(now())
-  updated_at                 DateTime? @updatedAt
+  number_of_members_required Int?
+  max_quantity_allowed       Int?
+  price                      Int?
+  discounted_price           Int?
+  profile                    String?  @db.VarChar(255)
+  addon_slug                 String?  @db.Text
+  status                     Int      @default(1) @db.TinyInt
+  addby                      Int?
+  created_at                 DateTime @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("addons")
 }
 
 model Treatment {
-  id             Int       @id @default(autoincrement())
-  name           String?
+  id             Int      @id @default(autoincrement())
   treatment_type Int?
-  status         String?   @default("1")
-  created_at     DateTime? @default(now())
-  updated_at     DateTime? @updatedAt
+  name           String?  @db.VarChar(255)
+  profile        String?  @db.VarChar(255)
+  status         Int      @default(1)
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("treatments")
 }
 
 model Professional {
   id                Int       @id @default(autoincrement())
-  professional_name String?
-  designation       String?
-  profession        String?
-  parent_id         Int?
-  category_ids      String?
-  profile           String?
-  rating            Decimal?  @db.Decimal(3, 1)
-  status            String?   @default("1")
-  created_at        DateTime? @default(now())
-  updated_at        DateTime? @updatedAt
-
-  bookings          KiBooking[]
+  professional_name String?   @db.VarChar(255)
+  email             String?   @db.VarChar(255)
+  mobile            String?   @db.VarChar(255)
+  gender            String?   @db.VarChar(100)
+  designation       String?   @db.VarChar(255)
+  profession        String?   @db.VarChar(255)
+  work_category     String?   @db.VarChar(255)
+  profile           String?   @db.VarChar(255)
+  monday            Boolean?
+  monday_start      DateTime? @db.Time(0)
+  monday_end        DateTime? @db.Time(0)
+  tuesday           Boolean?
+  tuesday_start     DateTime? @db.Time(0)
+  tuesday_end       DateTime? @db.Time(0)
+  wednesday         Boolean?
+  wednesday_start   DateTime? @db.Time(0)
+  wednesday_end     DateTime? @db.Time(0)
+  thursday          Boolean?
+  thursday_start    DateTime? @db.Time(0)
+  thursday_end      DateTime? @db.Time(0)
+  friday            Boolean?
+  friday_start      DateTime? @db.Time(0)
+  friday_end        DateTime? @db.Time(0)
+  saturday          Boolean?
+  saturday_start    DateTime? @db.Time(0)
+  saturday_end      DateTime? @db.Time(0)
+  sunday            Boolean?
+  sunday_start      DateTime? @db.Time(0)
+  sunday_end        DateTime? @db.Time(0)
+  status            Int       @default(1) @db.TinyInt
+  addby             Int?
+  created_at        DateTime  @default(now()) @db.Timestamp(0)
+  updated_at        DateTime  @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("professionals")
 }
 
 model KiBooking {
-  id                     Int       @id @default(autoincrement())
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   user_id                Int?
   service_id             String?   @db.Text
   ssessionsystems        String?   @db.Text
   spricesystems          String?   @db.Text
   addon_id               String?   @db.Text
   profession_id          Int?
-  total_service_duration Int?
-  total_addon_duration   Int?
-  clinic_id              Int?
+  total_service_duration String?   @db.VarChar(255)
+  total_addon_duration   String?   @db.VarChar(255)
   ddate                  DateTime? @db.Date
   slot_id                Int?
-  slot_date              String?
-  slot_time              String?
-  first_name             String?
-  last_name              String?
-  email                  String?
-  mobile                 String?
-  payment_method_id      String?
-  payment_method         String?
-  payment_amount         Decimal?  @db.Decimal(10, 2)
-  booking_status         String?   @default("pending")
-  is_web                 String?   @default("0")
-  status                 String?   @default("1")
-  created_at             DateTime? @default(now())
-  updated_at             DateTime? @updatedAt
-
-  customer               Customer?     @relation(fields: [user_id], references: [id])
-  professional           Professional? @relation(fields: [profession_id], references: [id])
+  slot_date              String?   @db.VarChar(255)
+  slot_time              String?   @db.VarChar(255)
+  first_name             String?   @db.VarChar(255)
+  last_name              String?   @db.VarChar(255)
+  email                  String?   @db.VarChar(255)
+  mobile                 String?   @db.VarChar(255)
+  status                 Int       @default(1) @db.TinyInt
+  otp                    Int       @default(1234)
+  payment_method_id      String?   @db.VarChar(255)
+  payment_method         String?   @db.VarChar(255)
+  payment_amount         String?   @db.VarChar(255)
+  is_web                 Int       @default(0)
+  clinic_id              String?   @db.VarChar(255)
+  selected_date          String?   @db.VarChar(255)
+  selected_time          String?   @db.VarChar(255)
+  cart_details           Json?
+  remember_token         String?   @db.VarChar(100)
+  device_token           String?   @db.Text
+  created_at             DateTime? @default(now()) @db.Timestamp(0)
+  updated_at             DateTime? @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("ki_bookings")
 }
 
 model Order {
-  id                 Int       @id @default(autoincrement())
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   user_id            Int?
-  billing_first_name String?
-  billing_last_name  String?
-  billing_phone      String?
-  billing_email      String?
-  billing_company    String?
-  billing_country    String?
-  billing_address_1  String?
-  billing_city       String?
-  billing_postcode   String?
-  order_amount       Decimal?  @db.Decimal(10, 2)
-  payment_method_id  String?
-  payment_method     String?
-  cart_details       String?   @db.Text
-  order_status       String?   @default("pending")
-  status             String?   @default("1")
-  created_at         DateTime? @default(now())
-  updated_at         DateTime? @updatedAt
-
-  customer           Customer? @relation(fields: [user_id], references: [id])
+  billing_first_name String?   @db.VarChar(255)
+  billing_last_name  String?   @db.VarChar(255)
+  billing_company    String?   @db.VarChar(255)
+  billing_country    String?   @db.VarChar(255)
+  billing_phone      String?   @db.VarChar(255)
+  billing_email      String?   @db.VarChar(255)
+  billing_address_1  String?   @db.VarChar(255)
+  billing_city       String?   @db.VarChar(255)
+  billing_postcode   String?   @db.VarChar(255)
+  order_amount       Int?
+  payment_method_id  String?   @db.VarChar(255)
+  payment_method     String?   @db.VarChar(255)
+  cart_details       Json?
+  order_status       String    @default("Pending") @db.VarChar(255)
+  status             Int       @default(1) @db.TinyInt
+  otp                Int       @default(1234)
+  remember_token     String?   @db.VarChar(100)
+  device_token       String?   @db.Text
+  created_at         DateTime? @default(now()) @db.Timestamp(0)
+  updated_at         DateTime? @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("orders")
 }
 
 model Clinic {
-  id         Int       @id @default(autoincrement())
-  name       String?
-  address    String?
-  city       String?
-  postcode   String?
-  phone      String?
-  email      String?
-  status     String?   @default("1")
-  created_at DateTime? @default(now())
-  updated_at DateTime? @updatedAt
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  clinic_name       String?   @db.VarChar(255)
+  mon_to_fry        String?   @db.VarChar(11)
+  clinic_start_time DateTime? @db.Time(0)
+  clinic_close_time DateTime? @db.Time(0)
+  sat               String?   @db.VarChar(11)
+  sat_start_time    DateTime? @db.Time(0)
+  sat_close_time    DateTime? @db.Time(0)
+  sun               String?   @db.VarChar(11)
+  sun_start_time    DateTime? @db.Time(0)
+  sun_close_time    DateTime? @db.Time(0)
+  clinic_website    String?   @db.VarChar(255)
+  clinic_email      String?   @db.VarChar(255)
+  clinic_phone      String?   @db.VarChar(255)
+  clinic_whatsapp   String?   @db.VarChar(255)
+  clinic_alt_phone  String?   @db.VarChar(255)
+  clinic_timezone   String?   @db.VarChar(255)
+  profile           String?   @db.VarChar(255)
+  address           String?   @db.VarChar(255)
+  google_map        String?   @db.Text
+  metro_name        String?   @db.VarChar(255)
+  metro_text        String?   @db.VarChar(255)
+  railway_name      String?   @db.VarChar(255)
+  railway_text      String?   @db.VarChar(255)
+  addby             Int?
+  created_at        DateTime? @default(now()) @db.Timestamp(0)
+  updated_at        DateTime? @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("clinics")
 }
 
 model MasterValue {
-  id          Int       @id @default(autoincrement())
-  MasterHead  Int?
-  MasterValue String?
-  status      String?   @default("1")
-  created_at  DateTime? @default(now())
-  updated_at  DateTime? @updatedAt
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  MasterHead      Int
+  MasterValue     String    @db.VarChar(200)
+  MasterValueIcon String?   @db.VarChar(200)
+  status          Int       @default(1) @db.TinyInt
+  created_by      Int
+  updated_by      Int?
+  created_at      DateTime  @default(now()) @db.Timestamp(0)
+  updated_at      DateTime? @updatedAt @db.Timestamp(0)
 
   @@map("master_values")
 }
 
 model Banner {
-  id         Int       @id @default(autoincrement())
-  title      String?
-  image      String?
-  link       String?
-  status     String?   @default("1")
-  created_at DateTime? @default(now())
-  updated_at DateTime? @updatedAt
+  id             Int      @id @default(autoincrement())
+  banner_type    String?  @db.VarChar(255)
+  banner_name    String?  @db.VarChar(255)
+  banner_url     String?  @db.VarChar(255)
+  profile        String?  @db.VarChar(255)
+  description    String?  @db.Text
+  description_cn String?  @db.Text
+  description_ar String?  @db.Text
+  profile_cn     String?  @db.VarChar(255)
+  profile_ar     String?  @db.VarChar(255)
+  status         Int      @default(1)
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("banners")
 }
 
 model Review {
-  id         Int       @id @default(autoincrement())
-  name       String?
-  rating     Int?
-  review     String?   @db.Text
-  status     String?   @default("1")
-  created_at DateTime? @default(now())
-  updated_at DateTime? @updatedAt
+  id          Int       @id @default(autoincrement())
+  user_id     String?   @db.VarChar(255)
+  full_name   String?   @db.VarChar(255)
+  rating      String?   @db.VarChar(255)
+  adddate     DateTime? @db.Date
+  location    String?   @db.VarChar(255)
+  title       String?   @db.VarChar(255)
+  description String?   @db.Text
+  status      Int       @default(1)
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime  @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("reviews")
 }
 
 model Faq {
-  id            Int       @id @default(autoincrement())
-  question      String?
-  answer        String?   @db.Text
-  sorting_order Int?      @default(0)
-  status        String?   @default("1")
-  created_at    DateTime? @default(now())
-  updated_at    DateTime? @updatedAt
+  id            Int      @id @default(autoincrement())
+  category_id   Int
+  question      String?  @db.Text
+  answer        String?  @db.Text
+  question_cn   String?  @db.Text
+  answer_cn     String?  @db.Text
+  question_ar   String?  @db.Text
+  answer_ar     String?  @db.Text
+  sorting_order Int      @default(8888)
+  status        Int      @default(1)
+  created_at    DateTime @default(now()) @db.Timestamp(0)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("faqs")
 }
 
 model Blog {
-  id            Int       @id @default(autoincrement())
-  title         String?
-  slug          String?
-  content       String?   @db.Text
-  blog_category Int?
-  image         String?
-  status        String?   @default("1")
-  created_at    DateTime? @default(now())
-  updated_at    DateTime? @updatedAt
+  id               Int       @id @default(autoincrement())
+  blog_category    Int?
+  blog_slug        String?   @db.VarChar(400)
+  meta_title       String?   @db.VarChar(400)
+  meta_keywords    String?   @db.VarChar(400)
+  meta_description String?   @db.VarChar(400)
+  meta_scripts     String?   @db.Text
+  blog_date        DateTime? @db.Date
+  profile_name     String?   @db.VarChar(255)
+  profile_alt      String?   @db.VarChar(255)
+  profile2_name    String?   @db.VarChar(255)
+  profile2_alt     String?   @db.VarChar(255)
+  profile_cn_name  String?   @db.VarChar(255)
+  profile_cn_alt   String?   @db.VarChar(255)
+  profile2_cn_name String?   @db.VarChar(255)
+  profile2_cn_alt  String?   @db.VarChar(255)
+  profile_ar_name  String?   @db.VarChar(255)
+  profile_ar_alt   String?   @db.VarChar(255)
+  profile2_ar_name String?   @db.VarChar(255)
+  profile2_ar_alt  String?   @db.VarChar(255)
+  title            String?   @db.VarChar(255)
+  profile          String?   @db.VarChar(255)
+  profile2         String?   @db.VarChar(255)
+  description      String?   @db.Text
+  title_cn         String?   @db.VarChar(255)
+  description_cn   String?   @db.Text
+  profile_cn       String?   @db.VarChar(255)
+  profile2_cn      String?   @db.VarChar(255)
+  title_ar         String?   @db.VarChar(255)
+  description_ar   String?   @db.Text
+  profile_ar       String?   @db.VarChar(255)
+  profile2_ar      String?   @db.VarChar(255)
+  status           Int       @default(1)
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("blogs")
 }
 
 model Seo {
-  id               Int       @id @default(autoincrement())
-  page_name        String?
-  meta_title       String?
-  meta_description String?   @db.Text
-  meta_keywords    String?
-  status           String?   @default("1")
-  created_at       DateTime? @default(now())
-  updated_at       DateTime? @updatedAt
+  id               Int      @id @default(autoincrement())
+  meta_title       String?  @db.VarChar(400)
+  meta_keywords    String?  @db.VarChar(400)
+  meta_description String?  @db.VarChar(400)
+  meta_scripts     String?  @db.Text
+  title            String?  @db.VarChar(255)
+  pageurl          String?  @db.VarChar(400)
+  status           Int      @default(1)
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(0)
 
   @@map("seos")
 }
 
-model RefreshToken {
+model admin_menus {
+  id          Int      @id @default(autoincrement())
+  parent      Int      @default(0)
+  menu_name   String   @db.VarChar(255)
+  menu_link   String   @db.VarChar(300)
+  menu_icon   String   @db.VarChar(255)
+  sortid      Int      @default(8888)
+  adddate     DateTime @default(now()) @db.DateTime(0)
+  displayflag Boolean  @default(true)
+}
+
+model appointment_journeys {
+  id          Int      @id @default(autoincrement())
+  appointment Int?
+  notes       String?  @db.Text
+  add_by      Int?
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model appointment_logs {
+  id                 Int      @id @default(autoincrement())
+  appointment        Int?
+  appointment_action String?  @db.VarChar(255)
+  add_by             Int?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model appointments {
+  id                     Int       @id @default(autoincrement())
+  clinician_id           Int?
+  title                  String?   @db.VarChar(255)
+  app_date               String?   @db.VarChar(100)
+  app_duration           DateTime? @db.Time(0)
+  total_service_duration String?   @db.VarChar(100)
+  app_time_id            String?   @db.VarChar(100)
+  app_time_start         String?   @db.VarChar(100)
+  app_time_end           String?   @db.VarChar(100)
+  app_purpose            String?   @db.VarChar(100)
+  app_patient            String?   @db.VarChar(100)
+  app_type               String?   @db.VarChar(255)
+  virtual_call           String?   @db.VarChar(20)
+  treatement_type        String?   @db.VarChar(255)
+  treatement             String?   @db.Text
+  room                   String?   @db.VarChar(255)
+  equipment              String?   @db.Text
+  app_notes              String?   @db.VarChar(255)
+  add_by                 String?   @db.VarChar(255)
+  status                 Int       @default(1)
+  app_status             String    @default("Pending") @db.VarChar(20)
+  created_at             DateTime  @default(now()) @db.Timestamp(0)
+  updated_at             DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model attendances {
+  id               Int                    @id @default(autoincrement())
+  user_id          Int?
+  current_location String?                @db.VarChar(255)
+  attendance_date  DateTime?              @db.Date
+  attendance_time  DateTime?              @db.Time(0)
+  is_present       attendances_is_present
+  created_at       DateTime               @default(now()) @db.Timestamp(0)
+  updated_at       DateTime               @default(now()) @db.Timestamp(0)
+}
+
+model attribute_values {
+  id              BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  attribute_id    BigInt   @db.UnsignedBigInt
+  attribute_value String?  @db.VarChar(255)
+  sort            Int      @default(8888) @db.UnsignedInt
+  status          Int?     @default(1) @db.UnsignedTinyInt
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model attributes {
+  id             BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  attribute_name String?  @db.VarChar(255)
+  alias          String?  @db.VarChar(255)
+  attribute_type String?  @db.VarChar(50)
+  description    String?  @db.VarChar(255)
+  status         Int?     @default(1) @db.UnsignedTinyInt
+  sort           Int?     @db.UnsignedInt
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @default(now()) @db.Timestamp(0)
+}
+
+model brands {
   id         Int      @id @default(autoincrement())
-  token      String   @unique
+  name       String?  @db.VarChar(255)
+  profile    String?  @db.VarChar(255)
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model builders {
+  id           Int      @id @default(autoincrement())
+  builder_name String?  @db.VarChar(255)
+  email        String?  @db.VarChar(255)
+  mobile_no    String?  @db.VarChar(255)
+  address      String?  @db.VarChar(500)
+  country_id   Int?
+  state_id     Int?
+  city_id      Int?
+  pincode      String?  @db.VarChar(255)
+  profile      String?  @db.VarChar(500)
+  status       Int      @default(1)
+  addby        Int?
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+model checked_services {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  stype      String   @default("service") @db.VarChar(255)
+  cat_id     Int?     @db.UnsignedInt
+  user_id    Int?
+  system_id  String?  @db.VarChar(255)
+  sid        Int?
+  ssession   String?  @db.VarChar(255)
+  sprice     String?  @db.VarChar(255)
+  item       Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model storefront_sessions {
+  id                   BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  system_id            String   @unique(map: "storefront_sessions_system_id_unique") @db.VarChar(255)
+  professional_id      Int?
+  slot_id              Int?
+  slot_date            String?  @db.VarChar(255)
+  slot_time            String?  @db.VarChar(255)
+  total_addon_duration String?  @db.VarChar(255)
+  language             String?  @db.VarChar(10)
+  hide_popup           Int      @default(0) @db.TinyInt
+  created_at           DateTime @default(now()) @db.Timestamp(0)
+  updated_at           DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
+
+model cities {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(30)
+  state_id Int
+}
+
+model clinical_options {
+  id              Int      @id @default(autoincrement())
+  clinical_option Int?
+  parent_id       Int      @default(0)
+  name            String?  @db.VarChar(255)
+  childs          Json?
+  profile         String?  @db.VarChar(255)
+  status          Int      @default(1)
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model colours {
+  id         Int      @id @default(autoincrement())
+  brand      Int?
+  model      Int?
+  variant    Int?
+  name       String?  @db.VarChar(255)
+  profile    String?  @db.VarChar(255)
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model concerns {
+  id            Int      @id @default(autoincrement())
+  concern_types Int?
+  parent_id     Int      @default(0)
+  name          String?  @db.VarChar(255)
+  childs        Json?
+  profile       String?  @db.VarChar(255)
+  status        Int      @default(1)
+  created_at    DateTime @default(now()) @db.Timestamp(0)
+  updated_at    DateTime @default(now()) @db.Timestamp(0)
+}
+
+model consultation_forms {
+  id         Int      @id @default(autoincrement())
+  ctype      String?  @db.VarChar(25)
+  first_name String?  @db.VarChar(255)
+  last_name  String?  @db.VarChar(255)
+  email      String?  @db.VarChar(255)
+  mobile     String?  @db.VarChar(255)
+  clinic     String?  @db.VarChar(255)
+  service    String?  @db.VarChar(255)
+  message    String?  @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model countries {
+  id        Int    @id @default(autoincrement())
+  shortname String @db.VarChar(3)
+  name      String @db.VarChar(150)
+  phonecode Int
+  status    Int    @default(0)
+}
+
+model customer_emis {
+  id             Int       @id @default(autoincrement())
+  customer_id    Int?
+  emi_amount     Int?
+  emi_start_date DateTime? @db.Date
+  emi_end_date   DateTime? @db.Date
+  payment_status String?   @db.VarChar(255)
+  status         Int       @default(0)
+  created_at     DateTime  @default(now()) @db.Timestamp(0)
+  updated_at     DateTime  @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model data {
+  id                  Int                     @id @default(autoincrement())
+  is_lead             data_is_lead
+  user_id             Int?
+  is_called           data_is_called
+  is_connected_call   data_is_connected_call
+  property_type       Int?
+  property_sub_type   Int?
+  budget_start        String?                 @db.VarChar(50)
+  budget_end          String?                 @db.VarChar(50)
+  buy_type            String?                 @db.VarChar(100)
+  builder_id          Int?
+  society_id          Int?
+  property_id         Int?
+  room_id             Int?
+  bed_id              String?                 @db.VarChar(11)
+  source              String?                 @db.VarChar(255)
+  name                String?                 @db.VarChar(255)
+  email               String?                 @db.VarChar(255)
+  mobile_no           String?                 @db.VarChar(255)
+  alt_mobile_no       String?                 @db.VarChar(255)
+  city                String?                 @db.VarChar(100)
+  availability        DateTime?               @db.Date
+  availability_time   String?                 @db.VarChar(255)
+  room_type           Int?
+  room_rent           Float                   @default(0.00)
+  moveindate          DateTime?               @db.Date
+  token_amount        Float                   @default(0.00)
+  upload_tm           String?                 @db.VarChar(255)
+  upload_bba          String?                 @db.VarChar(255)
+  upload_tpa          String?                 @db.VarChar(255)
+  upload_ids          String?                 @db.VarChar(255)
+  upload_notery       String?                 @db.VarChar(255)
+  upload_sale_dscp    String?                 @db.VarChar(255)
+  upload_other        String?                 @db.VarChar(255)
+  registry_date       DateTime?               @db.Date
+  registry_status     String?                 @db.VarChar(255)
+  registry_paper_work String?                 @db.VarChar(255)
+  registry_address    String?                 @db.VarChar(255)
+  message             String?                 @db.LongText
+  flat                String?                 @db.VarChar(255)
+  size                String?                 @db.VarChar(255)
+  location            String?                 @db.VarChar(255)
+  campaigns           String?                 @db.VarChar(255)
+  budget              Int?                    @default(0)
+  within              String?                 @db.VarChar(255)
+  type                String?                 @db.VarChar(255)
+  pro_status          String?                 @db.VarChar(255)
+  assign_emp          Int?
+  assign_date         DateTime?               @db.DateTime(0)
+  assign_by           Int?
+  call_status         String?                 @db.VarChar(100)
+  call_date           DateTime?               @db.Date
+  call_time           DateTime?               @db.Time(0)
+  call_agenda         String?                 @db.VarChar(400)
+  meeting_status      String?                 @db.VarChar(100)
+  meeting_with        String?                 @db.VarChar(100)
+  meeting_date        DateTime?               @db.Date
+  meeting_time        DateTime?               @db.Time(0)
+  meeting_agenda      String?                 @db.VarChar(400)
+  status              String                  @default("New") @db.VarChar(255)
+  data_status         String                  @default("New") @db.VarChar(50)
+  sale_value          Int?
+  token_collect_flag  data_token_collect_flag
+  token_collect_date  DateTime?               @db.Date
+  dead_date           DateTime?               @db.DateTime(0)
+  dead_by             Int?
+  addby               Int?
+  converted_date      DateTime?               @db.DateTime(0)
+  converted_by        Int?
+  created_at          DateTime                @default(now()) @db.Timestamp(0)
+  updated_at          DateTime                @default(now()) @db.Timestamp(0)
+}
+
+model data_errors {
+  id            Int                 @id @default(autoincrement())
+  import_id     Int?
+  is_lead       data_errors_is_lead
+  source        String?             @db.VarChar(255)
+  name          String?             @db.VarChar(255)
+  email         String?             @db.VarChar(255)
+  mobile_no     String?             @db.VarChar(255)
+  alt_mobile_no String?             @db.VarChar(255)
+  city          String?             @db.VarChar(100)
+  message       String?             @db.LongText
+  campaigns     String?             @db.VarChar(255)
+  developer     String?             @db.VarChar(255)
+  project       String?             @db.VarChar(255)
+  reason        String?             @db.VarChar(255)
+  assign_emp    Int?
+  assign_date   DateTime?           @db.DateTime(0)
+  assign_by     Int?
+  addby         Int?
+  created_at    DateTime            @default(now()) @db.Timestamp(0)
+  updated_at    DateTime            @default(now()) @db.Timestamp(0)
+}
+
+model data_import_logs {
+  id           Int      @id @default(autoincrement())
+  total_record String?  @db.VarChar(255)
+  start_id     String?  @db.VarChar(255)
+  end_id       String?  @db.VarChar(255)
+  duplicate    String?  @db.VarChar(255)
+  updated      String?  @db.VarChar(255)
+  total_new    String?  @db.VarChar(255)
+  upload_file  String?  @db.VarChar(255)
+  addby        Int?
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model data_journeys {
+  id                    Int                   @id @default(autoincrement())
+  is_lead               data_journeys_is_lead
+  lead                  Int?
+  status                String?               @db.VarChar(255)
+  visit_time            String?               @db.VarChar(100)
+  visit_date            String?               @db.VarChar(100)
+  builder               Int?
+  society               Int?
+  property              Int?
+  field_person          String?               @db.VarChar(11)
+  agreement             String?               @db.VarChar(500)
+  police_verification   String?               @db.VarChar(500)
+  signatured_agreement  String?               @db.VarChar(500)
+  owner_email_copy      String?               @db.VarChar(500)
+  entry_task_copy       String?               @db.VarChar(500)
+  payment_receipt       String?               @db.VarChar(500)
+  token_amount          Decimal?              @default(0) @db.Decimal(10, 0)
+  sale_value            Int?
+  upload_tm             String?               @db.VarChar(255)
+  upload_bba            String?               @db.VarChar(255)
+  upload_tpa            String?               @db.VarChar(255)
+  upload_ids            String?               @db.VarChar(255)
+  upload_notery         String?               @db.VarChar(255)
+  upload_sale_dscp      String?               @db.VarChar(255)
+  upload_other          String?               @db.VarChar(255)
+  registry_date         DateTime?             @db.Date
+  registry_status       String?               @db.VarChar(255)
+  registry_paper_work   String?               @db.VarChar(255)
+  registry_address      String?               @db.VarChar(255)
+  remark                String?               @db.LongText
+  assign_emp            Int?
+  assign_date           DateTime?             @db.DateTime(0)
+  call_status           String?               @db.VarChar(100)
+  call_date             DateTime?             @db.Date
+  call_time             DateTime?             @db.Time(0)
+  call_agenda           String?               @db.VarChar(400)
+  meeting_status        String?               @db.VarChar(100)
+  meeting_with          String?               @db.VarChar(100)
+  meeting_date          DateTime?             @db.Date
+  meeting_time          DateTime?             @db.Time(0)
+  meeting_agenda        String?               @db.VarChar(400)
+  agtosale_status       String?               @db.VarChar(255)
+  agtosale_date         String?               @db.VarChar(255)
+  agtosale_time         String?               @db.VarChar(255)
+  agtosale_attachment   String?               @db.VarChar(255)
+  noc_apply_date        String?               @db.VarChar(255)
+  noc_collect_date      String?               @db.VarChar(255)
+  noc_attachment        String?               @db.VarChar(255)
+  loan_bank_name        String?               @db.VarChar(255)
+  loan_banker           String?               @db.VarChar(255)
+  loan_disbursed_amount String?               @db.VarChar(255)
+  loan_sanctioned_date  String?               @db.VarChar(255)
+  loan_document_status  String?               @db.VarChar(255)
+  addby                 Int?
+  created_at            DateTime              @default(now()) @db.Timestamp(0)
+  updated_at            DateTime              @default(now()) @db.Timestamp(0)
+}
+
+model designations {
+  id         Int      @id @default(autoincrement())
+  dept_id    Int?
+  name       String?  @db.VarChar(255)
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model guest_carts {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  ip_address   String    @db.VarChar(45)
+  product_id   BigInt    @db.UnsignedBigInt
+  product_name String    @db.VarChar(255)
+  price        Decimal   @default(0.00) @db.Decimal(10, 2)
+  qty          Int       @default(1)
+  image        String?   @db.VarChar(500)
+  type         String?   @db.VarChar(100)
+  session      String?   @db.VarChar(255)
+  created_at   DateTime? @default(now()) @db.Timestamp(0)
+  updated_at   DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model inventories {
+  id                     Int                      @id @default(autoincrement())
+  inventory_type         String?                  @db.VarChar(255)
+  inventory_category     String?                  @db.VarChar(255)
+  inventory_sub_category String?                  @db.VarChar(255)
+  inventory_name         String?                  @db.VarChar(255)
+  colour                 String?                  @db.VarChar(255)
+  brand                  String?                  @db.VarChar(255)
+  mrp                    String?                  @db.VarChar(255)
+  rental_price           String?                  @db.VarChar(255)
+  warranty_start_date    String?                  @db.VarChar(255)
+  warranty_end_date      String?                  @db.VarChar(255)
+  penalty                String?                  @db.VarChar(255)
+  sh_barcode             String?                  @db.VarChar(255)
+  profile                String?                  @db.VarChar(255)
+  is_available           inventories_is_available
+  property_id            Int?
+  room_id                Int?
+  status                 Int                      @default(1)
+  map_date               DateTime?                @db.DateTime(0)
+  created_at             DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at             DateTime                 @default(now()) @db.Timestamp(0)
+}
+
+model inventory_attribute_values {
+  id              BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  attribute_id    BigInt   @db.UnsignedBigInt
+  attribute_value String?  @db.VarChar(255)
+  sort            Int      @default(8888) @db.UnsignedInt
+  status          Int?     @default(1) @db.UnsignedTinyInt
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model inventory_attributes {
+  id             BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  attribute_name String?  @db.VarChar(255)
+  alias          String?  @db.VarChar(255)
+  attribute_type String?  @db.VarChar(50)
+  description    String?  @db.VarChar(255)
+  status         Int?     @default(1) @db.UnsignedTinyInt
+  sort           Int?     @db.UnsignedInt
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @default(now()) @db.Timestamp(0)
+}
+
+model inventory_categories {
+  id            BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  parent_id     BigInt?  @db.UnsignedBigInt
+  category_name String?  @db.VarChar(255)
+  category_slug String?  @db.VarChar(255)
+  icon          String?  @db.VarChar(255)
+  banner        String?  @db.VarChar(255)
+  description   String?  @db.Text
+  meta_keywords String?  @db.Text
+  status        Int?     @default(1) @db.TinyInt
+  sort          Int?     @default(8888)
+  created_at    DateTime @default(now()) @db.Timestamp(0)
+  updated_at    DateTime @default(now()) @db.Timestamp(0)
+}
+
+model inventory_category_attributes {
+  id                 Int      @id @default(autoincrement())
+  inventory_id       Int?
+  attribute_id       Int?
+  attribute_value_id Int?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model inventory_images {
+  id           Int      @id @default(autoincrement())
+  inventory_id Int?
+  image        String?  @db.VarChar(255)
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+model lead_errors {
+  id            Int                 @id @default(autoincrement())
+  import_id     Int?
+  is_lead       lead_errors_is_lead
+  source        String?             @db.VarChar(255)
+  name          String?             @db.VarChar(255)
+  email         String?             @db.VarChar(255)
+  mobile_no     String?             @db.VarChar(255)
+  alt_mobile_no String?             @db.VarChar(255)
+  city          String?             @db.VarChar(100)
+  message       String?             @db.LongText
+  campaigns     String?             @db.VarChar(255)
+  developer     String?             @db.VarChar(255)
+  project       String?             @db.VarChar(255)
+  reason        String?             @db.VarChar(255)
+  assign_emp    Int?
+  assign_date   DateTime?           @db.DateTime(0)
+  assign_by     Int?
+  addby         Int?
+  created_at    DateTime            @default(now()) @db.Timestamp(0)
+  updated_at    DateTime            @default(now()) @db.Timestamp(0)
+}
+
+model lead_import_logs {
+  id           Int      @id @default(autoincrement())
+  total_record String?  @db.VarChar(255)
+  start_id     String?  @db.VarChar(255)
+  end_id       String?  @db.VarChar(255)
+  duplicate    String?  @db.VarChar(255)
+  updated      String?  @db.VarChar(255)
+  total_new    String?  @db.VarChar(255)
+  upload_file  String?  @db.VarChar(255)
+  addby        Int?
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model lead_journeys {
+  id                        Int                   @id @default(autoincrement())
+  is_lead                   lead_journeys_is_lead
+  lead                      Int?
+  status                    String?               @db.VarChar(255)
+  visit_time                String?               @db.VarChar(100)
+  visit_date                String?               @db.VarChar(100)
+  builder                   Int?
+  society                   Int?
+  property                  Int?
+  field_person              String?               @db.VarChar(11)
+  token_amount              Decimal?              @default(0) @db.Decimal(10, 0)
+  sale_value                Int?
+  our_commission            Int?
+  upload_tm                 String?               @db.VarChar(255)
+  upload_bba                String?               @db.VarChar(255)
+  upload_tpa                String?               @db.VarChar(255)
+  upload_ids                String?               @db.VarChar(255)
+  upload_notery             String?               @db.VarChar(255)
+  upload_sale_dscp          String?               @db.VarChar(255)
+  upload_other              String?               @db.VarChar(255)
+  registry_date             DateTime?             @db.Date
+  registry_status           String?               @db.VarChar(255)
+  registry_paper_work       String?               @db.VarChar(255)
+  registry_address          String?               @db.VarChar(255)
+  remark                    String?               @db.LongText
+  assign_emp                Int?
+  assign_date               DateTime?             @db.DateTime(0)
+  call_status               String?               @db.VarChar(100)
+  call_date                 DateTime?             @db.Date
+  call_time                 DateTime?             @db.Time(0)
+  call_agenda               String?               @db.VarChar(400)
+  agtosale_status           String?               @db.VarChar(255)
+  agtosale_date             String?               @db.VarChar(255)
+  agtosale_time             String?               @db.VarChar(255)
+  agtosale_attachment       String?               @db.VarChar(255)
+  noc_apply_date            String?               @db.VarChar(255)
+  noc_collect_date          String?               @db.VarChar(255)
+  noc_attachment            String?               @db.VarChar(255)
+  loan_bank_name            String?               @db.VarChar(255)
+  loan_banker               String?               @db.VarChar(255)
+  loan_disbursed_amount     String?               @db.VarChar(255)
+  loan_sanctioned_date      String?               @db.VarChar(255)
+  loan_document_status      String?               @db.VarChar(255)
+  agent_name                String?               @db.VarChar(255)
+  agent_country             String?               @db.VarChar(255)
+  agent_company             String?               @db.VarChar(255)
+  agent_contact             String?               @db.VarChar(255)
+  agent_email               String?               @db.VarChar(255)
+  meeting_builder           String?               @db.VarChar(255)
+  meeting_society           String?               @db.VarChar(255)
+  meeting_property          String?               @db.VarChar(255)
+  meeting_with              String?               @db.VarChar(255)
+  meeting_date              String?               @db.VarChar(255)
+  meeting_time              String?               @db.VarChar(255)
+  meeting_agenda            String?               @db.VarChar(255)
+  meeting_feedback_builder  String?               @db.VarChar(255)
+  meeting_feedback_society  String?               @db.VarChar(255)
+  meeting_feedback_property String?               @db.VarChar(255)
+  meeting_feedback_date     String?               @db.VarChar(255)
+  meeting_feedback_time     String?               @db.VarChar(255)
+  eoi_collected_builder     String?               @db.VarChar(255)
+  eoi_collected_society     String?               @db.VarChar(255)
+  eoi_collected_property    String?               @db.VarChar(255)
+  eoi_collected_type        String?               @db.VarChar(255)
+  eoi_collected_amount      String?               @db.VarChar(255)
+  eoi_collected_date        String?               @db.VarChar(255)
+  spa_sign_date             String?               @db.VarChar(50)
+  spa_sign_client           String?               @db.VarChar(50)
+  spa_submitted_dev         String?               @db.VarChar(50)
+  spa_attachment            String?               @db.VarChar(255)
+  mou_commission_per        String?               @db.VarChar(50)
+  mou_advance_buyer         String?               @db.VarChar(50)
+  mou_advance_seller        String?               @db.VarChar(50)
+  mou_expiry_date           String?               @db.VarChar(50)
+  mou_seller_name           String?               @db.VarChar(50)
+  mou_seller_contact        String?               @db.VarChar(50)
+  mou_seller_email          String?               @db.VarChar(50)
+  mou_buyer_name            String?               @db.VarChar(50)
+  mou_buyer_contact         String?               @db.VarChar(50)
+  mou_buyer_email           String?               @db.VarChar(50)
+  mou_buyer_attachment      String?               @db.VarChar(255)
+  dld_sign_date             String?               @db.VarChar(100)
+  dld_appointment_date      String?               @db.VarChar(100)
+  dld_commission_received   String?               @db.VarChar(50)
+  dld_commission_amount     String?               @db.VarChar(50)
+  mortgage_downpayment      String?               @db.VarChar(50)
+  mortgage_amount           String?               @db.VarChar(50)
+  mortgage_commission_bank  String?               @db.VarChar(50)
+  addby                     Int?
+  created_at                DateTime              @default(now()) @db.Timestamp(0)
+  updated_at                DateTime              @default(now()) @db.Timestamp(0)
+}
+
+model lead_payments {
+  id           Int      @id @default(autoincrement())
+  lead         Int?
+  lead_journey Int?
+  user_id      Int?
+  builder_id   Int?
+  society_id   Int?
+  property_id  Int?
+  amount       Int?
+  payment      Int?
+  remark       String?  @db.VarChar(255)
+  addby        Int?
+  status       String   @default("Pending") @db.VarChar(255)
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model leads {
+  id                        Int                      @id @default(autoincrement())
+  data_id                   Int?
+  is_lead                   leads_is_lead
+  user_id                   Int?
+  is_profile_checked        leads_is_profile_checked
+  property_type             Int?
+  property_sub_type         Int?
+  budget_start              String?                  @db.VarChar(50)
+  budget_end                String?                  @db.VarChar(50)
+  buy_type                  String?                  @db.VarChar(100)
+  builder_id                Int?
+  society_id                Int?
+  property_id               Int?
+  room_id                   Int?
+  bed_id                    String?                  @db.VarChar(11)
+  source                    String?                  @db.VarChar(255)
+  name                      String?                  @db.VarChar(255)
+  email                     String?                  @db.VarChar(255)
+  mobile_no                 String?                  @db.VarChar(255)
+  alt_mobile_no             String?                  @db.VarChar(255)
+  city                      String?                  @db.VarChar(100)
+  availability              DateTime?                @db.Date
+  availability_time         String?                  @db.VarChar(255)
+  room_type                 Int?
+  room_rent                 Float                    @default(0.00)
+  moveindate                DateTime?                @db.Date
+  token_amount              Float                    @default(0.00)
+  upload_tm                 String?                  @db.VarChar(255)
+  upload_bba                String?                  @db.VarChar(255)
+  upload_tpa                String?                  @db.VarChar(255)
+  upload_ids                String?                  @db.VarChar(255)
+  upload_notery             String?                  @db.VarChar(255)
+  upload_sale_dscp          String?                  @db.VarChar(255)
+  upload_other              String?                  @db.VarChar(255)
+  registry_date             DateTime?                @db.Date
+  registry_status           String?                  @db.VarChar(255)
+  registry_paper_work       String?                  @db.VarChar(255)
+  registry_address          String?                  @db.VarChar(255)
+  message                   String?                  @db.LongText
+  flat                      String?                  @db.VarChar(255)
+  size                      String?                  @db.VarChar(255)
+  location                  String?                  @db.VarChar(255)
+  campaigns                 String?                  @db.VarChar(255)
+  budget                    Int?                     @default(0)
+  within                    String?                  @db.VarChar(255)
+  type                      String?                  @db.VarChar(255)
+  pro_status                String?                  @db.VarChar(255)
+  assign_emp                String?                  @db.VarChar(255)
+  assign_date               DateTime?                @db.DateTime(0)
+  assign_by                 Int?
+  call_status               String?                  @db.VarChar(100)
+  call_date                 DateTime?                @db.Date
+  call_time                 DateTime?                @db.Time(0)
+  call_agenda               String?                  @db.VarChar(400)
+  meeting_builder           String?                  @db.VarChar(255)
+  meeting_society           String?                  @db.VarChar(255)
+  meeting_property          String?                  @db.VarChar(255)
+  meeting_with              String?                  @db.VarChar(255)
+  meeting_date              String?                  @db.VarChar(255)
+  meeting_time              String?                  @db.VarChar(255)
+  meeting_agenda            String?                  @db.VarChar(255)
+  meeting_feedback_builder  String?                  @db.VarChar(255)
+  meeting_feedback_society  String?                  @db.VarChar(255)
+  meeting_feedback_property String?                  @db.VarChar(255)
+  meeting_feedback_date     String?                  @db.VarChar(255)
+  meeting_feedback_time     String?                  @db.VarChar(255)
+  eoi_collected_builder     String?                  @db.VarChar(255)
+  eoi_collected_society     String?                  @db.VarChar(255)
+  eoi_collected_property    String?                  @db.VarChar(255)
+  eoi_collected_type        String?                  @db.VarChar(255)
+  eoi_collected_amount      String?                  @db.VarChar(255)
+  eoi_collected_date        String?                  @db.VarChar(255)
+  status                    String                   @default("New") @db.VarChar(255)
+  data_status               String                   @default("New") @db.VarChar(50)
+  sale_value                Int?
+  token_collect_flag        leads_token_collect_flag
+  token_collect_date        DateTime?                @db.Date
+  our_commission            Int?
+  dead_date                 DateTime?                @db.DateTime(0)
+  dead_by                   Int?
+  addby                     Int?
+  converted_date            DateTime?                @db.DateTime(0)
+  converted_by              Int?
+  created_at                DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at                DateTime                 @default(now()) @db.Timestamp(0)
+}
+
+model leaves {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  leave_type String?   @db.VarChar(255)
+  day_type   String?   @db.VarChar(255)
+  leave_date DateTime? @db.Date
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model map_inventory_attributes {
+  id                        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  inventory_category_id     BigInt   @db.UnsignedBigInt
+  inventory_sub_category_id Int?
+  attribute_id              BigInt   @db.UnsignedBigInt
+  created_at                DateTime @default(now()) @db.Timestamp(0)
+  updated_at                DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([inventory_category_id], map: "ad_id")
+}
+
+model map_property_categories {
+  id                       Int      @id @default(autoincrement())
+  property_category_id     Int?
+  sub_property_category_id Int?
+  created_at               DateTime @default(now()) @db.Timestamp(0)
+  updated_at               DateTime @default(now()) @db.Timestamp(0)
+}
+
+model map_work_categories {
+  id                   Int      @id @default(autoincrement())
+  work_category_id     Int?
+  sub_work_category_id Int?
+  created_at           DateTime @default(now()) @db.Timestamp(0)
+  updated_at           DateTime @default(now()) @db.Timestamp(0)
+}
+
+model mapped_attributes {
+  id                       BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  property_category_id     BigInt   @db.UnsignedBigInt
+  property_sub_category_id BigInt?  @db.UnsignedBigInt
+  attribute_id             BigInt   @db.UnsignedBigInt
+  created_at               DateTime @default(now()) @db.Timestamp(0)
+  updated_at               DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([property_category_id], map: "ad_id")
+}
+
+model mapped_inventory_attributes {
+  id                   BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  property_category_id BigInt   @db.UnsignedBigInt
+  attribute_id         BigInt   @db.UnsignedBigInt
+  created_at           DateTime @default(now()) @db.Timestamp(0)
+  updated_at           DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([property_category_id], map: "ad_id")
+}
+
+model masters {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  MasterHead String    @db.VarChar(200)
+  MasterIcon String?   @db.VarChar(200)
+  status     Int       @default(1) @db.TinyInt
+  created_by Int
+  updated_by Int?
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model medical_histories {
+  id              Int      @id @default(autoincrement())
+  medical_history Int?
+  name            String?  @db.VarChar(255)
+  profile         String?  @db.VarChar(255)
+  status          Int      @default(1)
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model mmodels {
+  id         Int      @id @default(autoincrement())
+  brand      Int?
+  name       String?  @db.VarChar(255)
+  profile    String?  @db.VarChar(255)
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model move_detail_rents {
+  id                  Int      @id @default(autoincrement())
+  move_in_id          Int?
+  property_id         Int?
+  room_id             Int?
+  tenant_id           Int?
+  month_a             String?  @db.VarChar(255)
+  rent_per_month      String?  @db.VarChar(255)
+  ac_charges          String?  @db.VarChar(255)
+  fixed_charges       String?  @db.VarChar(255)
+  rent_as_per_invoice String?  @db.VarChar(255)
+  dsl_assurance       String?  @db.VarChar(255)
+  meter_install       String?  @db.VarChar(255)
+  discount            String?  @db.VarChar(255)
+  this_month          String?  @db.VarChar(255)
+  status              String   @default("Pending") @db.VarChar(255)
+  created_at          DateTime @default(now()) @db.Timestamp(0)
+  updated_at          DateTime @default(now()) @db.Timestamp(0)
+}
+
+model move_details {
+  id                         Int      @id @default(autoincrement())
+  society_id                 Int?
+  property_id                Int?
+  room_id                    Int?
+  flat_size                  String?  @db.VarChar(255)
+  owner_id                   Int?
+  owner                      String?  @db.VarChar(255)
+  tenant_id                  Int?
+  name_individual            String?  @db.VarChar(255)
+  tenant_phone               String?  @db.VarChar(255)
+  tenant_parents_phone       String?  @db.VarChar(255)
+  tenant_email               String?  @db.VarChar(255)
+  agent_name                 String?  @db.VarChar(255)
+  token_amount               String?  @db.VarChar(255)
+  room_type                  String?  @db.VarChar(255)
+  rooms                      String?  @db.VarChar(255)
+  movein_date                String?  @db.VarChar(255)
+  first_renewal_date         String?  @db.VarChar(255)
+  second_renewal_date        String?  @db.VarChar(255)
+  rent_payment_date          String?  @db.VarChar(255)
+  total_amount_of_new_client String?  @db.VarChar(255)
+  created_at                 DateTime @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime @default(now()) @db.Timestamp(0)
+}
+
+model owners {
+  id                 Int      @id @default(autoincrement())
+  first_name         String?  @db.VarChar(255)
+  last_name          String?  @db.VarChar(255)
+  email              String?  @db.VarChar(255)
+  mobile_no          String?  @db.VarChar(255)
+  alt_mobile_no      String?  @db.VarChar(255)
+  gender             String?  @db.VarChar(255)
+  relative_name      String?  @db.VarChar(255)
+  per_address        String?  @db.VarChar(255)
+  pan_card_no        String?  @db.VarChar(255)
+  aadhar_card_no     String?  @db.VarChar(255)
+  pan_card_upload    String?  @db.VarChar(255)
+  aadhar_card_upload String?  @db.VarChar(255)
+  pan_card_status    Int?     @default(0)
+  aadhar_card_status Int?     @default(0)
+  profile            String?  @db.VarChar(500)
+  status             Int      @default(1)
+  addby              Int?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model owners_03 {
+  id                 Int      @id @default(autoincrement())
+  first_name         String?  @db.VarChar(255)
+  last_name          String?  @db.VarChar(255)
+  email              String?  @db.VarChar(255)
+  mobile_no          String?  @db.VarChar(255)
+  gender             String?  @db.VarChar(255)
+  relative_name      String?  @db.VarChar(255)
+  per_address        String?  @db.VarChar(255)
+  pan_card_no        String?  @db.VarChar(255)
+  aadhar_card_no     String?  @db.VarChar(255)
+  pan_card_upload    String?  @db.VarChar(255)
+  aadhar_card_upload String?  @db.VarChar(255)
+  pan_card_status    Int?     @default(0)
+  aadhar_card_status Int?     @default(0)
+  profile            String?  @db.VarChar(500)
+  status             Int      @default(1)
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model password_reset_tokens {
+  email      String    @id @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+}
+
+model patient_concerns {
+  id             Int      @id @default(autoincrement())
+  patient_id     Int?
+  appointment_id Int?
+  concerns       Json?
+  status         Int      @default(1)
+  add_by         Int?
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @default(now()) @db.Timestamp(0)
+}
+
+model patient_medical_histories {
+  id              Int      @id @default(autoincrement())
+  patient_id      Int?
+  appointment_id  Int?
+  medical_history Json?
+  status          Int      @default(1)
+  add_by          Int?
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model patients {
+  id                       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title                    String?   @db.VarChar(50)
+  first_name               String?   @db.VarChar(255)
+  last_name                String?   @db.VarChar(255)
+  middle_name              String?   @db.VarChar(255)
+  sex                      String?   @db.VarChar(50)
+  gender                   String?   @db.VarChar(50)
+  dob                      DateTime? @db.Date
+  marital_status           String?   @db.VarChar(50)
+  maiden_name              String?   @db.VarChar(255)
+  about_hear               String?   @db.VarChar(255)
+  mobile                   String?   @db.VarChar(15)
+  home_mobile              String?   @db.VarChar(15)
+  work_mobile              String?   @db.VarChar(15)
+  email                    String?   @db.VarChar(255)
+  contact_permission       String?   @db.VarChar(50)
+  address1                 String?   @db.VarChar(255)
+  address2                 String?   @db.VarChar(255)
+  city                     String?   @db.VarChar(100)
+  country                  String?   @db.VarChar(100)
+  pincode                  String?   @db.VarChar(20)
+  country2                 String?   @db.VarChar(100)
+  clinic_id                Int?
+  clinician_id             Int?
+  gp_privately_insured     String?   @db.VarChar(50)
+  gp_practice              String?   @db.VarChar(255)
+  gp_name                  String?   @db.VarChar(255)
+  gp_phone                 String?   @db.VarChar(15)
+  gp_address1              String?   @db.VarChar(255)
+  gp_address2              String?   @db.VarChar(255)
+  gp_city                  String?   @db.VarChar(100)
+  gp_country               String?   @db.VarChar(100)
+  gp_pincode               String?   @db.VarChar(20)
+  gp_country2              String?   @db.VarChar(100)
+  permission_to_contact    String?   @db.VarChar(50)
+  contact_permission_for   String?   @db.Text
+  permission_to_marketing  String?   @db.VarChar(50)
+  marketing_permission_for String?   @db.Text
+  e_first_name             String?   @db.VarChar(255)
+  e_last_name              String?   @db.VarChar(255)
+  e_mobile                 String?   @db.VarChar(15)
+  e_home_mobile            String?   @db.VarChar(15)
+  e_patient_relation       String?   @db.VarChar(100)
+  add_by                   Int?
+  created_at               DateTime? @default(now()) @db.Timestamp(0)
+  updated_at               DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  expires_at     DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model property_category_attributes {
+  id                 Int      @id @default(autoincrement())
+  property_id        Int?
+  attribute_id       Int?
+  attribute_value_id Int?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_category_mains {
+  id               BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  parent_id        BigInt?  @db.UnsignedBigInt
+  category_name    String?  @db.VarChar(255)
+  category_slug    String?  @db.VarChar(255)
+  icon             String?  @db.VarChar(255)
+  banner           String?  @db.VarChar(255)
+  description      String?  @db.Text
+  description1     String?  @db.Text
+  description2     String?  @db.Text
+  description3     String?  @db.Text
+  description4     String?  @db.Text
+  icon1            String?  @db.VarChar(255)
+  icon2            String?  @db.VarChar(255)
+  icon3            String?  @db.VarChar(255)
+  icon4            String?  @db.VarChar(255)
+  meta_keywords    String?  @db.Text
+  meta_title       String?  @db.VarChar(400)
+  meta_description String?  @db.VarChar(400)
+  sorting_order    Int      @default(8888)
+  status           Int?     @default(1) @db.TinyInt
+  sort             Int?     @default(8888)
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_checklists {
+  id                Int      @id @default(autoincrement())
+  property_id       Int
+  checklist_item_id Int
+  checklist_item    String?  @db.VarChar(255)
+  qty               String?  @db.VarChar(255)
+  size              String?  @db.VarChar(255)
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+  updated_at        DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_images {
+  id          Int      @id @default(autoincrement())
+  property_id Int?
+  image       String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_journeys {
+  id                        Int      @id @default(autoincrement())
+  property_id               Int?
+  old_base_rate             String?  @db.VarChar(255)
+  old_unit_value            String?  @db.VarChar(255)
+  old_total_cost            String?  @db.VarChar(255)
+  old_outstanding_principle String?  @db.VarChar(255)
+  base_rate                 String?  @db.VarChar(255)
+  unit_value                String?  @db.VarChar(255)
+  total_cost                String?  @db.VarChar(255)
+  outstanding_principle     String?  @db.VarChar(255)
+  status                    String?  @db.VarChar(255)
+  addby                     Int?
+  created_at                DateTime @default(now()) @db.Timestamp(0)
+  updated_at                DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_room_inventories {
+  id           Int      @id @default(autoincrement())
+  property_id  Int?
+  room_id      Int?
+  inventory_id Int?
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @db.Timestamp(0)
+}
+
+model property_rooms {
+  id                            Int      @id @default(autoincrement())
+  property_id                   Int?
+  room_type                     String?  @db.VarChar(255)
+  room_size                     String?  @db.VarChar(255)
+  room_bed                      String?  @db.VarChar(255)
+  room_rent_per_month           Float?
+  room_security                 Float    @default(0.00)
+  room_assurance                Float    @default(0.00)
+  room_agreement_n_verification Float    @default(0.00)
+  room_society_entry            Float    @default(0.00)
+  maintenance                   Float?
+  rooms                         String?  @db.VarChar(255)
+  bathroom                      String?  @db.VarChar(255)
+  kitchen                       String?  @db.VarChar(255)
+  balcony                       String?  @db.VarChar(255)
+  available                     String?  @db.VarChar(255)
+  available_b1                  String?  @db.VarChar(50)
+  available_b2                  String?  @db.VarChar(50)
+  available_b3                  String?  @db.VarChar(50)
+  available_b4                  String?  @db.VarChar(50)
+  created_at                    DateTime @default(now()) @db.Timestamp(0)
+  updated_at                    DateTime @default(now()) @db.Timestamp(0)
+}
+
+model redurls {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  old_url           String?   @db.VarChar(255)
+  redirect_url      String?   @db.VarChar(255)
+  short_description String?   @db.VarChar(255)
+  addby             Int?
+  created_at        DateTime? @default(now()) @db.Timestamp(0)
+  updated_at        DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model sales_lead_category_attributes {
+  id                 Int      @id @default(autoincrement())
+  property_id        Int?
+  attribute_id       Int?
+  attribute_value_id Int?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model sales_lead_images {
+  id          Int      @id @default(autoincrement())
+  property_id Int?
+  image       String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model searches {
+  id         Int      @id @default(autoincrement())
+  searchbox  String?  @db.Text
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model seller_lead_journeys {
+  id                   Int       @id @default(autoincrement())
+  lead                 Int?
+  status               String?   @db.VarChar(255)
+  call_back_date       String?   @db.VarChar(100)
+  visit_time           String?   @db.VarChar(100)
+  visit_date           String?   @db.VarChar(100)
+  property             Int?
+  field_person         String?   @db.VarChar(11)
+  agreement            String?   @db.VarChar(500)
+  police_verification  String?   @db.VarChar(500)
+  signatured_agreement String?   @db.VarChar(500)
+  owner_email_copy     String?   @db.VarChar(500)
+  entry_task_copy      String?   @db.VarChar(500)
+  payment_receipt      String?   @db.VarChar(500)
+  token_amount         Decimal?  @default(0) @db.Decimal(10, 0)
+  upload_tm            String?   @db.VarChar(255)
+  upload_bba           String?   @db.VarChar(255)
+  upload_tpa           String?   @db.VarChar(255)
+  upload_ids           String?   @db.VarChar(255)
+  upload_notery        String?   @db.VarChar(255)
+  upload_sale_dscp     String?   @db.VarChar(255)
+  upload_other         String?   @db.VarChar(255)
+  registry_date        DateTime? @db.Date
+  registry_status      String?   @db.VarChar(255)
+  registry_paper_work  String?   @db.VarChar(255)
+  registry_address     String?   @db.VarChar(255)
+  remark               String?   @db.LongText
+  assign_emp           Int?
+  assign_date          DateTime? @db.DateTime(0)
+  call_status          String?   @db.VarChar(100)
+  call_date            DateTime? @db.Date
+  call_time            DateTime? @db.Time(0)
+  call_agenda          String?   @db.VarChar(400)
+  meeting_status       String?   @db.VarChar(100)
+  meeting_with         String?   @db.VarChar(100)
+  meeting_date         DateTime? @db.Date
+  meeting_time         DateTime? @db.Time(0)
+  meeting_agenda       String?   @db.VarChar(400)
+  addby                Int?
+  created_at           DateTime  @default(now()) @db.Timestamp(0)
+  updated_at           DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model seller_leads {
+  id                         Int       @id @default(autoincrement())
+  name                       String?   @db.VarChar(255)
+  mobile_no                  String?   @db.VarChar(255)
+  alt_mobile_no              String?   @db.VarChar(255)
+  email                      String?   @db.VarChar(255)
+  property_name              String?   @db.VarChar(255)
+  is_for_rent                String    @default("No") @db.VarChar(50)
+  owner_id                   Int?
+  builder_id                 Int?
+  society_id                 Int?
+  property_category          Int?
+  property_sub_category      Int?
+  property_size              String?   @db.VarChar(255)
+  property_bhk               String?   @db.VarChar(255)
+  country_id                 Int?
+  state_id                   Int?
+  city_id                    Int?
+  area                       String?   @db.VarChar(255)
+  street                     String?   @db.VarChar(255)
+  pincode                    String?   @db.VarChar(255)
+  property_tags              String?   @db.VarChar(255)
+  rental_plan_duration       String?   @db.VarChar(255)
+  rent_per_month             String?   @db.VarChar(255)
+  early_closure_charges_info String?   @db.VarChar(255)
+  free_relocation_info       String?   @db.VarChar(255)
+  free_upgrade_info          String?   @db.VarChar(255)
+  seven_days_free_trial      String?   @db.VarChar(255)
+  floor_name                 String?   @db.VarChar(255)
+  unit_no                    String?   @db.VarChar(255)
+  tower_no                   String?   @db.VarChar(255)
+  salable_area               String?   @db.VarChar(255)
+  base_rate                  String?   @db.VarChar(255)
+  unit_value                 String?   @db.VarChar(255)
+  total_cost                 String?   @db.VarChar(255)
+  outstanding_principle      String?   @db.VarChar(255)
+  broker_name                String?   @db.VarChar(255)
+  possession_status          String?   @db.VarChar(100)
+  registration_no            String?   @db.VarChar(255)
+  loan_on_property           String?   @db.VarChar(50)
+  loan_bank_name             String?   @db.VarChar(255)
+  video_link                 String?   @db.VarChar(255)
+  status                     Int       @default(1) @db.TinyInt
+  assign_emp                 Int?
+  assign_date                DateTime? @db.DateTime(0)
+  assign_by                  Int?
+  lead_status                String?   @default("New") @db.VarChar(255)
+  call_status                String?   @db.VarChar(100)
+  call_date                  DateTime? @db.Date
+  call_time                  DateTime? @db.Time(0)
+  call_agenda                String?   @db.VarChar(255)
+  meeting_status             String?   @db.VarChar(100)
+  meeting_with               String?   @db.VarChar(100)
+  meeting_date               DateTime? @db.Date
+  meeting_time               DateTime? @db.Time(0)
+  meeting_agenda             String?   @db.VarChar(255)
+  addby                      Int?
+  created_at                 DateTime  @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime  @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model seller_leads_081223 {
+  id                    Int       @id @default(autoincrement())
+  name                  String?   @db.VarChar(255)
+  mobile_no             String?   @db.VarChar(255)
+  alt_mobile_no         String?   @db.VarChar(255)
+  email                 String?   @db.VarChar(255)
+  sale_type             String?   @db.VarChar(255)
+  property_category     String?   @db.VarChar(255)
+  property_sub_category String?   @db.VarChar(255)
+  property_size         String?   @db.VarChar(255)
+  builder_name          String?   @db.VarChar(255)
+  project_name          String?   @db.VarChar(255)
+  country_name          String?   @db.VarChar(255)
+  state_name            String?   @db.VarChar(255)
+  city_name             String?   @db.VarChar(255)
+  address               String?   @db.VarChar(255)
+  locality              String?   @db.VarChar(255)
+  pincode               String?   @db.VarChar(255)
+  floor_name            String?   @db.VarChar(100)
+  unit_no               String?   @db.VarChar(100)
+  tower_no              String?   @db.VarChar(100)
+  salable_area          String?   @db.VarChar(100)
+  base_rate             Float?    @default(0.00)
+  unit_value            Float?    @default(0.00)
+  total_cost            Float?    @default(0.00)
+  outstanding_principle Float?    @default(0.00)
+  broker_name           String?   @db.VarChar(255)
+  message               String?   @db.VarChar(400)
+  call_status           String?   @db.VarChar(100)
+  call_date             DateTime? @db.Date
+  call_time             DateTime? @db.Time(0)
+  call_agenda           String?   @db.VarChar(400)
+  meeting_status        String?   @db.VarChar(100)
+  meeting_with          String?   @db.VarChar(255)
+  meeting_date          DateTime? @db.Date
+  meeting_time          DateTime? @db.Time(0)
+  meeting_agenda        String?   @db.VarChar(400)
+  assign_emp            Int?
+  assign_date           DateTime? @db.DateTime(0)
+  assign_by             Int?
+  status                String    @default("New") @db.VarChar(255)
+  addby                 Int?
+  created_at            DateTime  @default(now()) @db.Timestamp(0)
+  updated_at            DateTime  @default(now()) @db.Timestamp(0)
+  call_back_date        String?   @db.VarChar(255)
+  remark                String?   @db.VarChar(400)
+}
+
+model shop_images {
+  id         Int      @id @default(autoincrement())
+  shop_id    Int?
+  image      String?  @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model societies {
+  id                  Int      @id @default(autoincrement())
+  builder_id          String?  @db.VarChar(255)
+  society_name        String?  @db.VarChar(255)
+  address             String?  @db.VarChar(500)
+  country_id          Int?
+  state_id            Int?
+  city_id             Int?
+  pincode             String?  @db.VarChar(255)
+  profile             String?  @db.VarChar(500)
+  category            String?  @db.VarChar(255)
+  sub_category        String?  @db.VarChar(255)
+  project_area        String?  @db.VarChar(255)
+  total_tower         String?  @db.VarChar(255)
+  total_floor         String?  @db.VarChar(255)
+  total_no_of_unit    String?  @db.VarChar(255)
+  upload_master_plan  String?  @db.VarChar(255)
+  upload_payment_plan String?  @db.VarChar(255)
+  upload_price_list   String?  @db.VarChar(255)
+  possession_status   String?  @db.VarChar(255)
+  addby               Int?
+  created_at          DateTime @default(now()) @db.Timestamp(0)
+  updated_at          DateTime @default(now()) @db.Timestamp(0)
+}
+
+model society_options {
+  id                     Int      @id @default(autoincrement())
+  project_id             String?  @db.VarChar(255)
+  project_multiple_bhk   String?  @db.VarChar(255)
+  project_multiple_area  String?  @db.VarChar(255)
+  upload_multiple_layout String?  @db.VarChar(255)
+  addby                  Int?
+  created_at             DateTime @default(now()) @db.Timestamp(0)
+  updated_at             DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model sss11 {
+  id                         Int      @default(0)
+  parent_id                  Int      @default(0)
+  addon_ids                  String?  @db.VarChar(255)
+  property_name              String?  @db.VarChar(255)
+  skin_condition             Json?
+  skin_sub_condition         Json?
+  property_category          Json?
+  property_sub_category      Json?
+  description                String?  @db.Text
+  duration                   Int?
+  number_of_members_required Int?
+  max_quantity_allowed       Int?
+  session1                   Int      @default(1)
+  price                      Float    @default(0.00)
+  discounted_price           Float    @default(0.00)
+  session2                   Int?
+  price2                     Float    @default(0.00)
+  discounted_price2          Float    @default(0.00)
+  session3                   Int?
+  price3                     Float    @default(0.00)
+  discounted_price3          Float    @default(0.00)
+  session4                   Int?
+  price4                     Float    @default(0.00)
+  discounted_price4          Float    @default(0.00)
+  offer_status               Int      @default(0)
+  long_description           String?  @db.LongText
+  profile                    String?  @db.VarChar(255)
+  offer_image                String?  @db.VarChar(255)
+  status                     Int      @default(1) @db.TinyInt
+  addby                      Int?
+  created_at                 DateTime @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime @default(now()) @db.Timestamp(0)
+
+  @@ignore
+}
+
+model states {
+  id         Int    @id @default(autoincrement())
+  name       String @db.VarChar(30)
+  country_id Int    @default(1)
+}
+
+model subscribe_forms {
+  id                 Int      @id @default(autoincrement())
+  full_name          String?  @db.VarChar(255)
+  email              String?  @db.VarChar(255)
+  selectedTreatments Json?
+  created_at         DateTime @default(now()) @db.Timestamp(0)
+  updated_at         DateTime @default(now()) @db.Timestamp(0)
+}
+
+model teams {
+  id                  Int      @id @default(autoincrement())
+  team_slug           String?  @db.VarChar(255)
+  team_name           String?  @db.VarChar(255)
+  email               String?  @db.VarChar(255)
+  mobile              String?  @db.VarChar(255)
+  gender              String?  @db.VarChar(100)
+  designation         String?  @db.VarChar(255)
+  profession          String?  @db.VarChar(255)
+  profile             String?  @db.VarChar(255)
+  work_category       String?  @db.VarChar(255)
+  work_condition      String?  @db.VarChar(255)
+  banner              String?  @db.VarChar(255)
+  long_description    String?  @db.Text
+  description         String?  @db.VarChar(400)
+  banner_cn           String?  @db.VarChar(255)
+  long_description_cn String?  @db.Text
+  description_cn      String?  @db.VarChar(400)
+  banner_ar           String?  @db.VarChar(255)
+  long_description_ar String?  @db.Text
+  description_ar      String?  @db.VarChar(400)
+  monday              Boolean
+  monday_start        DateTime @db.Time(0)
+  monday_end          DateTime @db.Time(0)
+  tuesday             Boolean
+  tuesday_start       DateTime @db.Time(0)
+  tuesday_end         DateTime @db.Time(0)
+  wednesday           Boolean
+  wednesday_start     DateTime @db.Time(0)
+  wednesday_end       DateTime @db.Time(0)
+  thursday            Boolean
+  thursday_start      DateTime @db.Time(0)
+  thursday_end        DateTime @db.Time(0)
+  friday              Boolean
+  friday_start        DateTime @db.Time(0)
+  friday_end          DateTime @db.Time(0)
+  saturday            Boolean
+  saturday_start      DateTime @db.Time(0)
+  saturday_end        DateTime @db.Time(0)
+  sunday              Boolean
+  sunday_start        DateTime @db.Time(0)
+  sunday_end          DateTime @db.Time(0)
+  status              Int      @default(1) @db.TinyInt
+  addby               Int?
+  created_at          DateTime @default(now()) @db.Timestamp(0)
+  updated_at          DateTime @default(now()) @db.Timestamp(0)
+}
+
+model tenant_members_details {
+  id         Int      @id @default(autoincrement())
+  tenant_id  Int?
+  relation   String?  @db.VarChar(255)
+  name       String?  @db.VarChar(255)
+  mobile_no  String?  @db.VarChar(255)
+  gender     String?  @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model tenants {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  emp_id               String?   @db.VarChar(255)
+  first_name           String    @db.VarChar(255)
+  last_name            String?   @db.VarChar(100)
+  email                String?   @unique(map: "users_email_unique") @db.VarChar(255)
+  mobile_no            String?   @db.VarChar(20)
+  gender               String?   @db.VarChar(50)
+  dob                  DateTime? @db.Date
+  address              String?   @db.Text
+  country              String?   @default("101") @db.VarChar(20)
+  state                String?   @db.VarChar(20)
+  city                 String?   @db.VarChar(20)
+  pincode              String?   @db.VarChar(11)
+  date_of_joining      DateTime? @db.Date
+  password             String?   @db.VarChar(500)
+  type                 String?   @db.VarChar(255)
+  email_verified_at    DateTime? @db.Timestamp(0)
+  account_name         String?   @db.VarChar(255)
+  account_no           String?   @db.VarChar(255)
+  bank_name            String?   @db.VarChar(255)
+  ifcs                 String?   @db.VarChar(255)
+  profile              String?   @db.VarChar(255)
+  upload_aadhaar       String?   @db.VarChar(255)
+  upload_aadhaar2      String?   @db.VarChar(255)
+  aadhar_number        String?   @db.VarChar(255)
+  upload_pan           String?   @db.VarChar(255)
+  pan_number           String?   @db.VarChar(255)
+  upload_resume        String?   @db.VarChar(255)
+  upload_cancel_cheque String?   @db.VarChar(255)
+  police_verification  String?   @db.VarChar(255)
+  is_admin             Int       @default(0)
+  status               Int       @default(1) @db.TinyInt
+  otp                  Int       @default(1234)
+  remember_token       String?   @db.VarChar(100)
+  created_at           DateTime? @default(now()) @db.Timestamp(0)
+  updated_at           DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model user_locations {
+  id               Int      @id @default(autoincrement())
+  user_id          Int?
+  location_address String?  @db.VarChar(255)
+  location_lat     String?  @db.VarChar(255)
+  location_lng     String?  @db.VarChar(255)
+  location_date    String?  @db.VarChar(255)
+  location_time    String?  @db.VarChar(255)
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model variants {
+  id         Int      @id @default(autoincrement())
+  brand      Int?
+  model      Int?
+  name       String?  @db.VarChar(255)
+  profile    String?  @db.VarChar(255)
+  status     Int      @default(1)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+}
+
+model vendors {
+  id                  BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  emp_id              String?   @db.VarChar(255)
+  first_name          String    @db.VarChar(255)
+  last_name           String?   @db.VarChar(100)
+  email               String    @db.VarChar(255)
+  mobile_no           String?   @db.VarChar(20)
+  gender              String?   @db.VarChar(50)
+  dob                 DateTime? @db.Date
+  address             String?   @db.Text
+  country             String?   @db.VarChar(20)
+  state               String?   @db.VarChar(20)
+  city                String?   @db.VarChar(20)
+  pincode             Int?
+  password            String?   @db.VarChar(500)
+  type                String?   @db.VarChar(255)
+  email_verified_at   DateTime? @db.Timestamp(0)
+  profile             String?   @db.VarChar(255)
+  upload_aadhaar      String?   @db.VarChar(255)
+  aadhar_number       String?   @db.VarChar(255)
+  upload_pan          String?   @db.VarChar(255)
+  pan_number          String?   @db.VarChar(255)
+  police_verification String?   @db.VarChar(255)
+  work_category       String?   @db.VarChar(255)
+  work_sub_category   String?   @db.VarChar(255)
+  work_area           String?   @db.VarChar(255)
+  agreement           String?   @db.VarChar(255)
+  status              Int       @default(1) @db.TinyInt
+  remember_token      String?   @db.VarChar(100)
+  created_at          DateTime? @default(now()) @db.Timestamp(0)
+  updated_at          DateTime? @default(now()) @db.Timestamp(0)
+}
+
+enum data_is_lead {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum data_journeys_is_lead {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum lead_journeys_is_lead {
+  Yes @map("1")
+  No  @map("0")
+}
+
+enum property_categories_is_condition {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum data_errors_is_lead {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum lead_errors_is_lead {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum leads_is_lead {
+  Yes @map("1")
+  No  @map("0")
+}
+
+enum data_is_called {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum data_is_connected_call {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum leads_is_profile_checked {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum attendances_is_present {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum users_is_show_contact {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum inventories_is_available {
+  Yes @map("1")
+  No  @map("0")
+}
+
+enum property_categories_is_top {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum users_is_sub_admin {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum users_is_seller {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum users_is_kyc {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum data_token_collect_flag {
+  No  @map("0")
+  Yes @map("1")
+}
+
+enum leads_token_collect_flag {
+  No  @map("0")
+  Yes @map("1")
+}
+
+model RefreshToken {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  token      String   @unique @db.VarChar(255)
   user_id    Int
-  user_type  String
+  user_type  String   @db.VarChar(50)
   expires_at DateTime
   revoked    Boolean  @default(false)
   created_at DateTime @default(now())

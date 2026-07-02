@@ -1,29 +1,42 @@
 import { Router } from 'express';
 import { validate } from '../../middleware/validate.middleware';
-import { otpRateLimiter } from '../../middleware/rateLimiter.middleware';
+import { authMiddleware } from '../../middleware/auth.middleware';
 import {
   adminLoginSchema,
+  customerLoginSchema,
+  customerRegisterSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
   refreshTokenSchema,
-  requestOtpSchema,
-  verifyOtpSchema,
 } from './auth.schema';
 import {
   adminLogin,
   adminRefresh,
-  requestOtp,
-  verifyOtp,
+  customerLogin,
+  customerRegister,
+  forgotPassword,
+  resetPassword,
+  changePassword,
   customerRefresh,
 } from './auth.controller';
 
 const router = Router();
 
-// Admin routes
+// ===== Admin =====
 router.post('/admin/login', validate(adminLoginSchema), adminLogin);
 router.post('/admin/refresh', validate(refreshTokenSchema), adminRefresh);
 
-// Customer routes
-router.post('/customer/request-otp', otpRateLimiter, validate(requestOtpSchema), requestOtp);
-router.post('/customer/verify-otp', otpRateLimiter, validate(verifyOtpSchema), verifyOtp);
+// ===== Customer =====
+router.post('/customer/register', validate(customerRegisterSchema), customerRegister);
+router.post('/customer/login', validate(customerLoginSchema), customerLogin);
 router.post('/customer/refresh', validate(refreshTokenSchema), customerRefresh);
+
+// ===== Forgot / Reset Password =====
+router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
+router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+
+// ===== Change Password (authenticated) =====
+router.post('/change-password', authMiddleware, validate(changePasswordSchema), changePassword);
 
 export default router;

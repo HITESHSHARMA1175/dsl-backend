@@ -96,6 +96,25 @@ export class BookingService {
     return { items, total };
   }
 
+  /**
+   * List web-submitted bookings (is_web = 1). Avoids relation includes and
+   * created_at ordering to sidestep legacy data issues.
+   */
+  async listWeb(page = 1, perPage = 10) {
+    const where = { is_web: 1 };
+    const [items, total] = await Promise.all([
+      (this.prisma as any).kiBooking.findMany({
+        where,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { id: 'desc' },
+      }),
+      (this.prisma as any).kiBooking.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
   async search(searchText: string) {
     const items = await this.prisma.kiBooking.findMany({
       where: {

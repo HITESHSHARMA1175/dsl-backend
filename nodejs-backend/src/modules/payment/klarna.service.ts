@@ -34,4 +34,24 @@ export class KlarnaService {
     const { data } = await this.client.get(`/payments/v1/sessions/${sessionId}`);
     return data;
   }
+
+  /**
+   * Creates a Klarna order from an authorization token and returns the order id.
+   */
+  async createOrderFromAuthorization(authorizationToken: string, orderData: any) {
+    const { data } = await this.client.post(
+      `/payments/v1/authorizations/${authorizationToken}/order`,
+      orderData
+    );
+    return data;
+  }
+
+  /**
+   * Fetches full order details (incl. billing/customer) from the Klarna
+   * order-management API after an order has been created.
+   */
+  async getOrderDetails(orderId: string) {
+    const { data } = await this.client.get(`/ordermanagement/v1/orders/${orderId}`);
+    return data;
+  }
 }

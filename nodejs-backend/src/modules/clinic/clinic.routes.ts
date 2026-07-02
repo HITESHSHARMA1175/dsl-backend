@@ -9,11 +9,25 @@ import {
   updateClinic,
   deleteClinic,
   toggleClinicStatus,
+  getClinicInfo,
+  getClinicHxg,
+  getClinicTime,
+  getClinicRooms,
+  getClinicEquipments,
+  getClinicFinance,
 } from './clinic.controller';
 
 const router = Router();
 
-// All routes are admin-protected
+// ----- Mobile (clinic detail) endpoints — auth required -----
+router.get('/rooms', authMiddleware, getClinicRooms);
+router.get('/equipments', authMiddleware, getClinicEquipments);
+router.get('/finance', authMiddleware, getClinicFinance);
+router.get('/:id/info', authMiddleware, getClinicInfo);
+router.get('/:id/hxg', authMiddleware, getClinicHxg);
+router.get('/:id/time', authMiddleware, getClinicTime);
+
+// ----- Admin CRUD -----
 router.get('/', authMiddleware, adminGuard, listClinics);
 router.post('/', authMiddleware, adminGuard, validate(createClinicSchema), createClinic);
 router.put('/:id', authMiddleware, adminGuard, validate(updateClinicSchema), updateClinic);

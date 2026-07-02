@@ -253,3 +253,60 @@ export async function removeSeo(req: Request, res: Response, next: NextFunction)
     next(error);
   }
 }
+
+// --- Public (storefront) read handlers ---
+
+export async function publicBanners(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await contentService.publicBanners();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function publicReviews(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await contentService.publicReviews();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function publicFaqs(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await contentService.publicFaqs();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function publicBlogs(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await contentService.publicBlogs();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function publicBlogDetail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await contentService.publicBlogBySlug(req.params.slug);
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function publicSeo(req: Request, res: Response, next: NextFunction) {
+  try {
+    const pageurl = (req.query.pageurl as string) || (req.query.slug as string) || '';
+    const data = await contentService.publicSeoByUrl(pageurl);
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}

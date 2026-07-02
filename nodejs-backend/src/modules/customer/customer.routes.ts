@@ -10,6 +10,9 @@ import {
   updateAddress,
   getBookingHistory,
   getOrderHistory,
+  getEmiList,
+  addEmi,
+  getBuyerList,
 } from './customer.controller';
 
 const router = Router();
@@ -24,5 +27,8 @@ router.post('/addresses', validate(createAddressSchema), createAddress);
 router.put('/addresses/:id', validate(updateAddressSchema), updateAddress);
 router.get('/bookings', getBookingHistory);
 router.get('/orders', getOrderHistory);
+router.get('/emis', getEmiList);
+router.post('/emis', addEmi);
+router.get('/buyers', getBuyerList);
 
 export default router;

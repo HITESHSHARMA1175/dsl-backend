@@ -9,6 +9,7 @@ import {
   searchBookings,
   getBookingById,
   updateBookingStatus,
+  listWebBookings,
 } from './booking.controller';
 
 const router = Router();
@@ -18,6 +19,7 @@ router.post('/', validate(createBookingSchema), createBooking);
 
 // Admin-protected routes
 router.get('/', authMiddleware, adminGuard, listBookings);
+router.get('/web', authMiddleware, adminGuard, listWebBookings);
 router.get('/search', authMiddleware, adminGuard, searchBookings);
 router.get('/:id', authMiddleware, adminGuard, getBookingById);
 router.patch('/:id/status', authMiddleware, adminGuard, validate(updateStatusSchema), updateBookingStatus);

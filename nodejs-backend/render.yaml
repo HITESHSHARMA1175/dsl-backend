@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: dsl-backend
+    runtime: node
+    plan: free
+    # Build installs deps (postinstall runs `prisma generate`) and compiles to dist/.
+    buildCommand: npm install && npm run build
+    # Runs the compiled output.
+    startCommand: npm run start:compiled
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"
+      # Auto-generated strong secrets
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # Set this in the Render dashboard to a reachable (hosted) MySQL URL.
+      # Until set, the API still boots and serves Swagger at /api-docs;
+      # data endpoints will error until the DB is reachable.
+      - key: DATABASE_URL
+        sync: false
+      # Optional integrations — set real values in the dashboard if needed.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false

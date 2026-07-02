@@ -1,32 +1,15 @@
 # Dependencies
-/node_modules
-/vendor
 node_modules/
 
-# Node.js backend
-nodejs-backend/node_modules/
-nodejs-backend/dist/
-nodejs-backend/.env
-nodejs-backend/coverage/
+# Build output
+dist/
 
 # Environment
 .env
 
-# Laravel
-/storage/*.key
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-/storage/logs/*
-
-# Build
-/public/hot
-/public/storage
-/public/build
-
 # IDE
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
 
@@ -34,19 +17,8 @@ nodejs-backend/coverage/
 .DS_Store
 Thumbs.db
 
-# Backups (large)
-/backup_final
-/backup2
+# Coverage
+coverage/
 
-# Media
-*.mp4
-*.jpeg
-*.jpg
-*.png
-*.gif
-*.svg
-!public/favicon.ico
-
-# Package locks (optional, remove if you want to track them)
-package-lock.json
-composer.lock
+# Logs
+*.log

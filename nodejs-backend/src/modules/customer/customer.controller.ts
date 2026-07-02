@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CustomerService } from './customer.service';
 import { prisma } from '../../config/database';
-import { successResponse } from '../../shared/utils/response.util';
+import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
 
 const customerService = new CustomerService(prisma);
 
@@ -71,6 +71,39 @@ export async function getOrderHistory(req: Request, res: Response, next: NextFun
     const customerId = req.user!.id;
     const orders = await customerService.getOrderHistory(customerId);
     return res.status(200).json(successResponse(200, 'Success', orders));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getEmiList(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const emis = await customerService.getEmiList(customerId);
+    return res.status(200).json(successResponse(200, 'Success', emis));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function addEmi(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = req.user!.id;
+    const emi = await customerService.addEmi(customerId, req.body);
+    return res.status(201).json(successResponse(201, 'EMI mandate added', emi));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getBuyerList(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const perPage = Math.max(1, Number(req.query.per_page) || 10);
+    const search = (req.query.search as string) || undefined;
+    const { items, total } = await customerService.getBuyerList(page, perPage, search);
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
+    return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
   } catch (error) {
     next(error);
   }

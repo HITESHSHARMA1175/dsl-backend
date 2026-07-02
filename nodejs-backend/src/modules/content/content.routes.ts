@@ -41,9 +41,23 @@ import {
   createSeo,
   updateSeo,
   removeSeo,
+  publicBanners,
+  publicReviews,
+  publicFaqs,
+  publicBlogs,
+  publicBlogDetail,
+  publicSeo,
 } from './content.controller';
 
 const router = Router();
+
+// --- Public (storefront) read routes — no auth ---
+router.get('/public/banners', publicBanners);
+router.get('/public/reviews', publicReviews);
+router.get('/public/faqs', publicFaqs);
+router.get('/public/blogs', publicBlogs);
+router.get('/public/blogs/:slug', publicBlogDetail);
+router.get('/public/seo', publicSeo);
 
 // All content routes require admin authentication
 const adminAuth = [authMiddleware, adminGuard];

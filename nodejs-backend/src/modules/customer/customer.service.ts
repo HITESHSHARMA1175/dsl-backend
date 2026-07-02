@@ -96,4 +96,51 @@ export class CustomerService {
       where: { user_id: customerId },
     });
   }
+
+  async getEmiList(customerId: number) {
+    return (this.prisma as any).customer_emis.findMany({
+      where: { customer_id: customerId },
+      orderBy: { id: 'desc' },
+    });
+  }
+
+  async addEmi(customerId: number, data: {
+    emi_amount: number;
+    emi_start_date?: string;
+    emi_end_date?: string;
+    payment_status?: string;
+  }) {
+    return (this.prisma as any).customer_emis.create({
+      data: {
+        customer_id: customerId,
+        emi_amount: data.emi_amount,
+        emi_start_date: data.emi_start_date ? new Date(data.emi_start_date) : null,
+        emi_end_date: data.emi_end_date ? new Date(data.emi_end_date) : null,
+        payment_status: data.payment_status || 'Pending',
+        status: 1,
+      },
+    });
+  }
+
+  async getBuyerList(page = 1, perPage = 10, search?: string) {
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { first_name: { contains: search } },
+        { last_name: { contains: search } },
+        { email: { contains: search } },
+        { mobile: { contains: search } },
+      ];
+    }
+    const [items, total] = await Promise.all([
+      (this.prisma as any).customer.findMany({
+        where,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { id: 'desc' },
+      }),
+      (this.prisma as any).customer.count({ where }),
+    ]);
+    return { items, total };
+  }
 }
