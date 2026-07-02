@@ -5,13 +5,31 @@ export const adminLoginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const requestOtpSchema = z.object({
+export const customerLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const customerRegisterSchema = z.object({
+  first_name: z.string().min(1),
+  last_name: z.string().optional(),
+  email: z.string().email(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  mobile: z.string().optional(),
+});
+
+export const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
-export const verifyOtpSchema = z.object({
-  email: z.string().email(),
-  otp: z.string().length(4),
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(1),
+  new_password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export const refreshTokenSchema = z.object({

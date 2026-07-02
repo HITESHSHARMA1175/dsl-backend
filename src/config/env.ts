@@ -7,27 +7,28 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(3000),
 
-  // Database
-  DATABASE_URL: z.string().url(),
+  // Database — real value provided via Render env var; placeholder lets the
+  // app boot (and serve Swagger docs) even before the DB is wired.
+  DATABASE_URL: z.string().min(1).default('mysql://root@127.0.0.1:3306/dslclinic_ds1db'),
   DATABASE_POOL_SIZE: z.coerce.number().default(10),
 
-  // JWT
-  JWT_ACCESS_SECRET: z.string().min(32),
-  JWT_REFRESH_SECRET: z.string().min(32),
+  // JWT — override with strong secrets in production (Render generates these).
+  JWT_ACCESS_SECRET: z.string().min(32).default('dev_access_secret_change_me_0123456789abcdef'),
+  JWT_REFRESH_SECRET: z.string().min(32).default('dev_refresh_secret_change_me_0123456789abcdef'),
 
-  // Stripe
-  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
-  STRIPE_RETURN_URL: z.string().url(),
+  // Stripe (optional for docs deploy)
+  STRIPE_SECRET_KEY: z.string().default('sk_test_placeholder'),
+  STRIPE_WEBHOOK_SECRET: z.string().default('whsec_placeholder'),
+  STRIPE_RETURN_URL: z.string().default('http://localhost:3000'),
 
-  // Klarna
-  KLARNA_BASE_URL: z.string().url(),
-  KLARNA_USERNAME: z.string(),
-  KLARNA_PASSWORD: z.string(),
+  // Klarna (optional for docs deploy)
+  KLARNA_BASE_URL: z.string().url().default('https://api.playground.klarna.com'),
+  KLARNA_USERNAME: z.string().default(''),
+  KLARNA_PASSWORD: z.string().default(''),
 
-  // SendGrid
-  SENDGRID_API_KEY: z.string(),
-  SENDGRID_FROM_EMAIL: z.string().email(),
+  // SendGrid (optional for docs deploy)
+  SENDGRID_API_KEY: z.string().default(''),
+  SENDGRID_FROM_EMAIL: z.string().default('noreply@dslclinic.com'),
   SENDGRID_FROM_NAME: z.string().default('DSL Clinic'),
 
   // Twilio (future SMS OTP)

@@ -158,4 +158,42 @@ export class ContentService {
     await this.prisma.seo.delete({ where: { id } });
     return { message: 'SEO entry deleted successfully' };
   }
+
+  // --- Public (storefront) read methods ---
+
+  async publicBanners() {
+    return (this.prisma as any).banner.findMany({ where: { status: 1 } });
+  }
+
+  async publicReviews() {
+    return (this.prisma as any).review.findMany({ where: { status: 1 }, orderBy: { id: 'desc' } });
+  }
+
+  async publicFaqs() {
+    // Raw query with explicit columns — `faqs.created_at` has legacy zero-dates
+    // that break Prisma's default selection.
+    return (this.prisma as any).$queryRawUnsafe(
+      `SELECT id, category_id, question, answer, sorting_order, status
+       FROM faqs WHERE status = 1 ORDER BY sorting_order ASC`
+    );
+  }
+
+  async publicBlogs() {
+    return (this.prisma as any).blog.findMany({ where: { status: 1 }, orderBy: { id: 'desc' } });
+  }
+
+  async publicBlogBySlug(slug: string) {
+    const blog = await (this.prisma as any).blog.findFirst({ where: { blog_slug: slug } });
+    if (blog) return blog;
+    // Fallback to numeric id lookup
+    const asId = Number(slug);
+    if (!Number.isNaN(asId)) {
+      return (this.prisma as any).blog.findUnique({ where: { id: asId } });
+    }
+    return null;
+  }
+
+  async publicSeoByUrl(pageurl: string) {
+    return (this.prisma as any).seo.findFirst({ where: { pageurl } });
+  }
 }

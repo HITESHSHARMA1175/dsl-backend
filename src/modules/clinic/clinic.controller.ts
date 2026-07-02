@@ -52,3 +52,62 @@ export async function toggleClinicStatus(req: Request, res: Response, next: Next
     next(error);
   }
 }
+
+// ==================== MOBILE (clinic detail) ENDPOINTS ====================
+
+export async function getClinicInfo(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    const data = await clinicService.getInfo(id);
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClinicHxg(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    const data = await clinicService.getHxg(id);
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClinicTime(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    const data = await clinicService.getTime(id);
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClinicRooms(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await clinicService.getRooms();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClinicEquipments(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await clinicService.getEquipments();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getClinicFinance(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await clinicService.getFinance();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}

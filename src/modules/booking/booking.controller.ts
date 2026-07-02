@@ -38,6 +38,18 @@ export async function searchBookings(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function listWebBookings(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const perPage = Math.max(1, Number(req.query.per_page) || 10);
+    const { items, total } = await bookingService.listWeb(page, perPage);
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
+    return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getBookingById(req: Request, res: Response, next: NextFunction) {
   try {
     const id = Number(req.params.id);
