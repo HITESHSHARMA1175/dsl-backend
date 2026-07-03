@@ -8,12 +8,17 @@ export class AttributeService {
     return (this.prisma as any).attributes.findMany({ orderBy: { id: 'desc' } });
   }
 
-  async createAttribute(data: any) {
-    return (this.prisma as any).attributes.create({ data });
+  async createAttribute(data: { name: string; type?: string }) {
+    return (this.prisma as any).attributes.create({
+      data: { attribute_name: data.name, attribute_type: data.type },
+    });
   }
 
-  async updateAttribute(id: number, data: any) {
-    return (this.prisma as any).attributes.update({ where: { id }, data });
+  async updateAttribute(id: number, data: { name?: string; type?: string }) {
+    return (this.prisma as any).attributes.update({
+      where: { id },
+      data: { attribute_name: data.name, attribute_type: data.type },
+    });
   }
 
   async deleteAttribute(id: number) {
@@ -26,12 +31,17 @@ export class AttributeService {
     return (this.prisma as any).attribute_values.findMany({ orderBy: { id: 'desc' } });
   }
 
-  async createValue(data: any) {
-    return (this.prisma as any).attribute_values.create({ data });
+  async createValue(data: { attribute_id: number; value: string }) {
+    return (this.prisma as any).attribute_values.create({
+      data: { attribute_id: data.attribute_id, attribute_value: data.value },
+    });
   }
 
-  async updateValue(id: number, data: any) {
-    return (this.prisma as any).attribute_values.update({ where: { id }, data });
+  async updateValue(id: number, data: { value?: string }) {
+    return (this.prisma as any).attribute_values.update({
+      where: { id },
+      data: { attribute_value: data.value },
+    });
   }
 
   async deleteValue(id: number) {

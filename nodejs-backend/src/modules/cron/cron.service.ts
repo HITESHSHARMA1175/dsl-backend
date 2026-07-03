@@ -12,7 +12,7 @@ export class CronService {
     // 2. Create EMI records for each
     // 3. Send notifications
     const tenants = await (this.prisma as any).tenants.findMany({
-      where: { status: 'active' },
+      where: { status: 1 },
     });
 
     let created = 0;

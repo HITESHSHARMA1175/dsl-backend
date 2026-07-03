@@ -5,7 +5,7 @@ export class MasterService {
 
   async getValues(masterHeadId: number) {
     return this.prisma.masterValue.findMany({
-      where: { MasterHead: masterHeadId, status: '1' },
+      where: { MasterHead: masterHeadId, status: 1 },
       select: { id: true, MasterValue: true },
     });
   }

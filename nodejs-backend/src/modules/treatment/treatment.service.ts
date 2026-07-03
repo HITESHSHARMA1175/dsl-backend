@@ -15,7 +15,7 @@ export class TreatmentService {
     return this.prisma.treatment.create({ data });
   }
 
-  async update(id: number, data: { name?: string; treatment_type?: number; status?: string }) {
+  async update(id: number, data: { name?: string; treatment_type?: number; status?: number }) {
     return this.prisma.treatment.update({
       where: { id },
       data,

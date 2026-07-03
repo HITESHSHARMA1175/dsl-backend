@@ -7,19 +7,19 @@ export class BuyerCrmService {
     const skip = (page - 1) * perPage;
     const [items, total] = await Promise.all([
       (this.prisma as any).leads.findMany({
-        where: { is_lead: '1' },
+        where: { is_lead: 'Yes' },
         skip,
         take: perPage,
         orderBy: { id: 'desc' },
       }),
-      (this.prisma as any).leads.count({ where: { is_lead: '1' } }),
+      (this.prisma as any).leads.count({ where: { is_lead: 'Yes' } }),
     ]);
     return { items, total, page, perPage };
   }
 
   async create(data: any) {
     return (this.prisma as any).leads.create({
-      data: { ...data, is_lead: '1' },
+      data: { ...data, is_lead: 'Yes' },
     });
   }
 

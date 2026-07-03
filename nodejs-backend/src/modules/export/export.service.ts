@@ -20,7 +20,7 @@ export class ExportService {
     if (filters.status) where.status = filters.status;
 
     const data = await (this.prisma as any).leads.findMany({
-      where: { ...where, is_lead: '0' },
+      where: { ...where, is_lead: 'No' },
       orderBy: { id: 'desc' },
     });
     return data;

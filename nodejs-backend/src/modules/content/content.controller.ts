@@ -294,7 +294,7 @@ export async function publicBlogs(req: Request, res: Response, next: NextFunctio
 
 export async function publicBlogDetail(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await contentService.publicBlogBySlug(req.params.slug);
+    const data = await contentService.publicBlogBySlug(String(req.params.slug));
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
     next(error);

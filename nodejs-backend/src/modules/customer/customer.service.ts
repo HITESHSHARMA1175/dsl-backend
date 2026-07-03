@@ -43,7 +43,7 @@ export class CustomerService {
 
   async listAddresses(customerId: number) {
     return this.prisma.customerAddress.findMany({
-      where: { user_id: customerId },
+      where: { user_id: String(customerId) },
     });
   }
 
@@ -57,7 +57,7 @@ export class CustomerService {
   }) {
     return this.prisma.customerAddress.create({
       data: {
-        user_id: customerId,
+        user_id: String(customerId),
         ...data,
       },
     });
@@ -75,7 +75,7 @@ export class CustomerService {
     const address = await this.prisma.customerAddress.findUnique({
       where: { id: addressId },
     });
-    if (!address || address.user_id !== customerId) {
+    if (!address || address.user_id !== String(customerId)) {
       throw new AppError(404, 'Address not found');
     }
 

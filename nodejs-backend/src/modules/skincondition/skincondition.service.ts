@@ -4,13 +4,13 @@ export class SkinConditionService {
   // Main conditions (is_condition = 1, parent_id = 0)
   async list() {
     return (prisma as any).propertyCategory.findMany({
-      where: { is_condition: 1, parent_id: 0 },
+      where: { is_condition: 'Yes', parent_id: 0 },
     });
   }
 
   async create(data: any) {
     return (prisma as any).propertyCategory.create({
-      data: { ...data, is_condition: 1, parent_id: 0 },
+      data: { ...data, is_condition: 'Yes', is_top: 'No', parent_id: 0 },
     });
   }
 
@@ -52,13 +52,13 @@ export class SkinConditionService {
   // Sub-conditions
   async listSub() {
     return (prisma as any).propertyCategory.findMany({
-      where: { is_condition: 1, parent_id: { not: 0 } },
+      where: { is_condition: 'Yes', parent_id: { not: 0 } },
     });
   }
 
   async createSub(data: any) {
     return (prisma as any).propertyCategory.create({
-      data: { ...data, is_condition: 1 },
+      data: { ...data, is_condition: 'Yes', is_top: 'No' },
     });
   }
 

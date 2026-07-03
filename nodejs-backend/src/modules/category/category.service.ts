@@ -15,6 +15,8 @@ export class CategoryService {
       data: {
         category_name: data.category_name,
         parent_id: data.parent_id ?? 0,
+        is_condition: 'No',
+        is_top: 'No',
       },
     });
   }

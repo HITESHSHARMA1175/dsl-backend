@@ -2,7 +2,7 @@ import { prisma } from '../../config/database';
 
 export class SalesCrmService {
   async list(page: number = 1, perPage: number = 20, filters?: any) {
-    const where: any = { is_lead: '0' };
+    const where: any = { is_lead: 'No' };
     if (filters?.status) where.status = filters.status;
     if (filters?.search) {
       where.OR = [
@@ -13,47 +13,47 @@ export class SalesCrmService {
     }
 
     const [items, total] = await Promise.all([
-      (prisma as any).lead.findMany({
+      (prisma as any).leads.findMany({
         where,
         skip: (page - 1) * perPage,
         take: perPage,
         orderBy: { id: 'desc' },
       }),
-      (prisma as any).lead.count({ where }),
+      (prisma as any).leads.count({ where }),
     ]);
 
     return { items, total, page, perPage };
   }
 
   async create(data: any) {
-    return (prisma as any).lead.create({
-      data: { ...data, is_lead: '0' },
+    return (prisma as any).leads.create({
+      data: { ...data, is_lead: 'No' },
     });
   }
 
   async getById(id: number) {
-    return (prisma as any).lead.findUnique({ where: { id } });
+    return (prisma as any).leads.findUnique({ where: { id } });
   }
 
   async updateStatus(id: number, status: string, notes?: string) {
     const updateData: any = { status };
     if (notes) updateData.notes = notes;
-    return (prisma as any).lead.update({
+    return (prisma as any).leads.update({
       where: { id },
       data: updateData,
     });
   }
 
   async assign(id: number, empId: number) {
-    return (prisma as any).lead.update({
+    return (prisma as any).leads.update({
       where: { id },
       data: { assigned_to: empId },
     });
   }
 
   async getJourney(id: number) {
-    return (prisma as any).lead_journey.findMany({
-      where: { lead_id: id },
+    return (prisma as any).lead_journeys.findMany({
+      where: { lead: id },
       orderBy: { id: 'desc' },
     });
   }

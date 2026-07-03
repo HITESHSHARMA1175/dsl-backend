@@ -7,7 +7,7 @@ export class AttendanceService {
     const attendance = await this.prisma.attendances.create({
       data: {
         user_id: userId,
-        is_present: '1',
+        is_present: 'Yes',
         current_location: data.current_location,
         attendance_date: new Date(data.attendance_date || new Date().toISOString().split('T')[0]),
         attendance_time: data.attendance_time

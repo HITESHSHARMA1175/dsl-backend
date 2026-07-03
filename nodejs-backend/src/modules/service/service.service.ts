@@ -22,7 +22,7 @@ export class ServiceService {
     property_sub_category?: number;
     parent_id?: number;
     profile?: string;
-    status?: string;
+    status?: number;
   }) {
     return this.prisma.property.create({ data });
   }
@@ -40,7 +40,7 @@ export class ServiceService {
     property_sub_category?: number;
     parent_id?: number;
     profile?: string;
-    status?: string;
+    status?: number;
   }) {
     return this.prisma.property.update({ where: { id }, data });
   }

@@ -7,12 +7,41 @@ export class SocietyService {
     return (this.prisma as any).societies.findMany({ orderBy: { id: 'desc' } });
   }
 
-  async create(data: any) {
-    return (this.prisma as any).societies.create({ data });
+  async create(data: {
+    name: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    builder_id?: number;
+  }) {
+    return (this.prisma as any).societies.create({
+      data: {
+        society_name: data.name,
+        address: data.address,
+        pincode: data.pincode,
+        builder_id: data.builder_id !== undefined ? String(data.builder_id) : undefined,
+      },
+    });
   }
 
-  async update(id: number, data: any) {
-    return (this.prisma as any).societies.update({ where: { id }, data });
+  async update(id: number, data: {
+    name?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    builder_id?: number;
+  }) {
+    return (this.prisma as any).societies.update({
+      where: { id },
+      data: {
+        society_name: data.name,
+        address: data.address,
+        pincode: data.pincode,
+        builder_id: data.builder_id !== undefined ? String(data.builder_id) : undefined,
+      },
+    });
   }
 
   async delete(id: number) {
