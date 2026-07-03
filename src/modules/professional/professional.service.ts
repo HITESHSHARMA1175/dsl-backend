@@ -3,17 +3,14 @@ import { PrismaClient } from '@prisma/client';
 export class ProfessionalService {
   constructor(private prisma: PrismaClient) {}
 
-  async list(parentId?: number) {
-    const where = parentId !== undefined ? { parent_id: parentId } : {};
+  async list() {
     return this.prisma.professional.findMany({
-      where,
       select: {
         id: true,
         professional_name: true,
         designation: true,
         profession: true,
         profile: true,
-        rating: true,
       },
     });
   }
@@ -22,10 +19,8 @@ export class ProfessionalService {
     professional_name: string;
     designation?: string;
     profession?: string;
-    parent_id?: number;
-    category_ids?: string;
+    work_category?: string;
     profile?: string;
-    rating?: number;
   }) {
     return this.prisma.professional.create({ data });
   }
@@ -34,10 +29,8 @@ export class ProfessionalService {
     professional_name?: string;
     designation?: string;
     profession?: string;
-    parent_id?: number;
-    category_ids?: string;
+    work_category?: string;
     profile?: string;
-    rating?: number;
   }) {
     return this.prisma.professional.update({
       where: { id },
@@ -52,7 +45,7 @@ export class ProfessionalService {
 
   async toggleStatus(id: number) {
     const professional = await this.prisma.professional.findUniqueOrThrow({ where: { id } });
-    const newStatus = professional.status === '1' ? '0' : '1';
+    const newStatus = professional.status === 1 ? 0 : 1;
     return this.prisma.professional.update({
       where: { id },
       data: { status: newStatus },

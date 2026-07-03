@@ -2,7 +2,7 @@ import { prisma } from '../../config/database';
 
 export class EmployeeService {
   async list(filters?: any) {
-    const where: any = { is_admin: 0, is_sub_admin: 0 };
+    const where: any = { is_admin: 0, is_sub_admin: 'No' };
     if (filters?.search) {
       where.OR = [
         { name: { contains: filters.search } },
@@ -14,7 +14,7 @@ export class EmployeeService {
 
   async create(data: any) {
     return (prisma as any).user.create({
-      data: { ...data, is_admin: 0, is_sub_admin: 0 },
+      data: { ...data, is_admin: 0, is_sub_admin: 'No', is_seller: 'No', is_kyc: 'No' },
     });
   }
 
@@ -42,7 +42,18 @@ export class EmployeeService {
   async getUserMap(id: number) {
     return (prisma as any).user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, phone: true },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        mobile_no: true,
+        location_address: true,
+        location_lat: true,
+        location_lng: true,
+        location_date: true,
+        location_time: true,
+      },
     });
   }
 }

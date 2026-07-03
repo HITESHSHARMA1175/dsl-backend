@@ -9,11 +9,11 @@ export class HomeService {
       professionals,
       teams,
     ] = await Promise.all([
-      (prisma as any).property_category.findMany({
+      (prisma as any).propertyCategory.findMany({
         where: { parent_id: 0, status: 1 },
         take: 10,
       }),
-      (prisma as any).service.findMany({
+      (prisma as any).property.findMany({
         where: { status: 1 },
         take: 10,
         orderBy: { id: 'desc' },
@@ -27,7 +27,7 @@ export class HomeService {
         where: { status: 1 },
         take: 10,
       }),
-      (prisma as any).team.findMany({
+      (prisma as any).teams.findMany({
         where: { status: 1 },
         take: 10,
       }),

@@ -10,25 +10,42 @@ export class ClinicService {
   async create(data: {
     name: string;
     address?: string;
-    city?: string;
-    postcode?: string;
     phone?: string;
     email?: string;
-    status?: string;
+    website?: string;
+    whatsapp?: string;
   }) {
-    return this.prisma.clinic.create({ data });
+    return this.prisma.clinic.create({
+      data: {
+        clinic_name: data.name,
+        address: data.address,
+        clinic_phone: data.phone,
+        clinic_email: data.email,
+        clinic_website: data.website,
+        clinic_whatsapp: data.whatsapp,
+      },
+    });
   }
 
   async update(id: number, data: {
     name?: string;
     address?: string;
-    city?: string;
-    postcode?: string;
     phone?: string;
     email?: string;
-    status?: string;
+    website?: string;
+    whatsapp?: string;
   }) {
-    return this.prisma.clinic.update({ where: { id }, data });
+    return this.prisma.clinic.update({
+      where: { id },
+      data: {
+        clinic_name: data.name,
+        address: data.address,
+        clinic_phone: data.phone,
+        clinic_email: data.email,
+        clinic_website: data.website,
+        clinic_whatsapp: data.whatsapp,
+      },
+    });
   }
 
   async delete(id: number) {
@@ -36,13 +53,12 @@ export class ClinicService {
     return { message: 'Clinic deleted successfully' };
   }
 
+  /**
+   * The clinics table (introspected from legacy MySQL) has no status/active
+   * column, so there is nothing to persist here — return the record as-is.
+   */
   async toggleStatus(id: number) {
-    const record = await this.prisma.clinic.findUniqueOrThrow({ where: { id } });
-    const newStatus = record.status === '1' ? '0' : '1';
-    return this.prisma.clinic.update({
-      where: { id },
-      data: { status: newStatus },
-    });
+    return this.prisma.clinic.findUniqueOrThrow({ where: { id } });
   }
 
   // ==================== MOBILE (clinic detail) ENDPOINTS ====================

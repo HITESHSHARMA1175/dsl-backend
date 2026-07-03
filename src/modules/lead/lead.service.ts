@@ -14,7 +14,7 @@ export class LeadService {
         assign_emp: data.assign_emp,
         campaigns: data.campaigns,
         addby: addBy,
-        is_lead: '1',
+        is_lead: 'Yes',
         is_profile_checked: '0',
         token_collect_flag: '0',
         status: 'New',
@@ -89,7 +89,7 @@ export class LeadService {
         lead: id,
         status,
         remark: notes,
-        is_lead: '1',
+        is_lead: 'Yes',
         assign_emp: updatedBy,
       },
     });

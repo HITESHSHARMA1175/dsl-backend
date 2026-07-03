@@ -7,12 +7,27 @@ export class BuilderService {
     return (this.prisma as any).builders.findMany({ orderBy: { id: 'desc' } });
   }
 
-  async create(data: any) {
-    return (this.prisma as any).builders.create({ data });
+  async create(data: { name: string; contact_person?: string; email?: string; phone?: string; address?: string }) {
+    return (this.prisma as any).builders.create({
+      data: {
+        builder_name: data.name,
+        email: data.email,
+        mobile_no: data.phone,
+        address: data.address,
+      },
+    });
   }
 
-  async update(id: number, data: any) {
-    return (this.prisma as any).builders.update({ where: { id }, data });
+  async update(id: number, data: { name?: string; contact_person?: string; email?: string; phone?: string; address?: string }) {
+    return (this.prisma as any).builders.update({
+      where: { id },
+      data: {
+        builder_name: data.name,
+        email: data.email,
+        mobile_no: data.phone,
+        address: data.address,
+      },
+    });
   }
 
   async delete(id: number) {

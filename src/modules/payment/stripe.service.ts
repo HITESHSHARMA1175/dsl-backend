@@ -130,4 +130,12 @@ export class StripeService {
   async retrievePaymentIntent(paymentIntentId: string) {
     return this.stripe.paymentIntents.retrieve(paymentIntentId);
   }
+
+  /**
+   * Retrieves a Checkout Session by its ID (used to confirm payment status
+   * after redirect from Stripe Checkout).
+   */
+  async retrieveSession(sessionId: string) {
+    return this.stripe.checkout.sessions.retrieve(sessionId);
+  }
 }

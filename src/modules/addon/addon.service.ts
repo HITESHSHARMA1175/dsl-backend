@@ -20,7 +20,6 @@ export class AddonService {
           parent_id: true,
           addon_name: true,
           description: true,
-          long_description: true,
           price: true,
           discounted_price: true,
           number_of_members_required: true,
@@ -38,13 +37,12 @@ export class AddonService {
     addon_name: string;
     parent_id?: number;
     description?: string;
-    long_description?: string;
     price?: number;
     discounted_price?: number;
     number_of_members_required?: number;
     duration?: number;
     profile?: string;
-    status?: string;
+    status?: number;
   }) {
     const addon = await this.prisma.addon.create({ data });
     return addon;
@@ -56,13 +54,12 @@ export class AddonService {
       addon_name?: string;
       parent_id?: number;
       description?: string;
-      long_description?: string;
       price?: number;
       discounted_price?: number;
       number_of_members_required?: number;
       duration?: number;
       profile?: string;
-      status?: string;
+      status?: number;
     }
   ) {
     const existing = await this.prisma.addon.findUnique({ where: { id } });
@@ -90,7 +87,7 @@ export class AddonService {
       throw new AppError(404, 'Addon not found');
     }
 
-    const newStatus = existing.status === '1' ? '0' : '1';
+    const newStatus = existing.status === 1 ? 0 : 1;
     const addon = await this.prisma.addon.update({
       where: { id },
       data: { status: newStatus },

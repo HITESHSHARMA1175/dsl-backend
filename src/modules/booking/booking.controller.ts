@@ -64,7 +64,7 @@ export async function updateBookingStatus(req: Request, res: Response, next: Nex
   try {
     const id = Number(req.params.id);
     const { status } = req.body;
-    const booking = await bookingService.updateStatus(id, status);
+    const booking = await bookingService.updateStatus(id, Number(status));
     return res.status(200).json(successResponse(200, 'Booking status updated successfully', booking));
   } catch (error) {
     next(error);

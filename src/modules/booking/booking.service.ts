@@ -45,7 +45,7 @@ export class BookingService {
     // Create KiBooking record
     const booking = await this.prisma.kiBooking.create({
       data: {
-        user_id: customer.id,
+        user_id: Number(customer.id),
         service_id: data.service_id,
         profession_id: data.profession_id,
         slot_id: data.slot_id,
@@ -56,17 +56,17 @@ export class BookingService {
         email: data.email,
         mobile: data.mobile,
         addon_id: data.addon_id,
-        total_service_duration: data.total_service_duration,
-        total_addon_duration: data.total_addon_duration,
-        clinic_id: data.clinic_id,
-        booking_status: 'pending',
+        total_service_duration: data.total_service_duration?.toString(),
+        total_addon_duration: data.total_addon_duration?.toString(),
+        clinic_id: data.clinic_id?.toString(),
+        status: 1,
       },
     });
 
     // Send confirmation email via SendGrid
     try {
       await this.sendGridService.sendBookingConfirmation(data.email, {
-        bookingId: booking.id,
+        bookingId: Number(booking.id),
         amount: '0.00',
         date: data.slot_date,
         time: data.slot_time || '',
@@ -85,15 +85,42 @@ export class BookingService {
         skip: (page - 1) * perPage,
         take: perPage,
         orderBy: { created_at: 'desc' },
-        include: {
-          customer: true,
-          professional: true,
-        },
       }),
       this.prisma.kiBooking.count(),
     ]);
 
-    return { items, total };
+    return { items: await this.attachRelations(items), total };
+  }
+
+  /**
+   * KiBooking has no Prisma relations to Customer/Professional (schema was
+   * pulled from legacy MySQL with no FKs), so join them manually by id.
+   */
+  private async attachRelations<T extends { user_id: number | null; profession_id: number | null }>(
+    bookings: T[]
+  ) {
+    const customerIds = [...new Set(bookings.map((b) => b.user_id).filter((id): id is number => id !== null))];
+    const professionalIds = [
+      ...new Set(bookings.map((b) => b.profession_id).filter((id): id is number => id !== null)),
+    ];
+
+    const [customers, professionals] = await Promise.all([
+      customerIds.length
+        ? this.prisma.customer.findMany({ where: { id: { in: customerIds.map((id) => BigInt(id)) } } })
+        : Promise.resolve([]),
+      professionalIds.length
+        ? this.prisma.professional.findMany({ where: { id: { in: professionalIds } } })
+        : Promise.resolve([]),
+    ]);
+
+    const customerById = new Map(customers.map((c) => [c.id.toString(), c]));
+    const professionalById = new Map(professionals.map((p) => [p.id, p]));
+
+    return bookings.map((booking) => ({
+      ...booking,
+      customer: booking.user_id !== null ? customerById.get(booking.user_id.toString()) ?? null : null,
+      professional: booking.profession_id !== null ? professionalById.get(booking.profession_id) ?? null : null,
+    }));
   }
 
   /**
@@ -120,32 +147,25 @@ export class BookingService {
       where: {
         first_name: { contains: searchText },
       },
-      include: {
-        customer: true,
-        professional: true,
-      },
     });
 
-    return items;
+    return this.attachRelations(items);
   }
 
   async getById(id: number) {
     const booking = await this.prisma.kiBooking.findUnique({
       where: { id },
-      include: {
-        customer: true,
-        professional: true,
-      },
     });
 
     if (!booking) {
       throw new AppError(404, 'Booking not found');
     }
 
-    return booking;
+    const [withRelations] = await this.attachRelations([booking]);
+    return withRelations;
   }
 
-  async updateStatus(id: number, status: string) {
+  async updateStatus(id: number, status: number) {
     const existing = await this.prisma.kiBooking.findUnique({ where: { id } });
     if (!existing) {
       throw new AppError(404, 'Booking not found');
@@ -153,7 +173,7 @@ export class BookingService {
 
     const booking = await this.prisma.kiBooking.update({
       where: { id },
-      data: { booking_status: status },
+      data: { status },
     });
 
     return booking;

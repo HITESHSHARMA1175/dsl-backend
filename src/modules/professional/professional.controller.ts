@@ -7,10 +7,7 @@ const professionalService = new ProfessionalService(prisma);
 
 export async function listProfessionals(req: Request, res: Response, next: NextFunction) {
   try {
-    const parentId = req.query.parent_id !== undefined
-      ? Number(req.query.parent_id)
-      : undefined;
-    const professionals = await professionalService.list(parentId);
+    const professionals = await professionalService.list();
     return res.status(200).json(successResponse(200, 'Success', professionals));
   } catch (error) {
     next(error);

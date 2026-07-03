@@ -35,7 +35,7 @@ export class SlotService {
           slot.slot_start,
           totalServiceDuration,
           booking.slot_time!,
-          booking.total_service_duration!
+          Number(booking.total_service_duration)
         )
       );
     });
