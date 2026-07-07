@@ -5,6 +5,7 @@ node_modules/
 .env
 .env.local
 .env.*.local
+postman_environment.json
 
 # Build output
 dist/
@@ -33,6 +34,7 @@ Thumbs.db
 
 # Temp
 tmp_*.ts
+tmp_*.sql
 *.tmp
 
 # Placeholder files
