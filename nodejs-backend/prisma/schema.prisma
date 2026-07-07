@@ -13,7 +13,7 @@ model User {
   menu_permission        String?               @db.VarChar(400)
   emp_type               String?               @db.VarChar(255)
   reporting_boss         Int?
-  is_show_contact        users_is_show_contact @default(dbgenerated("0"))
+  is_show_contact        users_is_show_contact @default(dbgenerated("'0'"))
   designation            Int?
   first_name             String                @db.VarChar(255)
   last_name              String?               @db.VarChar(100)
@@ -1840,44 +1840,6 @@ model society_options {
   addby                  Int?
   created_at             DateTime @default(now()) @db.Timestamp(0)
   updated_at             DateTime @default(now()) @db.Timestamp(0)
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model sss11 {
-  id                         Int      @default(0)
-  parent_id                  Int      @default(0)
-  addon_ids                  String?  @db.VarChar(255)
-  property_name              String?  @db.VarChar(255)
-  skin_condition             Json?
-  skin_sub_condition         Json?
-  property_category          Json?
-  property_sub_category      Json?
-  description                String?  @db.Text
-  duration                   Int?
-  number_of_members_required Int?
-  max_quantity_allowed       Int?
-  session1                   Int      @default(1)
-  price                      Float    @default(0.00)
-  discounted_price           Float    @default(0.00)
-  session2                   Int?
-  price2                     Float    @default(0.00)
-  discounted_price2          Float    @default(0.00)
-  session3                   Int?
-  price3                     Float    @default(0.00)
-  discounted_price3          Float    @default(0.00)
-  session4                   Int?
-  price4                     Float    @default(0.00)
-  discounted_price4          Float    @default(0.00)
-  offer_status               Int      @default(0)
-  long_description           String?  @db.LongText
-  profile                    String?  @db.VarChar(255)
-  offer_image                String?  @db.VarChar(255)
-  status                     Int      @default(1) @db.TinyInt
-  addby                      Int?
-  created_at                 DateTime @default(now()) @db.Timestamp(0)
-  updated_at                 DateTime @default(now()) @db.Timestamp(0)
-
-  @@ignore
 }
 
 model states {
