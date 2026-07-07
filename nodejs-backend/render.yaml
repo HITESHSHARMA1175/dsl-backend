@@ -3,6 +3,7 @@ services:
     name: dsl-backend
     runtime: node
     plan: free
+    rootDir: nodejs-backend
     # Build installs deps (postinstall runs `prisma generate`) and compiles to dist/.
     buildCommand: npm install && npm run build
     # Runs the compiled output.
