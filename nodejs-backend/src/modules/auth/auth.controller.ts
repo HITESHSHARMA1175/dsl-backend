@@ -72,7 +72,7 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
 export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body;
-    await authService.logout(refreshToken);
+    await authService.logout(refreshToken, req.user!.id, req.user!.role);
     return res.status(200).json(successResponse(200, 'Logout successful', null));
   } catch (error) {
     next(error);
