@@ -58,8 +58,8 @@ export class AuthService {
   }
 
   // ==================== LOGOUT ====================
-  async logout(refreshToken: string): Promise<void> {
-    await this.tokenService.revokeRefreshToken(refreshToken);
+  async logout(refreshToken: string, userId: number, userType: string): Promise<void> {
+    await this.tokenService.revokeRefreshToken(refreshToken, userId, userType);
   }
 
   // ==================== CUSTOMER LOGIN (Email + Password) ====================

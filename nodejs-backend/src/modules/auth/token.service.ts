@@ -25,9 +25,9 @@ export class TokenService {
     });
   }
 
-  async revokeRefreshToken(token: string): Promise<void> {
+  async revokeRefreshToken(token: string, userId: number, userType: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
-      where: { token },
+      where: { token, user_id: userId, user_type: userType },
       data: { revoked: true },
     });
   }
