@@ -57,6 +57,11 @@ export class AuthService {
     };
   }
 
+  // ==================== LOGOUT ====================
+  async logout(refreshToken: string): Promise<void> {
+    await this.tokenService.revokeRefreshToken(refreshToken);
+  }
+
   // ==================== CUSTOMER LOGIN (Email + Password) ====================
   async customerLogin(email: string, password: string) {
     const customer = await (prisma as any).customer.findFirst({

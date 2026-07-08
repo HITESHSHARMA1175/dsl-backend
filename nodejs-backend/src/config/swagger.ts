@@ -84,7 +84,7 @@ export function generateSwaggerSpec(app: any) {
       { name: 'Storefront', description: 'Storefront selection session: services/addons/products, slots, language, search' },
     ],
     paths: {
-      // ==================== AUTH (8 endpoints) ====================
+      // ==================== AUTH (9 endpoints) ====================
       '/auth/admin/login': {
         post: {
           tags: ['Auth'],
@@ -172,6 +172,18 @@ export function generateSwaggerSpec(app: any) {
             content: { 'application/json': { schema: { type: 'object', required: ['current_password', 'new_password'], properties: { current_password: { type: 'string' }, new_password: { type: 'string' } } } } },
           },
           responses: { '200': { description: 'Password changed successfully' }, '400': { description: 'Current password incorrect' } },
+        },
+      },
+      '/auth/logout': {
+        post: {
+          tags: ['Auth'],
+          summary: 'Logout (authenticated)',
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['refreshToken'], properties: { refreshToken: { type: 'string' } } } } },
+          },
+          responses: { '200': { description: 'Logout successful' }, '401': { description: 'Unauthorized' } },
         },
       },
 

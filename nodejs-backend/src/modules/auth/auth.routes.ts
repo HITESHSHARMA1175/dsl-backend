@@ -19,6 +19,7 @@ import {
   resetPassword,
   changePassword,
   customerRefresh,
+  logout,
 } from './auth.controller';
 
 const router = Router();
@@ -38,5 +39,8 @@ router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 
 // ===== Change Password (authenticated) =====
 router.post('/change-password', authMiddleware, validate(changePasswordSchema), changePassword);
+
+// ===== Logout (authenticated) =====
+router.post('/logout', authMiddleware, validate(refreshTokenSchema), logout);
 
 export default router;
