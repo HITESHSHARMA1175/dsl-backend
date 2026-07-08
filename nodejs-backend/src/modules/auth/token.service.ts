@@ -25,6 +25,13 @@ export class TokenService {
     });
   }
 
+  async revokeRefreshToken(token: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { token },
+      data: { revoked: true },
+    });
+  }
+
   async rotateRefreshToken(oldToken: string, userId: number, userType: string): Promise<string> {
     // Invalidate old token
     await this.prisma.refreshToken.updateMany({

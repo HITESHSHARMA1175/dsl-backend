@@ -69,6 +69,16 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function logout(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { refreshToken } = req.body;
+    await authService.logout(refreshToken);
+    return res.status(200).json(successResponse(200, 'Logout successful', null));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function adminRefresh(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body;
