@@ -687,7 +687,7 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, image_url: { type: 'string' }, link: { type: 'string' }, sort_order: { type: 'integer' } } } } },
+            content: { 'application/json': { schema: { type: 'object', required: ['title'], properties: { title: { type: 'string' }, image: { type: 'string' }, link: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '201': { description: 'Banner created' } },
         },
@@ -700,7 +700,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, image_url: { type: 'string' }, link: { type: 'string' }, sort_order: { type: 'integer' } } } } },
+            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, image: { type: 'string' }, link: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '200': { description: 'Banner updated' } },
         },
@@ -735,7 +735,7 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { customer_name: { type: 'string' }, rating: { type: 'integer' }, review_text: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', required: ['name', 'rating'], properties: { name: { type: 'string' }, rating: { type: 'integer', minimum: 1, maximum: 5 }, review: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '201': { description: 'Review created' } },
         },
@@ -748,7 +748,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { customer_name: { type: 'string' }, rating: { type: 'integer' }, review_text: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, rating: { type: 'integer', minimum: 1, maximum: 5 }, review: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '200': { description: 'Review updated' } },
         },
@@ -783,7 +783,7 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { question: { type: 'string' }, answer: { type: 'string' }, sort_order: { type: 'integer' } } } } },
+            content: { 'application/json': { schema: { type: 'object', required: ['category_id', 'question'], properties: { category_id: { type: 'integer' }, question: { type: 'string' }, answer: { type: 'string' }, sorting_order: { type: 'integer' }, status: { type: 'integer' } } } } },
           },
           responses: { '201': { description: 'FAQ created' } },
         },
@@ -796,7 +796,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { question: { type: 'string' }, answer: { type: 'string' }, sort_order: { type: 'integer' } } } } },
+            content: { 'application/json': { schema: { type: 'object', properties: { category_id: { type: 'integer' }, question: { type: 'string' }, answer: { type: 'string' }, sorting_order: { type: 'integer' }, status: { type: 'integer' } } } } },
           },
           responses: { '200': { description: 'FAQ updated' } },
         },
@@ -843,7 +843,7 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, slug: { type: 'string' }, image_url: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', required: ['title'], properties: { title: { type: 'string' }, content: { type: 'string' }, slug: { type: 'string' }, image: { type: 'string' }, blog_category: { type: 'integer' }, status: { type: 'integer' } } } } },
           },
           responses: { '201': { description: 'Blog created' } },
         },
@@ -856,7 +856,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, slug: { type: 'string' }, image_url: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, slug: { type: 'string' }, image: { type: 'string' }, blog_category: { type: 'integer' }, status: { type: 'integer' } } } } },
           },
           responses: { '200': { description: 'Blog updated' } },
         },
@@ -891,7 +891,7 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { page_name: { type: 'string' }, meta_title: { type: 'string' }, meta_description: { type: 'string' }, meta_keywords: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', required: ['page_name'], properties: { page_name: { type: 'string' }, pageurl: { type: 'string' }, meta_title: { type: 'string' }, meta_description: { type: 'string' }, meta_keywords: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '201': { description: 'SEO entry created' } },
         },
@@ -904,7 +904,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: { page_name: { type: 'string' }, meta_title: { type: 'string' }, meta_description: { type: 'string' }, meta_keywords: { type: 'string' } } } } },
+            content: { 'application/json': { schema: { type: 'object', properties: { page_name: { type: 'string' }, pageurl: { type: 'string' }, meta_title: { type: 'string' }, meta_description: { type: 'string' }, meta_keywords: { type: 'string' }, status: { type: 'integer' } } } } },
           },
           responses: { '200': { description: 'SEO entry updated' } },
         },
