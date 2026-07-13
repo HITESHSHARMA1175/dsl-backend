@@ -436,10 +436,12 @@ model Blog {
   id               Int       @id @default(autoincrement())
   blog_category    Int?
   blog_slug        String?   @db.VarChar(400)
+  author_name      String?   @db.VarChar(255)
   meta_title       String?   @db.VarChar(400)
   meta_keywords    String?   @db.VarChar(400)
   meta_description String?   @db.VarChar(400)
   meta_scripts     String?   @db.Text
+  seo_tags         String?   @db.VarChar(400)
   blog_date        DateTime? @db.Date
   profile_name     String?   @db.VarChar(255)
   profile_alt      String?   @db.VarChar(255)
