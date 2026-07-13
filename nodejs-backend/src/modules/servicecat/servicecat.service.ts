@@ -17,10 +17,9 @@ export class ServicecatService {
   }
 
   async list(parentId?: number) {
-    const where: any = {};
-    if (parentId !== undefined) {
-      where.parent_id = parentId;
-    }
+    // Top-level categories have parent_id = NULL (not 0) in this table, so
+    // "no parent_id given" must mean "top-level", not "everything flat".
+    const where: any = { parent_id: parentId !== undefined ? parentId : null };
     return this.prisma.property_category_mains.findMany({
       where,
       orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
