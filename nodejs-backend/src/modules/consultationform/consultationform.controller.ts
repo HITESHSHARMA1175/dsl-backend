@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ConsultationFormService } from './consultationform.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const consultationFormService = new ConsultationFormService();
 
@@ -15,7 +16,7 @@ export async function listConsultationForms(req: Request, res: Response, next: N
 
 export async function getConsultationFormById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const form = await consultationFormService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', form));
   } catch (error) {

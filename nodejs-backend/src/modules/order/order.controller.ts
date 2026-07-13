@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { OrderService } from './order.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const orderService = new OrderService(prisma);
 
@@ -23,7 +24,7 @@ export async function listOrders(req: Request, res: Response, next: NextFunction
 
 export async function getOrderById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const order = await orderService.getById(id);
     return res.status(200).json(successResponse(200, 'Order details fetched successfully', order));
   } catch (error) {
@@ -33,7 +34,7 @@ export async function getOrderById(req: Request, res: Response, next: NextFuncti
 
 export async function updateOrderStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { order_status } = req.body;
     const result = await orderService.updateStatus(id, order_status);
     return res.status(200).json(successResponse(200, 'Order status updated successfully', result));
@@ -44,7 +45,7 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
 
 export async function toggleOrderStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await orderService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Order status toggled successfully', result));
   } catch (error) {
@@ -54,7 +55,7 @@ export async function toggleOrderStatus(req: Request, res: Response, next: NextF
 
 export async function deleteOrder(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await orderService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

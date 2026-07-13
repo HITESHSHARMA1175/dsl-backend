@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ConcernService } from './concern.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const concernService = new ConcernService();
 
@@ -34,7 +35,7 @@ export async function saveConcerns(req: Request, res: Response, next: NextFuncti
 
 export async function getSavedConcerns(req: Request, res: Response, next: NextFunction) {
   try {
-    const patientId = Number(req.params.patientId);
+    const patientId = parseIdParam(req.params.patientId);
     const concerns = await concernService.getSaved(patientId);
     return res.status(200).json(successResponse(200, 'Success', concerns));
   } catch (error) {

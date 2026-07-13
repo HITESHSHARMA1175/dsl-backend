@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { LeadService } from './lead.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const leadService = new LeadService(prisma);
 
@@ -35,7 +36,7 @@ export async function listLeads(req: Request, res: Response, next: NextFunction)
 
 export async function getLeadById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const lead = await leadService.getById(id);
     return res.status(200).json(successResponse(200, 'Lead details fetched successfully', lead));
   } catch (error) {
@@ -45,7 +46,7 @@ export async function getLeadById(req: Request, res: Response, next: NextFunctio
 
 export async function updateLeadStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { status, notes } = req.body;
     const result = await leadService.updateStatus(id, status, notes, req.user!.id);
     return res.status(200).json(successResponse(200, 'Lead status updated successfully', result));
@@ -56,7 +57,7 @@ export async function updateLeadStatus(req: Request, res: Response, next: NextFu
 
 export async function assignLead(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { assign_emp } = req.body;
     const result = await leadService.assign(id, assign_emp, req.user!.id);
     return res.status(200).json(successResponse(200, 'Lead assigned successfully', result));
@@ -67,7 +68,7 @@ export async function assignLead(req: Request, res: Response, next: NextFunction
 
 export async function getLeadJourney(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const journey = await leadService.getJourney(id);
     return res.status(200).json(successResponse(200, 'Lead journey fetched successfully', journey));
   } catch (error) {

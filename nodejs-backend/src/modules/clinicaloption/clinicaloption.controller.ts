@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ClinicalOptionService } from './clinicaloption.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const clinicalOptionService = new ClinicalOptionService();
 
@@ -24,7 +25,7 @@ export async function createClinicalOption(req: Request, res: Response, next: Ne
 
 export async function updateClinicalOption(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const option = await clinicalOptionService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Clinical option updated', option));
   } catch (error) {
@@ -34,7 +35,7 @@ export async function updateClinicalOption(req: Request, res: Response, next: Ne
 
 export async function deleteClinicalOption(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await clinicalOptionService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

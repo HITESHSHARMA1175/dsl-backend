@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AttendanceService } from './attendance.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const attendanceService = new AttendanceService(prisma);
 
@@ -16,7 +17,7 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
 
 export async function punchOut(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await attendanceService.punchOut(id, req.body);
     return res.status(200).json(successResponse(200, 'Punch out recorded successfully', result));
   } catch (error) {

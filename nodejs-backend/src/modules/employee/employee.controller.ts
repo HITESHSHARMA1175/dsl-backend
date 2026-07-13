@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { EmployeeService } from './employee.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const employeeService = new EmployeeService();
 
@@ -25,7 +26,7 @@ export async function createEmployee(req: Request, res: Response, next: NextFunc
 
 export async function updateEmployee(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const employee = await employeeService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Employee updated', employee));
   } catch (error) {
@@ -35,7 +36,7 @@ export async function updateEmployee(req: Request, res: Response, next: NextFunc
 
 export async function getEmployeeById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const employee = await employeeService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', employee));
   } catch (error) {
@@ -45,7 +46,7 @@ export async function getEmployeeById(req: Request, res: Response, next: NextFun
 
 export async function toggleEmployeeStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const employee = await employeeService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled', employee));
   } catch (error) {
@@ -55,7 +56,7 @@ export async function toggleEmployeeStatus(req: Request, res: Response, next: Ne
 
 export async function getEmployeeMap(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const map = await employeeService.getUserMap(id);
     return res.status(200).json(successResponse(200, 'Success', map));
   } catch (error) {

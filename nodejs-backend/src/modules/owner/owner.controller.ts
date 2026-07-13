@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { OwnerService } from './owner.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const service = new OwnerService(prisma);
 
@@ -21,7 +22,7 @@ export async function createOwner(req: Request, res: Response, next: NextFunctio
 
 export async function updateOwner(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const item = await service.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Owner updated', item));
   } catch (error) { next(error); }
@@ -29,7 +30,7 @@ export async function updateOwner(req: Request, res: Response, next: NextFunctio
 
 export async function deleteOwner(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) { next(error); }

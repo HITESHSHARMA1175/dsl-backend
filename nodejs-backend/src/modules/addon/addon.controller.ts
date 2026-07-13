@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AddonService } from './addon.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const addonService = new AddonService(prisma);
 
@@ -31,7 +32,7 @@ export async function createAddon(req: Request, res: Response, next: NextFunctio
 
 export async function updateAddon(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const addon = await addonService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Addon updated successfully', addon));
   } catch (error) {
@@ -41,7 +42,7 @@ export async function updateAddon(req: Request, res: Response, next: NextFunctio
 
 export async function deleteAddon(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await addonService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
@@ -51,7 +52,7 @@ export async function deleteAddon(req: Request, res: Response, next: NextFunctio
 
 export async function toggleAddonStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const addon = await addonService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Addon status toggled successfully', addon));
   } catch (error) {

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { SubadminService } from './subadmin.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const subadminService = new SubadminService(prisma);
 
@@ -20,7 +21,7 @@ export async function listSubadmins(req: Request, res: Response, next: NextFunct
 
 export async function getSubadminById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await subadminService.getById(id);
     return res.status(200).json(successResponse(200, 'Sub-admin details fetched successfully', data));
   } catch (error) {
@@ -39,7 +40,7 @@ export async function createSubadmin(req: Request, res: Response, next: NextFunc
 
 export async function updateSubadmin(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await subadminService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Sub-admin updated successfully', data));
   } catch (error) {
@@ -49,7 +50,7 @@ export async function updateSubadmin(req: Request, res: Response, next: NextFunc
 
 export async function toggleSubadminStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await subadminService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled successfully', data));
   } catch (error) {

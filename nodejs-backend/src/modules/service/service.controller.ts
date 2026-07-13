@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ServiceService } from './service.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const serviceService = new ServiceService(prisma);
 
@@ -31,7 +32,7 @@ export async function createService(req: Request, res: Response, next: NextFunct
 
 export async function updateService(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const service = await serviceService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Service updated', service));
   } catch (error) {
@@ -41,7 +42,7 @@ export async function updateService(req: Request, res: Response, next: NextFunct
 
 export async function removeService(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     await serviceService.delete(id);
     return res.status(200).json(successResponse(200, 'Service deleted', null));
   } catch (error) {
@@ -51,7 +52,7 @@ export async function removeService(req: Request, res: Response, next: NextFunct
 
 export async function toggleServiceStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const service = await serviceService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled', service));
   } catch (error) {

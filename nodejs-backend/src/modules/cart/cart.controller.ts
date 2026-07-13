@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CartService } from './cart.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const cartService = new CartService(prisma);
 
@@ -42,7 +43,7 @@ export async function addToCart(req: Request, res: Response, next: NextFunction)
 
 export async function updateCartQty(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const qty = Number(req.body.qty);
     const data = await cartService.updateQty(id, qty);
     return res.status(200).json(successResponse(200, 'Cart updated', data));
@@ -53,7 +54,7 @@ export async function updateCartQty(req: Request, res: Response, next: NextFunct
 
 export async function removeCartItem(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await cartService.remove(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

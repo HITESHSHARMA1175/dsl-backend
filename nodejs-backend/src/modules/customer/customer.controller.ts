@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CustomerService } from './customer.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const customerService = new CustomerService(prisma);
 
@@ -48,7 +49,7 @@ export async function createAddress(req: Request, res: Response, next: NextFunct
 export async function updateAddress(req: Request, res: Response, next: NextFunction) {
   try {
     const customerId = req.user!.id;
-    const addressId = Number(req.params.id);
+    const addressId = parseIdParam(req.params.id);
     const address = await customerService.updateAddress(customerId, addressId, req.body);
     return res.status(200).json(successResponse(200, 'Address updated', address));
   } catch (error) {
