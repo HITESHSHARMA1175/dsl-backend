@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppointmentService } from './appointment.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const appointmentService = new AppointmentService(prisma);
 
@@ -30,7 +31,7 @@ export async function listAppointments(req: Request, res: Response, next: NextFu
 
 export async function getAppointmentById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const appointment = await appointmentService.getById(id);
     return res.status(200).json(successResponse(200, 'Appointment details successfully', appointment));
   } catch (error) {
@@ -40,7 +41,7 @@ export async function getAppointmentById(req: Request, res: Response, next: Next
 
 export async function addAppointmentNotes(req: Request, res: Response, next: NextFunction) {
   try {
-    const appointmentId = Number(req.params.id);
+    const appointmentId = parseIdParam(req.params.id);
     const { notes } = req.body;
     const result = await appointmentService.addNotes(appointmentId, notes, req.user!.id);
     return res.status(200).json(successResponse(200, 'Appointment notes added successfully', result));
@@ -51,7 +52,7 @@ export async function addAppointmentNotes(req: Request, res: Response, next: Nex
 
 export async function addAppointmentLogs(req: Request, res: Response, next: NextFunction) {
   try {
-    const appointmentId = Number(req.params.id);
+    const appointmentId = parseIdParam(req.params.id);
     const result = await appointmentService.addLogs(appointmentId, req.body, req.user!.id);
     return res.status(200).json(successResponse(200, 'Appointment action added successfully', result));
   } catch (error) {

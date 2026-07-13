@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ClinicService } from './clinic.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const clinicService = new ClinicService(prisma);
 
@@ -25,7 +26,7 @@ export async function createClinic(req: Request, res: Response, next: NextFuncti
 
 export async function updateClinic(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const clinic = await clinicService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Clinic updated', clinic));
   } catch (error) {
@@ -35,7 +36,7 @@ export async function updateClinic(req: Request, res: Response, next: NextFuncti
 
 export async function deleteClinic(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await clinicService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
@@ -45,7 +46,7 @@ export async function deleteClinic(req: Request, res: Response, next: NextFuncti
 
 export async function toggleClinicStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const clinic = await clinicService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled', clinic));
   } catch (error) {
@@ -57,7 +58,7 @@ export async function toggleClinicStatus(req: Request, res: Response, next: Next
 
 export async function getClinicInfo(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await clinicService.getInfo(id);
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
@@ -67,7 +68,7 @@ export async function getClinicInfo(req: Request, res: Response, next: NextFunct
 
 export async function getClinicHxg(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await clinicService.getHxg(id);
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
@@ -77,7 +78,7 @@ export async function getClinicHxg(req: Request, res: Response, next: NextFuncti
 
 export async function getClinicTime(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await clinicService.getTime(id);
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {

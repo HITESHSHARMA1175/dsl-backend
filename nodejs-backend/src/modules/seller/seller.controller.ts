@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { SellerService } from './seller.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const sellerService = new SellerService(prisma);
 
@@ -35,7 +36,7 @@ export async function getSellerKycList(req: Request, res: Response, next: NextFu
 
 export async function getSellerById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await sellerService.getById(id);
     return res.status(200).json(successResponse(200, 'Seller details fetched successfully', data));
   } catch (error) {
@@ -54,7 +55,7 @@ export async function createSeller(req: Request, res: Response, next: NextFuncti
 
 export async function updateSeller(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await sellerService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Seller updated successfully', data));
   } catch (error) {
@@ -64,7 +65,7 @@ export async function updateSeller(req: Request, res: Response, next: NextFuncti
 
 export async function toggleSellerStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await sellerService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled successfully', data));
   } catch (error) {
@@ -74,7 +75,7 @@ export async function toggleSellerStatus(req: Request, res: Response, next: Next
 
 export async function approveSellerKyc(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await sellerService.approveKyc(id);
     return res.status(200).json(successResponse(200, 'KYC status updated successfully', data));
   } catch (error) {

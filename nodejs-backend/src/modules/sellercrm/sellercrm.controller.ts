@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SellerCrmService } from './sellercrm.service';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const sellerCrmService = new SellerCrmService();
 
@@ -32,7 +33,7 @@ export async function createSellerLead(req: Request, res: Response, next: NextFu
 
 export async function getSellerLeadById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const lead = await sellerCrmService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', lead));
   } catch (error) {
@@ -42,7 +43,7 @@ export async function getSellerLeadById(req: Request, res: Response, next: NextF
 
 export async function updateSellerLeadStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { status, notes } = req.body;
     const lead = await sellerCrmService.updateStatus(id, status, notes);
     return res.status(200).json(successResponse(200, 'Status updated', lead));
@@ -53,7 +54,7 @@ export async function updateSellerLeadStatus(req: Request, res: Response, next: 
 
 export async function getSellerLeadJourney(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const journey = await sellerCrmService.getJourney(id);
     return res.status(200).json(successResponse(200, 'Success', journey));
   } catch (error) {
@@ -78,7 +79,7 @@ export async function assignedSellerData(req: Request, res: Response, next: Next
 
 export async function sellerDataDetails(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await sellerCrmService.sellerDataDetails(id);
     return res.status(200).json(successResponse(200, 'Success', result));
   } catch (error) {
@@ -88,7 +89,7 @@ export async function sellerDataDetails(req: Request, res: Response, next: NextF
 
 export async function sellerDataUpdate(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await sellerCrmService.sellerDataUpdate(req.user!.id, id, req.body);
     return res.status(200).json(successResponse(200, 'Seller lead updated', result));
   } catch (error) {

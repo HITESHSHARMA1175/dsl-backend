@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { InventoryService } from './inventory.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const inventoryService = new InventoryService();
 
@@ -24,7 +25,7 @@ export async function createInventory(req: Request, res: Response, next: NextFun
 
 export async function updateInventory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const item = await inventoryService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Inventory item updated', item));
   } catch (error) {
@@ -34,7 +35,7 @@ export async function updateInventory(req: Request, res: Response, next: NextFun
 
 export async function deleteInventory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await inventoryService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

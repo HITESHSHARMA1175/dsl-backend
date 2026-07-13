@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { BookingService } from './booking.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const bookingService = new BookingService(prisma);
 
@@ -52,7 +53,7 @@ export async function listWebBookings(req: Request, res: Response, next: NextFun
 
 export async function getBookingById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const booking = await bookingService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', booking));
   } catch (error) {
@@ -62,7 +63,7 @@ export async function getBookingById(req: Request, res: Response, next: NextFunc
 
 export async function updateBookingStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { status } = req.body;
     const booking = await bookingService.updateStatus(id, Number(status));
     return res.status(200).json(successResponse(200, 'Booking status updated successfully', booking));

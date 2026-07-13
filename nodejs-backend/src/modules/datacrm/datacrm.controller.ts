@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { DataCrmService } from './datacrm.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const dataCrmService = new DataCrmService(prisma);
 
@@ -24,7 +25,7 @@ export async function listData(req: Request, res: Response, next: NextFunction) 
 
 export async function getDataById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await dataCrmService.getById(id);
     return res.status(200).json(successResponse(200, 'Data details fetched successfully', data));
   } catch (error) {
@@ -43,7 +44,7 @@ export async function createData(req: Request, res: Response, next: NextFunction
 
 export async function updateData(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await dataCrmService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Data record updated successfully', data));
   } catch (error) {
@@ -53,7 +54,7 @@ export async function updateData(req: Request, res: Response, next: NextFunction
 
 export async function updateDataStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { status, remark } = req.body;
     const data = await dataCrmService.updateStatus(id, status, remark, req.user!.id);
     return res.status(200).json(successResponse(200, 'Data status updated successfully', data));
@@ -64,7 +65,7 @@ export async function updateDataStatus(req: Request, res: Response, next: NextFu
 
 export async function assignData(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { assign_emp } = req.body;
     const data = await dataCrmService.assign(id, assign_emp, req.user!.id);
     return res.status(200).json(successResponse(200, 'Data assigned successfully', data));
@@ -75,7 +76,7 @@ export async function assignData(req: Request, res: Response, next: NextFunction
 
 export async function markDataDead(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await dataCrmService.markDead(id, req.user!.id);
     return res.status(200).json(successResponse(200, 'Data marked as dead', data));
   } catch (error) {
@@ -85,7 +86,7 @@ export async function markDataDead(req: Request, res: Response, next: NextFuncti
 
 export async function getDataJourney(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const journey = await dataCrmService.getJourney(id);
     return res.status(200).json(successResponse(200, 'Data journey fetched successfully', journey));
   } catch (error) {
@@ -107,7 +108,7 @@ export async function getDataImportLogs(req: Request, res: Response, next: NextF
 
 export async function getDataImportErrors(req: Request, res: Response, next: NextFunction) {
   try {
-    const importId = Number(req.params.id);
+    const importId = parseIdParam(req.params.id);
     const errors = await dataCrmService.getImportErrors(importId);
     return res.status(200).json(successResponse(200, 'Import errors fetched successfully', errors));
   } catch (error) {

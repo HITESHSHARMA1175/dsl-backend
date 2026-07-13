@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SalesCrmService } from './salescrm.service';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const salesCrmService = new SalesCrmService();
 
@@ -32,7 +33,7 @@ export async function createSalesLead(req: Request, res: Response, next: NextFun
 
 export async function getSalesLeadById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const lead = await salesCrmService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', lead));
   } catch (error) {
@@ -42,7 +43,7 @@ export async function getSalesLeadById(req: Request, res: Response, next: NextFu
 
 export async function updateSalesLeadStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { status, notes } = req.body;
     const lead = await salesCrmService.updateStatus(id, status, notes);
     return res.status(200).json(successResponse(200, 'Status updated', lead));
@@ -53,7 +54,7 @@ export async function updateSalesLeadStatus(req: Request, res: Response, next: N
 
 export async function assignSalesLead(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const { empId } = req.body;
     const lead = await salesCrmService.assign(id, empId);
     return res.status(200).json(successResponse(200, 'Lead assigned', lead));
@@ -64,7 +65,7 @@ export async function assignSalesLead(req: Request, res: Response, next: NextFun
 
 export async function getSalesLeadJourney(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const journey = await salesCrmService.getJourney(id);
     return res.status(200).json(successResponse(200, 'Success', journey));
   } catch (error) {
@@ -112,7 +113,7 @@ export async function getTokenCollected(req: Request, res: Response, next: NextF
 
 export async function getScheduleTokenDetails(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await salesCrmService.getScheduleTokenDetails(id);
     return res.status(200).json(successResponse(200, 'Success', result));
   } catch (error) {

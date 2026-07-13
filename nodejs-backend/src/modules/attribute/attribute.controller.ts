@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AttributeService } from './attribute.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const service = new AttributeService(prisma);
 
@@ -26,7 +27,7 @@ export async function createAttribute(req: Request, res: Response, next: NextFun
 
 export async function updateAttribute(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const attribute = await service.updateAttribute(id, req.body);
     return res.status(200).json(successResponse(200, 'Attribute updated', attribute));
   } catch (error) {
@@ -36,7 +37,7 @@ export async function updateAttribute(req: Request, res: Response, next: NextFun
 
 export async function deleteAttribute(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteAttribute(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
@@ -65,7 +66,7 @@ export async function createValue(req: Request, res: Response, next: NextFunctio
 
 export async function updateValue(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const value = await service.updateValue(id, req.body);
     return res.status(200).json(successResponse(200, 'Attribute value updated', value));
   } catch (error) {
@@ -75,7 +76,7 @@ export async function updateValue(req: Request, res: Response, next: NextFunctio
 
 export async function deleteValue(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteValue(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

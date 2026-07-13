@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PropertyService } from './property.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const propertyService = new PropertyService(prisma);
 
@@ -21,7 +22,7 @@ export async function getProperties(req: Request, res: Response, next: NextFunct
 
 export async function getPropertyDetails(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await propertyService.getDetails(id);
     return res.status(200).json(successResponse(200, 'Property details', data));
   } catch (error) {
@@ -31,7 +32,7 @@ export async function getPropertyDetails(req: Request, res: Response, next: Next
 
 export async function getPropertyRooms(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await propertyService.getRooms(id);
     return res.status(200).json(successResponse(200, 'Property room list', data));
   } catch (error) {
@@ -41,7 +42,7 @@ export async function getPropertyRooms(req: Request, res: Response, next: NextFu
 
 export async function getRoomBeds(req: Request, res: Response, next: NextFunction) {
   try {
-    const roomId = Number(req.params.roomId);
+    const roomId = parseIdParam(req.params.roomId);
     const data = await propertyService.getRoomBeds(roomId);
     return res.status(200).json(successResponse(200, 'Room bed list', data));
   } catch (error) {
@@ -66,7 +67,7 @@ export async function listAllProperties(req: Request, res: Response, next: NextF
 
 export async function listPropertyRooms(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await propertyService.listPropertyRooms(id);
     return res.status(200).json(successResponse(200, 'Property rooms', data));
   } catch (error) {
@@ -76,7 +77,7 @@ export async function listPropertyRooms(req: Request, res: Response, next: NextF
 
 export async function deletePropertyRoom(req: Request, res: Response, next: NextFunction) {
   try {
-    const roomId = Number(req.params.roomId);
+    const roomId = parseIdParam(req.params.roomId);
     const result = await propertyService.deleteRoom(roomId);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
@@ -86,7 +87,7 @@ export async function deletePropertyRoom(req: Request, res: Response, next: Next
 
 export async function togglePropertyStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await propertyService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled', data));
   } catch (error) {
@@ -96,7 +97,7 @@ export async function togglePropertyStatus(req: Request, res: Response, next: Ne
 
 export async function togglePropertyOfferStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await propertyService.toggleOfferStatus(id);
     return res.status(200).json(successResponse(200, 'Offer status toggled', data));
   } catch (error) {

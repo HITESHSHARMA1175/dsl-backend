@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CategoryService } from './category.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const categoryService = new CategoryService(prisma);
 
@@ -28,7 +29,7 @@ export async function createCategory(req: Request, res: Response, next: NextFunc
 
 export async function updateCategory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const category = await categoryService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Category updated', category));
   } catch (error) {
@@ -38,7 +39,7 @@ export async function updateCategory(req: Request, res: Response, next: NextFunc
 
 export async function deleteCategory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await categoryService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {

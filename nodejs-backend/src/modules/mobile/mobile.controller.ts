@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { MobileService } from './mobile.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const service = new MobileService(prisma);
 
@@ -20,14 +21,14 @@ export async function createBrand(req: Request, res: Response, next: NextFunctio
 }
 export async function updateBrand(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const brand = await service.updateBrand(id, req.body);
     return res.status(200).json(successResponse(200, 'Brand updated', brand));
   } catch (error) { next(error); }
 }
 export async function deleteBrand(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteBrand(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) { next(error); }
@@ -48,14 +49,14 @@ export async function createModel(req: Request, res: Response, next: NextFunctio
 }
 export async function updateModel(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const model = await service.updateModel(id, req.body);
     return res.status(200).json(successResponse(200, 'Model updated', model));
   } catch (error) { next(error); }
 }
 export async function deleteModel(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteModel(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) { next(error); }
@@ -76,14 +77,14 @@ export async function createVariant(req: Request, res: Response, next: NextFunct
 }
 export async function updateVariant(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const variant = await service.updateVariant(id, req.body);
     return res.status(200).json(successResponse(200, 'Variant updated', variant));
   } catch (error) { next(error); }
 }
 export async function deleteVariant(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteVariant(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) { next(error); }
@@ -104,14 +105,14 @@ export async function createColour(req: Request, res: Response, next: NextFuncti
 }
 export async function updateColour(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const colour = await service.updateColour(id, req.body);
     return res.status(200).json(successResponse(200, 'Colour updated', colour));
   } catch (error) { next(error); }
 }
 export async function deleteColour(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await service.deleteColour(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) { next(error); }

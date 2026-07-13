@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ServicecatService } from './servicecat.service';
 import { prisma } from '../../config/database';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const servicecatService = new ServicecatService(prisma);
 
@@ -17,7 +18,7 @@ export async function listServicecats(req: Request, res: Response, next: NextFun
 
 export async function getServicecatById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await servicecatService.getById(id);
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
@@ -36,7 +37,7 @@ export async function createServicecat(req: Request, res: Response, next: NextFu
 
 export async function updateServicecat(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await servicecatService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Service category updated successfully', data));
   } catch (error) {
@@ -46,7 +47,7 @@ export async function updateServicecat(req: Request, res: Response, next: NextFu
 
 export async function deleteServicecat(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await servicecatService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
@@ -56,7 +57,7 @@ export async function deleteServicecat(req: Request, res: Response, next: NextFu
 
 export async function toggleServicecatStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const data = await servicecatService.toggleStatus(id);
     return res.status(200).json(successResponse(200, 'Status toggled successfully', data));
   } catch (error) {

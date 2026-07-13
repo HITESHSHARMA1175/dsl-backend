@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { MedicalHistoryService } from './medicalhistory.service';
 import { successResponse } from '../../shared/utils/response.util';
+import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const medicalHistoryService = new MedicalHistoryService();
 
@@ -24,7 +25,7 @@ export async function createMedicalHistory(req: Request, res: Response, next: Ne
 
 export async function updateMedicalHistory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const item = await medicalHistoryService.update(id, req.body);
     return res.status(200).json(successResponse(200, 'Medical history updated', item));
   } catch (error) {
@@ -34,7 +35,7 @@ export async function updateMedicalHistory(req: Request, res: Response, next: Ne
 
 export async function deleteMedicalHistory(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = Number(req.params.id);
+    const id = parseIdParam(req.params.id);
     const result = await medicalHistoryService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
   } catch (error) {
