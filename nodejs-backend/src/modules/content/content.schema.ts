@@ -58,22 +58,39 @@ export const updateFaqSortingSchema = z.object({
 
 // Blog schemas
 export const createBlogSchema = z.object({
+  blog_url: z.string().min(1, 'blog_url is required'),
+  author_name: z.string().optional(),
+  meta_title: z.string().optional(),
+  meta_description: z.string().optional(),
+  meta_keywords: z.string().optional(),
+  seo_tags: z.string().optional(),
+
   title: z.string().min(1, 'title is required'),
-  slug: z.string().optional(),
-  content: z.string().optional(),
+  description: z.string().optional(),
+  small_img_name: z.string().optional(),
+  small_img_alt: z.string().optional(),
+  large_img_name: z.string().optional(),
+  large_img_alt: z.string().optional(),
+
+  title_cn: z.string().optional(),
+  description_cn: z.string().optional(),
+  small_img_name_cn: z.string().optional(),
+  small_img_alt_cn: z.string().optional(),
+  large_img_name_cn: z.string().optional(),
+  large_img_alt_cn: z.string().optional(),
+
+  title_ar: z.string().optional(),
+  description_ar: z.string().optional(),
+  small_img_name_ar: z.string().optional(),
+  small_img_alt_ar: z.string().optional(),
+  large_img_name_ar: z.string().optional(),
+  large_img_alt_ar: z.string().optional(),
+
   blog_category: z.number().int().optional(),
-  image: z.string().optional(),
   status: z.coerce.number().int().optional(),
 });
 
-export const updateBlogSchema = z.object({
-  title: z.string().min(1).optional(),
-  slug: z.string().optional(),
-  content: z.string().optional(),
-  blog_category: z.number().int().optional(),
-  image: z.string().optional(),
-  status: z.coerce.number().int().optional(),
-});
+export const updateBlogSchema = createBlogSchema.partial();
 
 // SEO schemas
 export const createSeoSchema = z.object({

@@ -1,5 +1,38 @@
 import { PrismaClient } from '@prisma/client';
 
+type BlogInput = {
+  blog_url?: string;
+  author_name?: string;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  seo_tags?: string;
+
+  title?: string;
+  description?: string;
+  small_img_name?: string;
+  small_img_alt?: string;
+  large_img_name?: string;
+  large_img_alt?: string;
+
+  title_cn?: string;
+  description_cn?: string;
+  small_img_name_cn?: string;
+  small_img_alt_cn?: string;
+  large_img_name_cn?: string;
+  large_img_alt_cn?: string;
+
+  title_ar?: string;
+  description_ar?: string;
+  small_img_name_ar?: string;
+  small_img_alt_ar?: string;
+  large_img_name_ar?: string;
+  large_img_alt_ar?: string;
+
+  blog_category?: number;
+  status?: number;
+};
+
 export class ContentService {
   constructor(private prisma: PrismaClient) {}
 
@@ -144,47 +177,55 @@ export class ContentService {
     return this.prisma.blog.findMany();
   }
 
-  async createBlog(data: {
-    title: string;
-    slug?: string;
-    content?: string;
-    blog_category?: number;
-    image?: string;
-    status?: number;
-  }) {
-    return this.prisma.blog.create({
-      data: {
-        title: data.title,
-        blog_slug: data.slug,
-        description: data.content,
-        blog_category: data.blog_category,
-        profile: data.image,
-        status: data.status,
-      },
-    });
+  private mapBlogInput(data: BlogInput) {
+    return {
+      blog_slug: data.blog_url,
+      author_name: data.author_name,
+      meta_title: data.meta_title,
+      meta_description: data.meta_description,
+      meta_keywords: data.meta_keywords,
+      seo_tags: data.seo_tags,
+
+      title: data.title,
+      description: data.description,
+      profile_name: data.small_img_name,
+      profile: data.small_img_name,
+      profile_alt: data.small_img_alt,
+      profile2_name: data.large_img_name,
+      profile2: data.large_img_name,
+      profile2_alt: data.large_img_alt,
+
+      title_cn: data.title_cn,
+      description_cn: data.description_cn,
+      profile_cn_name: data.small_img_name_cn,
+      profile_cn: data.small_img_name_cn,
+      profile_cn_alt: data.small_img_alt_cn,
+      profile2_cn_name: data.large_img_name_cn,
+      profile2_cn: data.large_img_name_cn,
+      profile2_cn_alt: data.large_img_alt_cn,
+
+      title_ar: data.title_ar,
+      description_ar: data.description_ar,
+      profile_ar_name: data.small_img_name_ar,
+      profile_ar: data.small_img_name_ar,
+      profile_ar_alt: data.small_img_alt_ar,
+      profile2_ar_name: data.large_img_name_ar,
+      profile2_ar: data.large_img_name_ar,
+      profile2_ar_alt: data.large_img_alt_ar,
+
+      blog_category: data.blog_category,
+      status: data.status,
+    };
   }
 
-  async updateBlog(
-    id: number,
-    data: {
-      title?: string;
-      slug?: string;
-      content?: string;
-      blog_category?: number;
-      image?: string;
-      status?: number;
-    }
-  ) {
+  async createBlog(data: BlogInput) {
+    return this.prisma.blog.create({ data: this.mapBlogInput(data) });
+  }
+
+  async updateBlog(id: number, data: BlogInput) {
     return this.prisma.blog.update({
       where: { id },
-      data: {
-        title: data.title,
-        blog_slug: data.slug,
-        description: data.content,
-        blog_category: data.blog_category,
-        profile: data.image,
-        status: data.status,
-      },
+      data: this.mapBlogInput(data),
     });
   }
 
