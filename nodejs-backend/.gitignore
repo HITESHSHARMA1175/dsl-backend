@@ -37,6 +37,10 @@ tmp_*.ts
 tmp_*.sql
 *.tmp
 
+# Uploaded files (ephemeral on Render; not meant to live in git)
+uploads/*
+!uploads/.gitignore
+
 # Placeholder files
 .gitkeep
 **/.gitkeep

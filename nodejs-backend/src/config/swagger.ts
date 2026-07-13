@@ -82,6 +82,7 @@ export function generateSwaggerSpec(app: any) {
       { name: 'Property', description: 'Co-living / property listings, rooms and beds' },
       { name: 'Agent', description: 'Agent/seller mobile app: auth, profile, KYC, business, payments' },
       { name: 'Storefront', description: 'Storefront selection session: services/addons/products, slots, language, search' },
+      { name: 'Upload', description: 'Image upload (temporary local disk storage; will move to S3/Cloudinary)' },
     ],
     paths: {
       // ==================== AUTH (9 endpoints) ====================
@@ -3564,6 +3565,25 @@ export function generateSwaggerSpec(app: any) {
           summary: 'Search active services by name',
           parameters: [{ name: 'q', in: 'query', required: true, schema: { type: 'string' } }],
           responses: { '200': { description: 'Search results' } },
+        },
+      },
+
+      // ==================== UPLOAD ====================
+      '/upload': {
+        post: {
+          tags: ['Upload'],
+          summary: 'Upload an image (admin)',
+          description: 'Stores the image on local disk and returns a URL. NOTE: storage is temporary/ephemeral on Render until this moves to S3/Cloudinary — uploaded files are lost on every deploy.',
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'multipart/form-data': { schema: { type: 'object', required: ['image'], properties: { image: { type: 'string', format: 'binary' } } } } },
+          },
+          responses: {
+            '201': { description: 'Image uploaded, returns { filename, url }' },
+            '400': { description: 'No file provided, or file type not allowed (only JPEG/PNG/WEBP/GIF, max 5MB)' },
+            '401': { description: 'Unauthorized' },
+          },
         },
       },
 

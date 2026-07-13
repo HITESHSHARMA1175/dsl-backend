@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
+import fs from 'fs';
 import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env';
 import { generateSwaggerSpec } from './config/swagger';
@@ -62,6 +64,7 @@ import subscribeRoutes from './modules/subscribe/subscribe.routes';
 import propertyRoutes from './modules/property/property.routes';
 import agentRoutes from './modules/agent/agent.routes';
 import storefrontRoutes from './modules/storefront/storefront.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 
 const app = express();
 
@@ -136,6 +139,14 @@ app.use('/api/v1/subscribe', subscribeRoutes);
 app.use('/api/v1/properties', propertyRoutes);
 app.use('/api/v1/agent', agentRoutes);
 app.use('/api/v1/storefront', storefrontRoutes);
+app.use('/api/v1/upload', uploadRoutes);
+
+// Serve uploaded images. NOTE: Render's filesystem is ephemeral — anything
+// written here is wiped on every deploy/restart. This is a temporary local
+// setup until uploads move to S3/Cloudinary.
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
 
 // 5. Swagger API Documentation (auto-generated from routes)
 const swaggerSpec = generateSwaggerSpec(app);
