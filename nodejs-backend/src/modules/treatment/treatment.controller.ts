@@ -8,10 +8,13 @@ const treatmentService = new TreatmentService(prisma);
 
 export async function listTreatments(req: Request, res: Response, next: NextFunction) {
   try {
-    const treatmentType = req.query.treatment_type
-      ? Number(req.query.treatment_type)
+    const propertyCategory = req.query.property_category !== undefined
+      ? Number(req.query.property_category)
       : undefined;
-    const treatments = await treatmentService.list(treatmentType);
+    const propertySubCategory = req.query.property_sub_category !== undefined
+      ? Number(req.query.property_sub_category)
+      : undefined;
+    const treatments = await treatmentService.list(propertyCategory, propertySubCategory);
     return res.status(200).json(successResponse(200, 'Success', treatments));
   } catch (error) {
     next(error);

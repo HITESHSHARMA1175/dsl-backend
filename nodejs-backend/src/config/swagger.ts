@@ -327,9 +327,14 @@ export function generateSwaggerSpec(app: any) {
       '/treatments': {
         get: {
           tags: ['Treatments'],
-          summary: 'List all treatments',
+          summary: 'List treatments with full details (price, description, duration, category)',
+          description: 'Returns the same underlying data as /services (the properties table), filterable by category.',
           security: [{ BearerAuth: [] }],
-          responses: { '200': { description: 'List of treatments' } },
+          parameters: [
+            { name: 'property_category', in: 'query', required: false, schema: { type: 'integer' } },
+            { name: 'property_sub_category', in: 'query', required: false, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'List of treatments with price/description/category' } },
         },
         post: {
           tags: ['Treatments'],
