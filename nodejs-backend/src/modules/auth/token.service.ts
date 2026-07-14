@@ -10,7 +10,7 @@ export class TokenService {
     return jwt.sign(
       { sub: userId, role },
       env.JWT_ACCESS_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '1d' }
     );
   }
 
