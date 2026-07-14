@@ -65,6 +65,7 @@ import propertyRoutes from './modules/property/property.routes';
 import agentRoutes from './modules/agent/agent.routes';
 import storefrontRoutes from './modules/storefront/storefront.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import treatmentpageRoutes from './modules/treatmentpage/treatmentpage.routes';
 
 const app = express();
 
@@ -140,6 +141,7 @@ app.use('/api/v1/properties', propertyRoutes);
 app.use('/api/v1/agent', agentRoutes);
 app.use('/api/v1/storefront', storefrontRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/treatment-pages', treatmentpageRoutes);
 
 // Serve uploaded images. NOTE: Render's filesystem is ephemeral — anything
 // written here is wiped on every deploy/restart. This is a temporary local

@@ -83,6 +83,7 @@ export function generateSwaggerSpec(app: any) {
       { name: 'Agent', description: 'Agent/seller mobile app: auth, profile, KYC, business, payments' },
       { name: 'Storefront', description: 'Storefront selection session: services/addons/products, slots, language, search' },
       { name: 'Upload', description: 'Image upload (temporary local disk storage; will move to S3/Cloudinary)' },
+      { name: 'Treatment Pages', description: 'Rich per-treatment landing page content: hero, pricing packages, stats, before/after results, FAQs' },
     ],
     paths: {
       // ==================== AUTH (9 endpoints) ====================
@@ -3589,6 +3590,80 @@ export function generateSwaggerSpec(app: any) {
             '400': { description: 'No file provided, or file type not allowed (only JPEG/PNG/WEBP/GIF, max 5MB)' },
             '401': { description: 'Unauthorized' },
           },
+        },
+      },
+
+      // ==================== TREATMENT PAGES ====================
+      '/treatment-pages': {
+        get: {
+          tags: ['Treatment Pages'],
+          summary: 'List published treatment pages (public, summary only)',
+          responses: { '200': { description: 'List of { id, slug, service_id, status, updated_at }' } },
+        },
+        post: {
+          tags: ['Treatment Pages'],
+          summary: 'Create a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['slug'], properties: {
+              slug: { type: 'string' }, service_id: { type: 'integer' }, default_option_id: { type: 'string' },
+              hero: { type: 'object' }, detail: { type: 'object' }, pricing: { type: 'object' },
+              stats: { type: 'array' }, results: { type: 'object' }, faqs: { type: 'array' },
+              status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '201': { description: 'Treatment page created' }, '409': { description: 'Slug already exists' } },
+        },
+      },
+      '/treatment-pages/admin/all': {
+        get: {
+          tags: ['Treatment Pages'],
+          summary: 'List all treatment pages including unpublished (admin)',
+          security: [{ BearerAuth: [] }],
+          responses: { '200': { description: 'Full list of treatment pages' } },
+        },
+      },
+      '/treatment-pages/admin/{id}': {
+        get: {
+          tags: ['Treatment Pages'],
+          summary: 'Get a treatment page by numeric id, including unpublished (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          responses: { '200': { description: 'Treatment page' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{slug}': {
+        get: {
+          tags: ['Treatment Pages'],
+          summary: 'Get a published treatment page by slug (public)',
+          parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Full treatment page: hero, detail, pricing, stats, results, faqs' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{id}': {
+        put: {
+          tags: ['Treatment Pages'],
+          summary: 'Update a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: {
+              slug: { type: 'string' }, service_id: { type: 'integer' }, default_option_id: { type: 'string' },
+              hero: { type: 'object' }, detail: { type: 'object' }, pricing: { type: 'object' },
+              stats: { type: 'array' }, results: { type: 'object' }, faqs: { type: 'array' },
+              status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '200': { description: 'Treatment page updated' }, '404': { description: 'Not found' } },
+        },
+        delete: {
+          tags: ['Treatment Pages'],
+          summary: 'Delete a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          responses: { '200': { description: 'Treatment page deleted' }, '404': { description: 'Not found' } },
         },
       },
 

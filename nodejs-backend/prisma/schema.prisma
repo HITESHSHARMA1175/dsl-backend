@@ -201,6 +201,26 @@ model Property {
   @@map("properties")
 }
 
+model TreatmentPage {
+  id                Int      @id @default(autoincrement())
+  service_id        Int?
+  slug              String   @unique @db.VarChar(255)
+  default_option_id String?  @db.VarChar(100)
+
+  hero              Json?
+  detail            Json?
+  pricing           Json?
+  stats             Json?
+  results           Json?
+  faqs              Json?
+
+  status            Int      @default(1)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now()) @updatedAt
+
+  @@map("treatment_pages")
+}
+
 model Addon {
   id                         Int      @id @default(autoincrement())
   parent_id                  Int      @default(0)
