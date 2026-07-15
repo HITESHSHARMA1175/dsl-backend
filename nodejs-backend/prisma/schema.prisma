@@ -202,23 +202,91 @@ model Property {
 }
 
 model TreatmentPage {
-  id                Int      @id @default(autoincrement())
-  service_id        Int?
-  slug              String   @unique @db.VarChar(255)
-  default_option_id String?  @db.VarChar(100)
+  id                     Int      @id @default(autoincrement())
+  service_id             Int?
 
-  hero              Json?
-  detail            Json?
-  pricing           Json?
-  stats             Json?
-  results           Json?
-  faqs              Json?
+  treatment_name         String?  @db.VarChar(255)
+  slug                   String   @unique @db.VarChar(255)
 
-  status            Int      @default(1)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @default(now()) @updatedAt
+  short_description      String?  @db.Text
+  full_description       String?  @db.LongText
+
+  hero_title             String?  @db.VarChar(255)
+  hero_subtitle          String?  @db.VarChar(500)
+  hero_image             String?  @db.VarChar(500)
+
+  gallery_images         Json?
+  before_after           Json?
+  benefits               Json?
+  procedure              Json?
+  who_is_it_for          Json?
+  risks                  Json?
+
+  duration               String?  @db.VarChar(100)
+  recovery_time          String?  @db.VarChar(100)
+  results                String?  @db.Text
+  cost                   String?  @db.VarChar(100)
+
+  default_option_id      String?  @db.VarChar(100)
+  pricing                Json?
+  stats                  Json?
+
+  cta_text               String?  @db.VarChar(100)
+  cta_link               String?  @db.VarChar(255)
+
+  seo_title              String?  @db.VarChar(255)
+  seo_description        String?  @db.VarChar(500)
+  seo_keywords           String?  @db.VarChar(500)
+  og_image               String?  @db.VarChar(500)
+
+  related_treatment_ids  Json?
+  sections               Json?
+
+  // 0=draft, 1=published, 2=archived
+  status                 Int      @default(0)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @default(now()) @updatedAt
+
+  faqs                   TreatmentFaq[]
+  reviews                TreatmentReview[]
 
   @@map("treatment_pages")
+}
+
+model TreatmentFaq {
+  id                 Int      @id @default(autoincrement())
+  treatment_page_id  Int
+  question           String   @db.Text
+  answer             String   @db.Text
+  sorting_order      Int      @default(0)
+  // 1=enabled, 0=disabled
+  status             Int      @default(1)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @default(now()) @updatedAt
+
+  treatmentPage      TreatmentPage @relation(fields: [treatment_page_id], references: [id], onDelete: Cascade)
+
+  @@map("treatment_faqs")
+}
+
+model TreatmentReview {
+  id                  Int       @id @default(autoincrement())
+  treatment_page_id   Int
+  patient_name        String    @db.VarChar(255)
+  rating              Int
+  review_text         String?   @db.Text
+  patient_image       String?   @db.VarChar(500)
+  treatment_received  String?   @db.VarChar(255)
+  review_date         DateTime? @db.Date
+  sorting_order       Int       @default(0)
+  // 1=approved, 0=hidden
+  status              Int       @default(1)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+
+  treatmentPage       TreatmentPage @relation(fields: [treatment_page_id], references: [id], onDelete: Cascade)
+
+  @@map("treatment_reviews")
 }
 
 model Addon {

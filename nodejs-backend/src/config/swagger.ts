@@ -3598,7 +3598,7 @@ export function generateSwaggerSpec(app: any) {
         get: {
           tags: ['Treatment Pages'],
           summary: 'List published treatment pages (public, summary only)',
-          responses: { '200': { description: 'List of { id, slug, service_id, status, updated_at }' } },
+          responses: { '200': { description: 'List of { id, slug, treatment_name, hero_image, status, updated_at }' } },
         },
         post: {
           tags: ['Treatment Pages'],
@@ -3607,10 +3607,18 @@ export function generateSwaggerSpec(app: any) {
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', required: ['slug'], properties: {
-              slug: { type: 'string' }, service_id: { type: 'integer' }, default_option_id: { type: 'string' },
-              hero: { type: 'object' }, detail: { type: 'object' }, pricing: { type: 'object' },
-              stats: { type: 'array' }, results: { type: 'object' }, faqs: { type: 'array' },
-              status: { type: 'integer' },
+              slug: { type: 'string' }, service_id: { type: 'integer' }, treatment_name: { type: 'string' },
+              short_description: { type: 'string' }, full_description: { type: 'string' },
+              hero_title: { type: 'string' }, hero_subtitle: { type: 'string' }, hero_image: { type: 'string' },
+              gallery_images: { type: 'array' }, before_after: { type: 'array' },
+              benefits: { type: 'array' }, procedure: { type: 'array' }, who_is_it_for: { type: 'array' }, risks: { type: 'array' },
+              duration: { type: 'string' }, recovery_time: { type: 'string' }, results: { type: 'string' }, cost: { type: 'string' },
+              default_option_id: { type: 'string' }, pricing: { type: 'object' }, stats: { type: 'array' },
+              cta_text: { type: 'string' }, cta_link: { type: 'string' },
+              seo_title: { type: 'string' }, seo_description: { type: 'string' }, seo_keywords: { type: 'string' }, og_image: { type: 'string' },
+              related_treatment_ids: { type: 'array', items: { type: 'integer' } },
+              sections: { type: 'array', description: 'Generic future-proof blocks: [{ type, ...data }]' },
+              status: { type: 'integer', description: '0=draft, 1=published, 2=archived' },
             } } } },
           },
           responses: { '201': { description: 'Treatment page created' }, '409': { description: 'Slug already exists' } },
@@ -3619,7 +3627,7 @@ export function generateSwaggerSpec(app: any) {
       '/treatment-pages/admin/all': {
         get: {
           tags: ['Treatment Pages'],
-          summary: 'List all treatment pages including unpublished (admin)',
+          summary: 'List all treatment pages including drafts/archived (admin)',
           security: [{ BearerAuth: [] }],
           responses: { '200': { description: 'Full list of treatment pages' } },
         },
@@ -3627,10 +3635,10 @@ export function generateSwaggerSpec(app: any) {
       '/treatment-pages/admin/{id}': {
         get: {
           tags: ['Treatment Pages'],
-          summary: 'Get a treatment page by numeric id, including unpublished (admin)',
+          summary: 'Get a treatment page by numeric id, any status - also serves as the preview endpoint (admin)',
           security: [{ BearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
-          responses: { '200': { description: 'Treatment page' }, '404': { description: 'Not found' } },
+          responses: { '200': { description: 'Treatment page with all faqs and reviews (any status)' }, '404': { description: 'Not found' } },
         },
       },
       '/treatment-pages/{slug}': {
@@ -3638,7 +3646,7 @@ export function generateSwaggerSpec(app: any) {
           tags: ['Treatment Pages'],
           summary: 'Get a published treatment page by slug (public)',
           parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
-          responses: { '200': { description: 'Full treatment page: hero, detail, pricing, stats, results, faqs' }, '404': { description: 'Not found' } },
+          responses: { '200': { description: 'Full page content plus enabled faqs, approved reviews, and resolved relatedTreatments' }, '404': { description: 'Not found' } },
         },
       },
       '/treatment-pages/{id}': {
@@ -3649,12 +3657,7 @@ export function generateSwaggerSpec(app: any) {
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: { type: 'object', properties: {
-              slug: { type: 'string' }, service_id: { type: 'integer' }, default_option_id: { type: 'string' },
-              hero: { type: 'object' }, detail: { type: 'object' }, pricing: { type: 'object' },
-              stats: { type: 'array' }, results: { type: 'object' }, faqs: { type: 'array' },
-              status: { type: 'integer' },
-            } } } },
+            content: { 'application/json': { schema: { type: 'object', description: 'Same shape as POST, all fields optional' } } },
           },
           responses: { '200': { description: 'Treatment page updated' }, '404': { description: 'Not found' } },
         },
@@ -3664,6 +3667,177 @@ export function generateSwaggerSpec(app: any) {
           security: [{ BearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
           responses: { '200': { description: 'Treatment page deleted' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{id}/publish': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Publish a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          responses: { '200': { description: 'Status set to published' } },
+        },
+      },
+      '/treatment-pages/{id}/unpublish': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Unpublish a treatment page back to draft (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          responses: { '200': { description: 'Status set to draft' } },
+        },
+      },
+      '/treatment-pages/{id}/archive': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Archive a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          responses: { '200': { description: 'Status set to archived' } },
+        },
+      },
+      '/treatment-pages/{id}/faqs': {
+        post: {
+          tags: ['Treatment Pages'],
+          summary: 'Add a FAQ to a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['question', 'answer'], properties: {
+              question: { type: 'string' }, answer: { type: 'string' }, sorting_order: { type: 'integer' }, status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '201': { description: 'FAQ added' } },
+        },
+      },
+      '/treatment-pages/{id}/faqs/reorder': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Reorder FAQs for a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['items'], properties: {
+              items: { type: 'array', items: { type: 'object', properties: { id: { type: 'integer' }, sorting_order: { type: 'integer' } } } },
+            } } } },
+          },
+          responses: { '200': { description: 'FAQ order updated' } },
+        },
+      },
+      '/treatment-pages/{id}/faqs/{faqId}': {
+        put: {
+          tags: ['Treatment Pages'],
+          summary: 'Edit a FAQ (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'faqId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: {
+              question: { type: 'string' }, answer: { type: 'string' }, sorting_order: { type: 'integer' }, status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '200': { description: 'FAQ updated' }, '404': { description: 'Not found' } },
+        },
+        delete: {
+          tags: ['Treatment Pages'],
+          summary: 'Delete a FAQ (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'faqId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'FAQ deleted' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{id}/faqs/{faqId}/toggle-status': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Enable/disable a FAQ (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'faqId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'FAQ status toggled' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{id}/reviews': {
+        post: {
+          tags: ['Treatment Pages'],
+          summary: 'Add a review to a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['patient_name', 'rating'], properties: {
+              patient_name: { type: 'string' }, rating: { type: 'integer', minimum: 1, maximum: 5 },
+              review_text: { type: 'string' }, patient_image: { type: 'string' }, treatment_received: { type: 'string' },
+              review_date: { type: 'string', format: 'date' }, sorting_order: { type: 'integer' }, status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '201': { description: 'Review added' } },
+        },
+      },
+      '/treatment-pages/{id}/reviews/reorder': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Reorder reviews for a treatment page (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['items'], properties: {
+              items: { type: 'array', items: { type: 'object', properties: { id: { type: 'integer' }, sorting_order: { type: 'integer' } } } },
+            } } } },
+          },
+          responses: { '200': { description: 'Review order updated' } },
+        },
+      },
+      '/treatment-pages/{id}/reviews/{reviewId}': {
+        put: {
+          tags: ['Treatment Pages'],
+          summary: 'Edit a review (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'reviewId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: {
+              patient_name: { type: 'string' }, rating: { type: 'integer', minimum: 1, maximum: 5 },
+              review_text: { type: 'string' }, patient_image: { type: 'string' }, treatment_received: { type: 'string' },
+              review_date: { type: 'string', format: 'date' }, sorting_order: { type: 'integer' }, status: { type: 'integer' },
+            } } } },
+          },
+          responses: { '200': { description: 'Review updated' }, '404': { description: 'Not found' } },
+        },
+        delete: {
+          tags: ['Treatment Pages'],
+          summary: 'Delete a review (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'reviewId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'Review deleted' }, '404': { description: 'Not found' } },
+        },
+      },
+      '/treatment-pages/{id}/reviews/{reviewId}/toggle-status': {
+        patch: {
+          tags: ['Treatment Pages'],
+          summary: 'Approve/hide a review (admin)',
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
+            { name: 'reviewId', in: 'path', required: true, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'Review status toggled' }, '404': { description: 'Not found' } },
         },
       },
 
