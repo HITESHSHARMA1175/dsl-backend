@@ -2708,6 +2708,14 @@ export function generateSwaggerSpec(app: any) {
           responses: { '200': { description: 'Array of top-level categories, each with a children[] array' } },
         },
       },
+      '/service-categories/menu': {
+        get: {
+          tags: ['Service Categories'],
+          summary: 'Full navbar mega-menu (public) - categories with treatment items nested',
+          description: 'Returns every top-level category with a nested items[] array of treatment pages tagged to it (id, treatment_name, slug, status). Includes draft treatment pages, since a menu entry existing is separate from whether that page\'s content is finished.',
+          responses: { '200': { description: 'Array of top-level categories, each with an items[] array' } },
+        },
+      },
       '/service-categories/sorting': {
         post: {
           tags: ['Service Categories'],

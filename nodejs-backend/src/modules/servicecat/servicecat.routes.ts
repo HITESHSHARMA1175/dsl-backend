@@ -6,6 +6,7 @@ import { createServicecatSchema, updateServicecatSchema, sortingSchema } from '.
 import {
   listServicecats,
   getServicecatTree,
+  getServicecatMenu,
   getServicecatById,
   createServicecat,
   updateServicecat,
@@ -19,6 +20,7 @@ const router = Router();
 // Public listing (literal paths before the /:id wildcard)
 router.get('/', listServicecats);
 router.get('/tree', getServicecatTree);
+router.get('/menu', getServicecatMenu);
 
 // Admin protected
 router.post('/sorting', authMiddleware, adminGuard, validate(sortingSchema), updateServicecatSorting);
