@@ -25,6 +25,15 @@ export async function getServicecatTree(req: Request, res: Response, next: NextF
   }
 }
 
+export async function getServicecatMenu(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await servicecatService.getMenu();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getServicecatById(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await servicecatService.getBySlugOrId(String(req.params.id));

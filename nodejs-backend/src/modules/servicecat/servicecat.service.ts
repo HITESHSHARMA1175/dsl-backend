@@ -61,6 +61,34 @@ export class ServicecatService {
     );
   }
 
+  /**
+   * Full navbar mega-menu in one call: every top-level category with its
+   * treatment items nested inline (name + slug to link to). Includes draft
+   * treatment pages too — the menu entry existing is separate from whether
+   * that page's full content has been written yet.
+   */
+  async getMenu() {
+    const topLevel = await this.prisma.property_category_mains.findMany({
+      where: { parent_id: null, status: 1 },
+      orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+    });
+    return Promise.all(
+      topLevel.map(async (category: any) => {
+        const items = await this.prisma.treatmentPage.findMany({
+          where: { category_id: Number(category.id), status: { not: 2 } },
+          select: { id: true, treatment_name: true, slug: true, status: true },
+          orderBy: { id: 'asc' },
+        });
+        return {
+          id: Number(category.id),
+          category_name: category.category_name,
+          category_slug: category.category_slug,
+          items,
+        };
+      })
+    );
+  }
+
   async getById(id: number) {
     const record = await this.prisma.property_category_mains.findUnique({ where: { id } });
     if (!record) {
