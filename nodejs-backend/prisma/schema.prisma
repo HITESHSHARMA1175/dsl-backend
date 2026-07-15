@@ -204,6 +204,11 @@ model Property {
 model TreatmentPage {
   id                     Int      @id @default(autoincrement())
   service_id             Int?
+  // FKs into property_category_mains (BigInt ids there; plain Int link here,
+  // same style as service_id above - not a formal Prisma relation since that
+  // table was introspected from legacy data).
+  category_id            Int?
+  sub_category_id        Int?
 
   treatment_name         String?  @db.VarChar(255)
   slug                   String   @unique @db.VarChar(255)
