@@ -4,15 +4,28 @@ import { AppError } from '../../shared/utils/appError';
 export class TreatmentPageService {
   constructor(private prisma: PrismaClient) {}
 
-  async list() {
+  async list(categoryId?: number, subCategoryId?: number) {
+    const where: any = { status: 1 };
+    if (categoryId !== undefined && !Number.isNaN(categoryId)) where.category_id = categoryId;
+    if (subCategoryId !== undefined && !Number.isNaN(subCategoryId)) where.sub_category_id = subCategoryId;
+
     return this.prisma.treatmentPage.findMany({
-      where: { status: 1 },
+      where,
       select: {
         id: true, slug: true, treatment_name: true, hero_image: true,
-        status: true, updated_at: true,
+        category_id: true, sub_category_id: true, status: true, updated_at: true,
       },
       orderBy: { id: 'desc' },
     });
+  }
+
+  /** When both a category and subcategory are given, the subcategory must actually be a child of that category. */
+  private async assertValidCategoryPair(categoryId?: number | null, subCategoryId?: number | null) {
+    if (!categoryId || !subCategoryId) return;
+    const sub = await (this.prisma as any).property_category_mains.findUnique({ where: { id: subCategoryId } });
+    if (!sub || Number(sub.parent_id) !== categoryId) {
+      throw new AppError(400, 'sub_category_id must be a child of category_id');
+    }
   }
 
   async listAdmin() {
@@ -66,17 +79,21 @@ export class TreatmentPageService {
     if (existing) {
       throw new AppError(409, 'A treatment page with this slug already exists');
     }
+    await this.assertValidCategoryPair(data.category_id, data.sub_category_id);
     return this.prisma.treatmentPage.create({ data });
   }
 
   async update(id: number, data: any) {
-    await this.getById(id);
+    const current = await this.getById(id);
     if (data.slug) {
       const existing = await this.prisma.treatmentPage.findUnique({ where: { slug: data.slug } });
       if (existing && existing.id !== id) {
         throw new AppError(409, 'A treatment page with this slug already exists');
       }
     }
+    const categoryId = data.category_id !== undefined ? data.category_id : current.category_id;
+    const subCategoryId = data.sub_category_id !== undefined ? data.sub_category_id : current.sub_category_id;
+    await this.assertValidCategoryPair(categoryId, subCategoryId);
     return this.prisma.treatmentPage.update({ where: { id }, data });
   }
 

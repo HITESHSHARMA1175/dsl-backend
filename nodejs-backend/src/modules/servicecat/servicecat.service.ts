@@ -3,7 +3,7 @@ import { AppError } from '../../shared/utils/appError';
 /**
  * Service Category hierarchy management.
  * Maps to the `property_category_mains` table which supports a multi-level
- * hierarchy via the `parent_id` column (0 = top-level main category).
+ * hierarchy via the `parent_id` column (NULL = top-level main category).
  */
 export class ServicecatService {
   constructor(private prisma: any) {}
@@ -16,6 +16,25 @@ export class ServicecatService {
       .replace(/(^-|-$)/g, '');
   }
 
+  private async assertSlugAvailable(slug: string, excludeId?: number) {
+    if (!slug) return;
+    const existing = await this.prisma.property_category_mains.findFirst({ where: { category_slug: slug } });
+    if (existing && Number(existing.id) !== excludeId) {
+      throw new AppError(409, 'A category with this slug already exists');
+    }
+  }
+
+  private async buildBreadcrumbs(record: any): Promise<any[]> {
+    const trail: any[] = [];
+    let current = record;
+    while (current) {
+      trail.unshift({ id: Number(current.id), category_name: current.category_name, category_slug: current.category_slug });
+      if (current.parent_id === null || current.parent_id === undefined) break;
+      current = await this.prisma.property_category_mains.findUnique({ where: { id: current.parent_id } });
+    }
+    return trail;
+  }
+
   async list(parentId?: number) {
     // Top-level categories have parent_id = NULL (not 0) in this table, so
     // "no parent_id given" must mean "top-level", not "everything flat".
@@ -26,19 +45,54 @@ export class ServicecatService {
     });
   }
 
+  async getTree() {
+    const topLevel = await this.prisma.property_category_mains.findMany({
+      where: { parent_id: null },
+      orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+    });
+    return Promise.all(
+      topLevel.map(async (parent: any) => ({
+        ...parent,
+        children: await this.prisma.property_category_mains.findMany({
+          where: { parent_id: parent.id },
+          orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+        }),
+      }))
+    );
+  }
+
   async getById(id: number) {
     const record = await this.prisma.property_category_mains.findUnique({ where: { id } });
     if (!record) {
       throw new AppError(404, 'Service category not found');
     }
-    return record;
+    const breadcrumbs = await this.buildBreadcrumbs(record);
+    return { ...record, breadcrumbs };
+  }
+
+  /** Resolves a category by slug first, falling back to numeric id. */
+  async getBySlugOrId(value: string) {
+    let record = await this.prisma.property_category_mains.findFirst({ where: { category_slug: value } });
+    if (!record) {
+      const asId = Number(value);
+      if (Number.isInteger(asId) && asId > 0) {
+        record = await this.prisma.property_category_mains.findUnique({ where: { id: asId } });
+      }
+    }
+    if (!record) {
+      throw new AppError(404, 'Service category not found');
+    }
+    const breadcrumbs = await this.buildBreadcrumbs(record);
+    return { ...record, breadcrumbs };
   }
 
   async create(data: any) {
+    const slug = data.category_slug || this.slugify(data.category_name);
+    await this.assertSlugAvailable(slug);
     const payload: any = {
-      parent_id: data.parent_id ?? 0,
+      parent_id: data.parent_id ?? null,
       category_name: data.category_name,
-      category_slug: data.category_slug || this.slugify(data.category_name),
+      category_slug: slug,
       description: data.description,
       meta_title: data.meta_title,
       meta_keywords: data.meta_keywords,
@@ -57,6 +111,9 @@ export class ServicecatService {
     const payload: any = { ...data };
     if (data.category_name && !data.category_slug) {
       payload.category_slug = this.slugify(data.category_name);
+    }
+    if (payload.category_slug) {
+      await this.assertSlugAvailable(payload.category_slug, id);
     }
     return this.prisma.property_category_mains.update({ where: { id }, data: payload });
   }

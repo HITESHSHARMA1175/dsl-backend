@@ -5,6 +5,7 @@ import { validate } from '../../middleware/validate.middleware';
 import { createServicecatSchema, updateServicecatSchema, sortingSchema } from './servicecat.schema';
 import {
   listServicecats,
+  getServicecatTree,
   getServicecatById,
   createServicecat,
   updateServicecat,
@@ -15,8 +16,9 @@ import {
 
 const router = Router();
 
-// Public listing
+// Public listing (literal paths before the /:id wildcard)
 router.get('/', listServicecats);
+router.get('/tree', getServicecatTree);
 
 // Admin protected
 router.post('/sorting', authMiddleware, adminGuard, validate(sortingSchema), updateServicecatSorting);

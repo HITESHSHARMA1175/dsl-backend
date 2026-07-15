@@ -46,6 +46,8 @@ const sectionSchema = z.object({
 export const createTreatmentPageSchema = z.object({
   slug: z.string().min(1, 'slug is required'),
   service_id: z.number().int().optional(),
+  category_id: z.number().int().optional(),
+  sub_category_id: z.number().int().optional(),
   treatment_name: z.string().optional(),
 
   short_description: z.string().optional(),

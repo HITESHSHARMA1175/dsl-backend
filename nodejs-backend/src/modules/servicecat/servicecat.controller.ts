@@ -16,10 +16,18 @@ export async function listServicecats(req: Request, res: Response, next: NextFun
   }
 }
 
+export async function getServicecatTree(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await servicecatService.getTree();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getServicecatById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = parseIdParam(req.params.id);
-    const data = await servicecatService.getById(id);
+    const data = await servicecatService.getBySlugOrId(String(req.params.id));
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
     next(error);

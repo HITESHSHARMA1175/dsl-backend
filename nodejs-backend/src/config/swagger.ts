@@ -2700,6 +2700,14 @@ export function generateSwaggerSpec(app: any) {
           responses: { '201': { description: 'Created' }, '401': { description: 'Unauthorized' } },
         },
       },
+      '/service-categories/tree': {
+        get: {
+          tags: ['Service Categories'],
+          summary: 'Full nested category tree (public) - for navbar mega-menus',
+          description: 'Returns every top-level category with its direct children nested inline, in one call.',
+          responses: { '200': { description: 'Array of top-level categories, each with a children[] array' } },
+        },
+      },
       '/service-categories/sorting': {
         post: {
           tags: ['Service Categories'],
@@ -2715,9 +2723,10 @@ export function generateSwaggerSpec(app: any) {
       '/service-categories/{id}': {
         get: {
           tags: ['Service Categories'],
-          summary: 'Get service category by ID',
-          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
-          responses: { '200': { description: 'Category details' }, '404': { description: 'Not found' } },
+          summary: 'Get a service category by slug or numeric id (public)',
+          description: 'Accepts either the SEO-friendly category_slug (e.g. "hair-restoration") or the numeric id. Response includes a breadcrumbs array (root to self).',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Slug or numeric id' }],
+          responses: { '200': { description: 'Category details with breadcrumbs' }, '404': { description: 'Not found' } },
         },
         put: {
           tags: ['Service Categories'],
@@ -3598,7 +3607,12 @@ export function generateSwaggerSpec(app: any) {
         get: {
           tags: ['Treatment Pages'],
           summary: 'List published treatment pages (public, summary only)',
-          responses: { '200': { description: 'List of { id, slug, treatment_name, hero_image, status, updated_at }' } },
+          description: 'Optionally filter by category_id and/or sub_category_id (ids from /service-categories).',
+          parameters: [
+            { name: 'category_id', in: 'query', required: false, schema: { type: 'integer' } },
+            { name: 'sub_category_id', in: 'query', required: false, schema: { type: 'integer' } },
+          ],
+          responses: { '200': { description: 'List of { id, slug, treatment_name, hero_image, category_id, sub_category_id, status, updated_at }' } },
         },
         post: {
           tags: ['Treatment Pages'],
@@ -3607,7 +3621,10 @@ export function generateSwaggerSpec(app: any) {
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', required: ['slug'], properties: {
-              slug: { type: 'string' }, service_id: { type: 'integer' }, treatment_name: { type: 'string' },
+              slug: { type: 'string' }, service_id: { type: 'integer' },
+              category_id: { type: 'integer', description: 'FK to /service-categories' },
+              sub_category_id: { type: 'integer', description: 'Must be a child of category_id, if both given' },
+              treatment_name: { type: 'string' },
               short_description: { type: 'string' }, full_description: { type: 'string' },
               hero_title: { type: 'string' }, hero_subtitle: { type: 'string' }, hero_image: { type: 'string' },
               gallery_images: { type: 'array' }, before_after: { type: 'array' },
