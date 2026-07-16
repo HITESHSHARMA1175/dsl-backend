@@ -126,6 +126,7 @@ export class TreatmentsService {
     const resultsSection = (page.results_section as any) ?? {};
 
     return {
+      id: page.id,
       slug: page.slug,
       name: page.treatment_name,
       category_id: page.category_id,
