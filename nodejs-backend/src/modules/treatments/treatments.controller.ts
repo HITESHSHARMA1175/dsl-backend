@@ -21,3 +21,21 @@ export async function getTreatmentBySlug(req: Request, res: Response, next: Next
     next(error);
   }
 }
+
+export async function createTreatmentPage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await treatmentsService.createFromContract(req.body);
+    return res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateTreatmentPage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await treatmentsService.updateFromContract(String(req.params.slug), req.body);
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+}

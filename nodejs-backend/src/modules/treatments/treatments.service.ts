@@ -156,4 +156,101 @@ export class TreatmentsService {
       faqs: page.faqs.map((f) => ({ question: f.question, answer: f.answer })),
     };
   }
+
+  /** Maps the frontend's { name, slug, pageData } contract onto TreatmentPage's internal columns. */
+  private buildDataFromContract(payload: { name?: string; slug?: string; pageData?: any }) {
+    const pageData = payload.pageData ?? {};
+    const data: any = {};
+
+    if (payload.name !== undefined) data.treatment_name = payload.name;
+    if (payload.slug !== undefined) data.slug = payload.slug;
+    if (pageData.defaultOptionId !== undefined) data.default_option_id = pageData.defaultOptionId;
+
+    if (pageData.hero) {
+      const h = pageData.hero;
+      if (h.eyebrow !== undefined) data.hero_eyebrow = h.eyebrow;
+      if (h.title !== undefined) data.hero_title = h.title;
+      if (h.accentTitle !== undefined) data.hero_accent_title = h.accentTitle;
+      if (h.description !== undefined) data.short_description = h.description;
+      if (h.image !== undefined) data.hero_image = h.image;
+      if (h.imageAlt !== undefined) data.hero_image_alt = h.imageAlt;
+      if (h.badgeText !== undefined) data.hero_badge_text = h.badgeText;
+    }
+
+    if (pageData.detail !== undefined) data.detail = pageData.detail;
+    if (pageData.pricing !== undefined) data.pricing = pageData.pricing;
+    if (pageData.stats !== undefined) data.stats = pageData.stats;
+
+    if (pageData.results) {
+      data.results_section = {
+        eyebrow: pageData.results.eyebrow,
+        title: pageData.results.title,
+        description: pageData.results.description,
+      };
+      if (pageData.results.items !== undefined) data.before_after = pageData.results.items;
+    }
+
+    return data;
+  }
+
+  /** Create a new treatment page from the frontend's exact { name, slug, pageData } contract. Created as a draft; publish separately. */
+  async createFromContract(payload: { name: string; slug: string; pageData?: any }) {
+    const existing = await this.prisma.treatmentPage.findUnique({ where: { slug: payload.slug } });
+    if (existing) {
+      throw new AppError(409, 'A treatment page with this slug already exists');
+    }
+
+    const data = this.buildDataFromContract(payload);
+    const page = await this.prisma.treatmentPage.create({ data: { ...data, slug: payload.slug, status: 0 } });
+
+    const faqs = payload.pageData?.faqs;
+    if (Array.isArray(faqs) && faqs.length > 0) {
+      await this.prisma.treatmentFaq.createMany({
+        data: faqs.map((f: any, index: number) => ({
+          treatment_page_id: page.id,
+          question: f.question,
+          answer: f.answer,
+          sorting_order: index,
+        })),
+      });
+    }
+
+    return this.getBySlug(page.slug);
+  }
+
+  /** Update an existing treatment page from the frontend's exact { name, slug, pageData } contract. */
+  async updateFromContract(slug: string, payload: { name?: string; slug?: string; pageData?: any }) {
+    const existing = await this.prisma.treatmentPage.findUnique({ where: { slug } });
+    if (!existing) {
+      throw new AppError(404, 'Treatment page not found');
+    }
+
+    if (payload.slug !== undefined && payload.slug !== slug) {
+      const duplicate = await this.prisma.treatmentPage.findUnique({ where: { slug: payload.slug } });
+      if (duplicate) {
+        throw new AppError(409, 'A treatment page with this slug already exists');
+      }
+    }
+
+    const data = this.buildDataFromContract(payload);
+    await this.prisma.treatmentPage.update({ where: { id: existing.id }, data });
+
+    const faqs = payload.pageData?.faqs;
+    if (Array.isArray(faqs)) {
+      // Full replace - this contract represents the whole page's FAQ list, not incremental edits.
+      await this.prisma.treatmentFaq.deleteMany({ where: { treatment_page_id: existing.id } });
+      if (faqs.length > 0) {
+        await this.prisma.treatmentFaq.createMany({
+          data: faqs.map((f: any, index: number) => ({
+            treatment_page_id: existing.id,
+            question: f.question,
+            answer: f.answer,
+            sorting_order: index,
+          })),
+        });
+      }
+    }
+
+    return this.getBySlug(data.slug ?? slug);
+  }
 }

@@ -3691,6 +3691,49 @@ export function generateSwaggerSpec(app: any) {
           responses: { '200': { description: 'Treatment detail in the exact contract shape' }, '404': { description: 'Not found' } },
         },
       },
+      '/treatments/pages': {
+        post: {
+          tags: ['Treatments (Public Contract)'],
+          summary: 'Create a treatment page from the frontend\'s exact { name, slug, pageData } contract (admin)',
+          description: 'Created as a draft (status 0) - publish separately via PATCH /treatment-pages/{id}/publish. Does not set category_id/sub_category_id (not part of this contract) - tag it via the existing /treatment-pages/{id} endpoint to make it appear in a navbar column.',
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['name', 'slug'], properties: {
+              name: { type: 'string' },
+              slug: { type: 'string' },
+              pageData: { type: 'object', properties: {
+                defaultOptionId: { type: 'string' },
+                hero: { type: 'object' },
+                detail: { type: 'object' },
+                pricing: { type: 'object' },
+                stats: { type: 'array', items: { type: 'object' } },
+                results: { type: 'object' },
+                faqs: { type: 'array', items: { type: 'object', properties: { question: { type: 'string' }, answer: { type: 'string' } } } },
+              } },
+            } } } },
+          },
+          responses: { '201': { description: 'Created, in the same shape as GET /treatments/{slug}' }, '409': { description: 'Slug already exists' } },
+        },
+      },
+      '/treatments/pages/{slug}': {
+        put: {
+          tags: ['Treatments (Public Contract)'],
+          summary: 'Update a treatment page from the frontend\'s exact { name, slug, pageData } contract (admin)',
+          description: 'Only fields present in pageData are changed. pageData.faqs, if present, fully replaces the existing FAQ list (not merged).',
+          security: [{ BearerAuth: [] }],
+          parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: {
+              name: { type: 'string' },
+              slug: { type: 'string' },
+              pageData: { type: 'object' },
+            } } } },
+          },
+          responses: { '200': { description: 'Updated, in the same shape as GET /treatments/{slug}' }, '404': { description: 'Not found' } },
+        },
+      },
       '/treatment-pages/{id}': {
         put: {
           tags: ['Treatment Pages'],
