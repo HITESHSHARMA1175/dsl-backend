@@ -12,6 +12,7 @@ import categoryRoutes from './modules/category/category.routes';
 import serviceRoutes from './modules/service/service.routes';
 import addonRoutes from './modules/addon/addon.routes';
 import treatmentRoutes from './modules/treatment/treatment.routes';
+import treatmentsPublicRoutes from './modules/treatments/treatments.routes';
 import professionalRoutes from './modules/professional/professional.routes';
 import slotRoutes from './modules/slot/slot.routes';
 import bookingRoutes from './modules/booking/booking.routes';
@@ -87,6 +88,10 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/services', serviceRoutes);
 app.use('/api/v1/addons', addonRoutes);
+// New public contract routes (navbar/:slug) first; legacy admin-only treatment
+// CRUD (/, /:id) falls through to the second router untouched since Express
+// routers call next() when nothing matches.
+app.use('/api/v1/treatments', treatmentsPublicRoutes);
 app.use('/api/v1/treatments', treatmentRoutes);
 app.use('/api/v1/professionals', professionalRoutes);
 app.use('/api/v1/slots', slotRoutes);

@@ -3674,6 +3674,23 @@ export function generateSwaggerSpec(app: any) {
           responses: { '200': { description: 'Full page content plus enabled faqs, approved reviews, and resolved relatedTreatments' }, '404': { description: 'Not found' } },
         },
       },
+      '/treatments/navbar': {
+        get: {
+          tags: ['Treatments (Public Contract)'],
+          summary: 'Full navbar mega-menu in the frontend\'s exact contract shape (public)',
+          description: 'Every top-level nav group as { name, isMultiColumn, subItems } (flat) or { name, isMultiColumn, columns: [{ title, subItems }] } (grouped). Response is { success, data } with no extra fields, matching the frontend contract exactly.',
+          responses: { '200': { description: 'Array of nav groups' } },
+        },
+      },
+      '/treatments/{slug}': {
+        get: {
+          tags: ['Treatments (Public Contract)'],
+          summary: 'One treatment\'s full landing-page content in the frontend\'s exact contract shape (public)',
+          description: 'Returns { slug, defaultOptionId, hero, detail, stats, pricing, results, faqs } reshaped from the internal TreatmentPage record. Draft pages are included (not gated on status) since the navbar links to them - only a missing slug 404s.',
+          parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Treatment detail in the exact contract shape' }, '404': { description: 'Not found' } },
+        },
+      },
       '/treatment-pages/{id}': {
         put: {
           tags: ['Treatment Pages'],

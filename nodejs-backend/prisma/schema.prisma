@@ -217,8 +217,17 @@ model TreatmentPage {
   full_description       String?  @db.LongText
 
   hero_title             String?  @db.VarChar(255)
+  hero_eyebrow           String?  @db.VarChar(255)
+  hero_accent_title      String?  @db.VarChar(255)
   hero_subtitle          String?  @db.VarChar(500)
   hero_image             String?  @db.VarChar(500)
+  hero_image_alt         String?  @db.VarChar(255)
+  hero_badge_text        String?  @db.VarChar(255)
+
+  // Secondary "clinically validated protocol"-style content block below the hero.
+  detail                 Json?
+  // Wrapper text (eyebrow/title/description) around the before_after gallery below.
+  results_section        Json?
 
   gallery_images         Json?
   before_after           Json?
