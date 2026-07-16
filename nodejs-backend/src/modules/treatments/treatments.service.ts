@@ -127,6 +127,9 @@ export class TreatmentsService {
 
     return {
       slug: page.slug,
+      name: page.treatment_name,
+      category_id: page.category_id,
+      sub_category_id: page.sub_category_id,
       defaultOptionId: page.default_option_id,
       hero: {
         eyebrow: page.hero_eyebrow,
@@ -157,13 +160,24 @@ export class TreatmentsService {
     };
   }
 
-  /** Maps the frontend's { name, slug, pageData } contract onto TreatmentPage's internal columns. */
-  private buildDataFromContract(payload: { name?: string; slug?: string; pageData?: any }) {
+/** When both a category and sub-category are given, the sub-category must actually be a child of that category. */
+  private async assertValidCategoryPair(categoryId?: number | null, subCategoryId?: number | null) {
+    if (!categoryId || !subCategoryId) return;
+    const sub = await (this.prisma as any).property_category_mains.findUnique({ where: { id: subCategoryId } });
+    if (!sub || Number(sub.parent_id) !== categoryId) {
+      throw new AppError(400, 'sub_category_id must be a child of category_id');
+    }
+  }
+
+  /** Maps the frontend's { name, slug, category_id, sub_category_id, pageData } contract onto TreatmentPage's internal columns. */
+  private buildDataFromContract(payload: { name?: string; slug?: string; category_id?: number | null; sub_category_id?: number | null; pageData?: any }) {
     const pageData = payload.pageData ?? {};
     const data: any = {};
 
     if (payload.name !== undefined) data.treatment_name = payload.name;
     if (payload.slug !== undefined) data.slug = payload.slug;
+    if (payload.category_id !== undefined) data.category_id = payload.category_id;
+    if (payload.sub_category_id !== undefined) data.sub_category_id = payload.sub_category_id;
     if (pageData.defaultOptionId !== undefined) data.default_option_id = pageData.defaultOptionId;
 
     if (pageData.hero) {
@@ -193,12 +207,13 @@ export class TreatmentsService {
     return data;
   }
 
-  /** Create a new treatment page from the frontend's exact { name, slug, pageData } contract. Created as a draft; publish separately. */
-  async createFromContract(payload: { name: string; slug: string; pageData?: any }) {
+  /** Create a new treatment page from the frontend's exact { name, slug, category_id, sub_category_id, pageData } contract. Created as a draft; publish separately. */
+  async createFromContract(payload: { name: string; slug: string; category_id?: number; sub_category_id?: number; pageData?: any }) {
     const existing = await this.prisma.treatmentPage.findUnique({ where: { slug: payload.slug } });
     if (existing) {
       throw new AppError(409, 'A treatment page with this slug already exists');
     }
+    await this.assertValidCategoryPair(payload.category_id, payload.sub_category_id);
 
     const data = this.buildDataFromContract(payload);
     const page = await this.prisma.treatmentPage.create({ data: { ...data, slug: payload.slug, status: 0 } });
@@ -218,8 +233,8 @@ export class TreatmentsService {
     return this.getBySlug(page.slug);
   }
 
-  /** Update an existing treatment page from the frontend's exact { name, slug, pageData } contract. */
-  async updateFromContract(slug: string, payload: { name?: string; slug?: string; pageData?: any }) {
+  /** Update an existing treatment page from the frontend's exact { name, slug, category_id, sub_category_id, pageData } contract. */
+  async updateFromContract(slug: string, payload: { name?: string; slug?: string; category_id?: number | null; sub_category_id?: number | null; pageData?: any }) {
     const existing = await this.prisma.treatmentPage.findUnique({ where: { slug } });
     if (!existing) {
       throw new AppError(404, 'Treatment page not found');
@@ -231,6 +246,10 @@ export class TreatmentsService {
         throw new AppError(409, 'A treatment page with this slug already exists');
       }
     }
+
+    const categoryId = payload.category_id !== undefined ? payload.category_id : existing.category_id;
+    const subCategoryId = payload.sub_category_id !== undefined ? payload.sub_category_id : existing.sub_category_id;
+    await this.assertValidCategoryPair(categoryId, subCategoryId);
 
     const data = this.buildDataFromContract(payload);
     await this.prisma.treatmentPage.update({ where: { id: existing.id }, data });

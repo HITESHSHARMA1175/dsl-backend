@@ -75,11 +75,15 @@ const pageDataSchema = z.object({
 export const createTreatmentContractSchema = z.object({
   name: z.string().min(1, 'name is required'),
   slug: z.string().min(1, 'slug is required'),
+  category_id: z.number().int().optional(),
+  sub_category_id: z.number().int().optional(),
   pageData: pageDataSchema.optional(),
 });
 
 export const updateTreatmentContractSchema = z.object({
   name: z.string().optional(),
   slug: z.string().optional(),
+  category_id: z.number().int().nullable().optional(),
+  sub_category_id: z.number().int().nullable().optional(),
   pageData: pageDataSchema.optional(),
 });

@@ -3695,13 +3695,15 @@ export function generateSwaggerSpec(app: any) {
         post: {
           tags: ['Treatments (Public Contract)'],
           summary: 'Create a treatment page from the frontend\'s exact { name, slug, pageData } contract (admin)',
-          description: 'Created as a draft (status 0) - publish separately via PATCH /treatment-pages/{id}/publish. Does not set category_id/sub_category_id (not part of this contract) - tag it via the existing /treatment-pages/{id} endpoint to make it appear in a navbar column.',
+          description: 'Created as a draft (status 0) - publish separately via PATCH /treatment-pages/{id}/publish. Pass category_id (and optionally sub_category_id) to make it appear in a navbar column immediately - without one, it will exist but not show anywhere in GET /treatments/navbar.',
           security: [{ BearerAuth: [] }],
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', required: ['name', 'slug'], properties: {
               name: { type: 'string' },
               slug: { type: 'string' },
+              category_id: { type: 'integer', description: 'id from GET /service-categories/tree - required for this item to show in the navbar' },
+              sub_category_id: { type: 'integer', description: 'must be a child of category_id, if given' },
               pageData: { type: 'object', properties: {
                 defaultOptionId: { type: 'string' },
                 hero: { type: 'object' },
@@ -3728,6 +3730,8 @@ export function generateSwaggerSpec(app: any) {
             content: { 'application/json': { schema: { type: 'object', properties: {
               name: { type: 'string' },
               slug: { type: 'string' },
+              category_id: { type: 'integer' },
+              sub_category_id: { type: 'integer' },
               pageData: { type: 'object' },
             } } } },
           },
