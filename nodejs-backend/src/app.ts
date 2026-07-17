@@ -71,7 +71,19 @@ import treatmentpageRoutes from './modules/treatmentpage/treatmentpage.routes';
 const app = express();
 
 // 1. Security headers
-app.use(helmet());
+// crossOriginResourcePolicy defaults to 'same-origin', which blocks the
+// frontend (a different origin) from loading <img> tags pointing at
+// /uploads/* - the API is meant to be consumed cross-origin (CORS_ORIGINS
+// is '*'), so resources need to be too.
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'img-src': ["'self'", 'data:', 'https:'],
+    },
+  },
+}));
 
 // 2. CORS
 app.use(cors({
