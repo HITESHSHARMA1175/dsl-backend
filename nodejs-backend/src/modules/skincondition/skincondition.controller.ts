@@ -5,6 +5,15 @@ import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const skinConditionService = new SkinConditionService();
 
+export async function publicConditions(req: Request, res: Response, next: NextFunction) {
+  try {
+    const conditions = await skinConditionService.getPublicTree();
+    return res.status(200).json(successResponse(200, 'Success', conditions));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function listConditions(req: Request, res: Response, next: NextFunction) {
   try {
     const conditions = await skinConditionService.list();

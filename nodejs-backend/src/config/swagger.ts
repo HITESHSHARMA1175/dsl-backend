@@ -1283,6 +1283,14 @@ export function generateSwaggerSpec(app: any) {
       },
 
       // ==================== SKIN CONDITIONS (10 endpoints) ====================
+      '/skinconditions/public': {
+        get: {
+          tags: ['Skin Conditions'],
+          summary: 'Public skin condition tree (no auth) - top-level conditions with subConditions nested inline',
+          description: 'For a "shop by concern" style page - distinct from the Treatments navbar, which is organized by service type rather than skin concern.',
+          responses: { '200': { description: 'Array of top-level conditions, each with a subConditions[] array' } },
+        },
+      },
       '/skinconditions': {
         get: {
           tags: ['Skin Conditions'],

@@ -4,6 +4,7 @@ import { adminGuard } from '../../middleware/adminGuard.middleware';
 import { validate } from '../../middleware/validate.middleware';
 import { createConditionSchema, updateConditionSchema, sortingSchema, createSubConditionSchema, updateSubConditionSchema } from './skincondition.schema';
 import {
+  publicConditions,
   listConditions,
   createCondition,
   updateCondition,
@@ -17,6 +18,9 @@ import {
 } from './skincondition.controller';
 
 const router = Router();
+
+// Public - literal path first so it isn't swallowed by admin routes below.
+router.get('/public', publicConditions);
 
 // Main conditions
 router.get('/', authMiddleware, adminGuard, listConditions);

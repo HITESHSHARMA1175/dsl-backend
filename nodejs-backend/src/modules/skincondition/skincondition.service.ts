@@ -1,11 +1,49 @@
 import { prisma } from '../../config/database';
 
+const PUBLIC_SELECT = {
+  id: true,
+  category_name: true,
+  category_slug: true,
+  description: true,
+  icon: true,
+  parent_id: true,
+  sorting_order: true,
+} as const;
+
 export class SkinConditionService {
   // Main conditions (is_condition = 1, parent_id = 0)
   async list() {
     return (prisma as any).propertyCategory.findMany({
       where: { is_condition: 'Yes', parent_id: 0 },
     });
+  }
+
+  /**
+   * Public condition tree: top-level conditions with their sub-conditions
+   * nested inline. Explicit select avoids created_at/updated_at - some rows
+   * on this legacy table have invalid zero-date values Prisma can't
+   * deserialize (same issue found on `properties` earlier).
+   */
+  async getPublicTree() {
+    const topLevel = await (prisma as any).propertyCategory.findMany({
+      where: { is_condition: 'Yes', parent_id: 0, status: 1 },
+      select: PUBLIC_SELECT,
+      orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+    });
+
+    return Promise.all(
+      topLevel.map(async (condition: any) => ({
+        ...condition,
+        id: Number(condition.id),
+        subConditions: (
+          await (prisma as any).propertyCategory.findMany({
+            where: { is_condition: 'Yes', parent_id: Number(condition.id), status: 1 },
+            select: PUBLIC_SELECT,
+            orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+          })
+        ).map((sub: any) => ({ ...sub, id: Number(sub.id) })),
+      }))
+    );
   }
 
   async create(data: any) {
