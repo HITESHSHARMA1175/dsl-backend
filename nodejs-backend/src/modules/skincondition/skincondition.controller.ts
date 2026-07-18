@@ -1,9 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { env } from '../../config/env';
 import { SkinConditionService } from './skincondition.service';
 import { successResponse } from '../../shared/utils/response.util';
 import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const skinConditionService = new SkinConditionService();
+
+function hasValidAdminToken(req: Request): boolean {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return false;
+  try {
+    const payload = jwt.verify(authHeader.slice(7), env.JWT_ACCESS_SECRET) as any;
+    return payload.role === 'admin';
+  } catch {
+    return false;
+  }
+}
 
 export async function publicConditions(req: Request, res: Response, next: NextFunction) {
   try {
@@ -14,9 +27,17 @@ export async function publicConditions(req: Request, res: Response, next: NextFu
   }
 }
 
+/**
+ * No login required. Logged-in admins get the full unfiltered list (same as
+ * before, for the admin panel's manage screen); everyone else gets the same
+ * safe/active-only tree as GET /public, so this URL works for both without
+ * changing what the admin panel already relies on here.
+ */
 export async function listConditions(req: Request, res: Response, next: NextFunction) {
   try {
-    const conditions = await skinConditionService.list();
+    const conditions = hasValidAdminToken(req)
+      ? await skinConditionService.list()
+      : await skinConditionService.getPublicTree();
     return res.status(200).json(successResponse(200, 'Success', conditions));
   } catch (error) {
     next(error);

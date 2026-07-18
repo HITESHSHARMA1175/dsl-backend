@@ -23,7 +23,11 @@ const router = Router();
 router.get('/public', publicConditions);
 
 // Main conditions
-router.get('/', authMiddleware, adminGuard, listConditions);
+// GET / is intentionally not auth-gated - listConditions itself checks for a
+// valid admin token and returns the full unfiltered list when present, or
+// the same safe/active-only tree as GET /public otherwise. This keeps this
+// exact URL usable by both the admin panel and the public frontend.
+router.get('/', listConditions);
 router.post('/', authMiddleware, adminGuard, validate(createConditionSchema), createCondition);
 router.put('/:id', authMiddleware, adminGuard, validate(updateConditionSchema), updateCondition);
 router.delete('/:id', authMiddleware, adminGuard, deleteCondition);
