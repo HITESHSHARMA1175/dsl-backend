@@ -161,6 +161,18 @@ model PropertyCategory {
   created_at       DateTime                         @default(now()) @db.Timestamp(0)
   updated_at       DateTime                         @default(now()) @updatedAt @db.Timestamp(0)
 
+  // Skin condition detail page content (frontend contract fields with no
+  // legacy equivalent) - nullable/empty until an admin populates them.
+  hero_badge       String?                          @db.VarChar(255)
+  card_title       String?                          @db.VarChar(255)
+  card_description String?                          @db.Text
+  card_badge       String?                          @db.VarChar(255)
+  card_trust_label String?                          @db.VarChar(255)
+  treatment_stats  Json?
+  pricing          Json?
+  before_after     Json?
+  testimonials     Json?
+
   @@map("property_categories")
 }
 

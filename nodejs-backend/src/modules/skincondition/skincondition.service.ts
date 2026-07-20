@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { AppError } from '../../shared/utils/appError';
 
 const PUBLIC_SELECT = {
   id: true,
@@ -9,6 +10,31 @@ const PUBLIC_SELECT = {
   parent_id: true,
   sorting_order: true,
 } as const;
+
+const DETAIL_SELECT = {
+  id: true,
+  category_name: true,
+  category_slug: true,
+  parent_id: true,
+  sorting_order: true,
+  meta_title: true,
+  meta_description: true,
+  description: true,
+  icon: true,
+  image1: true,
+  image2: true,
+  hero_badge: true,
+  card_title: true,
+  card_description: true,
+  card_badge: true,
+  card_trust_label: true,
+  treatment_stats: true,
+  pricing: true,
+  before_after: true,
+  testimonials: true,
+} as const;
+
+const ICON_BASE_URL = 'https://cdn.diamondskinlondon.com/icons/';
 
 export class SkinConditionService {
   // Main conditions (is_condition = 1, parent_id = 0)
@@ -44,6 +70,68 @@ export class SkinConditionService {
         ).map((sub: any) => ({ ...sub, id: Number(sub.id) })),
       }))
     );
+  }
+
+  /**
+   * Full condition detail page: SEO, hero, card, stats, pricing, before/after,
+   * testimonials, real FAQs (faqs.category_id already links to this table -
+   * same mechanism the Content module's FAQ admin CRUD already manages),
+   * and sub-conditions. `image1`/`image2` are returned as raw filenames
+   * (`hero_image_filename`/`card_image_filename`) rather than resolved
+   * URLs - only `icon`'s CDN base has been confirmed, not these.
+   */
+  async getBySlug(slug: string) {
+    const condition = await (prisma as any).propertyCategory.findFirst({
+      where: { category_slug: slug, is_condition: 'Yes', status: 1 },
+      select: DETAIL_SELECT,
+    });
+    if (!condition) {
+      throw new AppError(404, 'Skin condition not found');
+    }
+
+    const id = Number(condition.id);
+
+    const [faqs, subConditions] = await Promise.all([
+      // Not filtered by status: real FAQ content on this legacy table sits at
+      // status 0 (never flipped to "published" by whatever admin tool wrote
+      // it), and this is a single curated resource, not a bulk public list -
+      // showing it beats hiding real content behind a flag nothing sets.
+      (prisma as any).faq.findMany({
+        where: { category_id: id },
+        orderBy: { sorting_order: 'asc' },
+        select: { id: true, question: true, answer: true },
+      }),
+      (prisma as any).propertyCategory.findMany({
+        where: { is_condition: 'Yes', parent_id: id, status: 1 },
+        select: { id: true, category_name: true, category_slug: true },
+        orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+      }),
+    ]);
+
+    return {
+      id,
+      category_name: condition.category_name,
+      category_slug: condition.category_slug,
+      parent_id: condition.parent_id,
+      sorting_order: condition.sorting_order,
+      meta_title: condition.meta_title,
+      meta_description: condition.meta_description,
+      short_description: condition.description,
+      icon: condition.icon ? `${ICON_BASE_URL}${condition.icon}` : null,
+      hero_image_filename: condition.image1,
+      card_image_filename: condition.image2,
+      hero_badge: condition.hero_badge,
+      card_title: condition.card_title,
+      card_description: condition.card_description,
+      card_badge: condition.card_badge,
+      card_trust_label: condition.card_trust_label,
+      treatment_stats: condition.treatment_stats ?? null,
+      pricing: condition.pricing ?? [],
+      before_after: condition.before_after ?? [],
+      testimonials: condition.testimonials ?? [],
+      faqs,
+      subConditions: subConditions.map((s: any) => ({ ...s, id: Number(s.id) })),
+    };
   }
 
   async create(data: any) {

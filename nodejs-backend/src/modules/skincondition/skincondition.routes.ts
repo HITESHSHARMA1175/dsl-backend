@@ -5,6 +5,7 @@ import { validate } from '../../middleware/validate.middleware';
 import { createConditionSchema, updateConditionSchema, sortingSchema, createSubConditionSchema, updateSubConditionSchema } from './skincondition.schema';
 import {
   publicConditions,
+  getConditionBySlug,
   listConditions,
   createCondition,
   updateCondition,
@@ -19,7 +20,7 @@ import {
 
 const router = Router();
 
-// Public - literal path first so it isn't swallowed by admin routes below.
+// Public - literal paths first so they aren't swallowed by admin routes or the /:slug wildcard below.
 router.get('/public', publicConditions);
 
 // Main conditions
@@ -40,5 +41,8 @@ router.post('/sub', authMiddleware, adminGuard, validate(createSubConditionSchem
 router.patch('/sub/sorting', authMiddleware, adminGuard, validate(sortingSchema), updateSorting);
 router.put('/sub/:id', authMiddleware, adminGuard, validate(updateSubConditionSchema), updateSubCondition);
 router.delete('/sub/:id', authMiddleware, adminGuard, deleteSubCondition);
+
+// Public - registered last so it doesn't swallow the literal paths above.
+router.get('/:slug', getConditionBySlug);
 
 export default router;
