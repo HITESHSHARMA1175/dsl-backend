@@ -20,6 +20,7 @@ const DETAIL_SELECT = {
   meta_title: true,
   meta_description: true,
   description: true,
+  description1: true,
   icon: true,
   image1: true,
   image2: true,
@@ -76,9 +77,15 @@ export class SkinConditionService {
    * Full condition detail page: SEO, hero, card, stats, pricing, before/after,
    * testimonials, real FAQs (faqs.category_id already links to this table -
    * same mechanism the Content module's FAQ admin CRUD already manages),
-   * and sub-conditions. `image1`/`image2` are returned as raw filenames
-   * (`hero_image_filename`/`card_image_filename`) rather than resolved
-   * URLs - only `icon`'s CDN base has been confirmed, not these.
+   * and sub-conditions.
+   *
+   * hero_image/card_image are null rather than a guessed URL: our stored
+   * filenames (image1/image2, e.g. "30uVnLJpCvIZp9s4F.png") don't correspond
+   * to the semantic-slug path pattern seen in example payloads
+   * (".../conditions/acne/hero.jpg") through any real transformation, so
+   * constructing one would be fabricating a URL, not resolving a real one.
+   * Only `icon`'s CDN base (cdn.diamondskinlondon.com/icons/) is confirmed,
+   * because that filename matched an example exactly.
    */
   async getBySlug(slug: string) {
     const condition = await (prisma as any).propertyCategory.findFirst({
@@ -114,22 +121,28 @@ export class SkinConditionService {
       category_slug: condition.category_slug,
       parent_id: condition.parent_id,
       sorting_order: condition.sorting_order,
+      icon: condition.icon ? `${ICON_BASE_URL}${condition.icon}` : null,
       meta_title: condition.meta_title,
       meta_description: condition.meta_description,
-      short_description: condition.description,
-      icon: condition.icon ? `${ICON_BASE_URL}${condition.icon}` : null,
-      hero_image_filename: condition.image1,
-      card_image_filename: condition.image2,
       hero_badge: condition.hero_badge,
+      short_description: condition.description,
+      long_description: condition.description1,
+      // Unresolved - see method doc comment above. Raw filenames are on
+      // condition.image1 / condition.image2 in the DB if needed for debugging.
+      hero_image: null,
+      card_image: null,
+      treatment_stats: condition.treatment_stats ?? null,
       card_title: condition.card_title,
       card_description: condition.card_description,
       card_badge: condition.card_badge,
       card_trust_label: condition.card_trust_label,
-      treatment_stats: condition.treatment_stats ?? null,
+      // Shape ready for real content: [{id, name, sessions, original_price, price, currency, popular}]
       pricing: condition.pricing ?? [],
+      // Shape ready for real content: [{id, before_image, after_image, caption}]
       before_after: condition.before_after ?? [],
-      testimonials: condition.testimonials ?? [],
       faqs,
+      // Shape ready for real content: [{id, name, rating, source, date, text}]
+      testimonials: condition.testimonials ?? [],
       subConditions: subConditions.map((s: any) => ({ ...s, id: Number(s.id) })),
     };
   }

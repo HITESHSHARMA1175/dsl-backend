@@ -1295,7 +1295,7 @@ export function generateSwaggerSpec(app: any) {
         get: {
           tags: ['Skin Conditions'],
           summary: 'Full skin condition detail page (public, no auth)',
-          description: 'SEO, hero, card, stats, pricing, before/after, testimonials, real FAQs, and sub-conditions for one condition. Fields with no populated content yet (pricing, before_after, testimonials, treatment_stats, card_*, hero_badge) return null/empty rather than fabricated placeholders. icon is a resolved full CDN URL; hero_image_filename/card_image_filename are raw filenames (URL base not yet confirmed).',
+          description: 'SEO, hero, card, stats, pricing, before/after, testimonials, real FAQs, and sub-conditions for one condition. Fields with no populated content yet (pricing, before_after, testimonials, treatment_stats, card_*, hero_badge, long_description) return null/empty rather than fabricated placeholders. icon is a resolved full CDN URL (cdn.diamondskinlondon.com/icons/...); hero_image/card_image are null - the stored filenames don\'t map to any confirmed URL pattern, so returning a guessed one would mean fabricating a link rather than resolving a real one.',
           parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
           responses: { '200': { description: 'Condition detail' }, '404': { description: 'Not found' } },
         },
