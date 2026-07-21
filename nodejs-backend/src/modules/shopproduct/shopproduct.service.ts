@@ -48,7 +48,6 @@ export class ShopProductService {
         created_at,
         updated_at
       FROM shop_products
-      WHERE CAST(is_active AS UNSIGNED) = 1
       ORDER BY sort_order ASC, id DESC
     `);
   }
