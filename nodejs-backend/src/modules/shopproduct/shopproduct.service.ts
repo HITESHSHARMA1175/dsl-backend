@@ -1,10 +1,38 @@
 import { AppError } from '../../shared/utils/appError';
 
 export class ShopProductService {
+  private ensureTablePromise?: Promise<void>;
+
   constructor(private prisma: any) {}
+
+  private ensureTable() {
+    if (!this.ensureTablePromise) {
+      this.ensureTablePromise = this.prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS shop_products (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          name VARCHAR(255) NOT NULL,
+          description TEXT NULL,
+          price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+          image VARCHAR(500) NULL,
+          category VARCHAR(255) NULL,
+          type VARCHAR(50) NOT NULL DEFAULT 'custom',
+          shopify_url VARCHAR(500) NULL,
+          is_active TINYINT NOT NULL DEFAULT 1,
+          sort_order INT NOT NULL DEFAULT 0,
+          created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          INDEX shop_products_is_active_sort_order_idx (is_active, sort_order)
+        )
+      `).then(() => undefined);
+    }
+
+    return this.ensureTablePromise;
+  }
 
   /** Public: list all active products ordered by sort_order */
   async listPublic() {
+    await this.ensureTable();
     return this.prisma.shop_products.findMany({
       where: { is_active: 1 },
       orderBy: [{ sort_order: 'asc' }, { id: 'desc' }],
@@ -13,6 +41,7 @@ export class ShopProductService {
 
   /** Admin: list all products (active + inactive) with pagination */
   async listAdmin(page = 1, perPage = 20, search?: string) {
+    await this.ensureTable();
     const where: any = {};
     if (search) {
       where.name = { contains: search };
@@ -33,6 +62,7 @@ export class ShopProductService {
 
   /** Admin: get single product */
   async getById(id: number) {
+    await this.ensureTable();
     const product = await this.prisma.shop_products.findUnique({ where: { id } });
     if (!product) throw new AppError(404, 'Product not found');
     return product;
@@ -40,6 +70,7 @@ export class ShopProductService {
 
   /** Admin: create product */
   async create(data: any) {
+    await this.ensureTable();
     return this.prisma.shop_products.create({
       data: {
         name: data.name,
@@ -57,6 +88,7 @@ export class ShopProductService {
 
   /** Admin: update product */
   async update(id: number, data: any) {
+    await this.ensureTable();
     const existing = await this.prisma.shop_products.findUnique({ where: { id } });
     if (!existing) throw new AppError(404, 'Product not found');
 
@@ -76,6 +108,7 @@ export class ShopProductService {
 
   /** Admin: toggle active/inactive */
   async toggleStatus(id: number) {
+    await this.ensureTable();
     const existing = await this.prisma.shop_products.findUnique({ where: { id } });
     if (!existing) throw new AppError(404, 'Product not found');
     return this.prisma.shop_products.update({
@@ -86,6 +119,7 @@ export class ShopProductService {
 
   /** Admin: delete product */
   async delete(id: number) {
+    await this.ensureTable();
     const existing = await this.prisma.shop_products.findUnique({ where: { id } });
     if (!existing) throw new AppError(404, 'Product not found');
     await this.prisma.shop_products.delete({ where: { id } });
