@@ -13,6 +13,7 @@ export async function listOrders(req: Request, res: Response, next: NextFunction
     const filters = {
       search: (req.query.search as string) || undefined,
       status: (req.query.status as string) || undefined,
+      user_id: req.query.user_id ? Number(req.query.user_id) : undefined,
     };
     const { items, total } = await orderService.list(page, perPage, filters);
     const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
@@ -58,6 +59,20 @@ export async function deleteOrder(req: Request, res: Response, next: NextFunctio
     const id = parseIdParam(req.params.id);
     const result = await orderService.delete(id);
     return res.status(200).json(successResponse(200, result.message, null));
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Customer: get their own orders */
+export async function getMyOrders(req: Request, res: Response, next: NextFunction) {
+  try {
+    const customerId = (req as any).user?.id;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const perPage = Math.max(1, Number(req.query.per_page) || 10);
+    const { items, total } = await orderService.getMyOrders(customerId, page, perPage);
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
+    return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
   } catch (error) {
     next(error);
   }

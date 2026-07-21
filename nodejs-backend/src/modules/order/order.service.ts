@@ -3,7 +3,7 @@ import { AppError } from '../../shared/utils/appError';
 export class OrderService {
   constructor(private prisma: any) {}
 
-  async list(page = 1, perPage = 10, filters?: { search?: string; status?: string }) {
+  async list(page = 1, perPage = 10, filters?: { search?: string; status?: string; user_id?: number }) {
     const where: any = {};
 
     if (filters?.search) {
@@ -17,6 +17,10 @@ export class OrderService {
 
     if (filters?.status) {
       where.order_status = filters.status;
+    }
+
+    if (filters?.user_id) {
+      where.user_id = filters.user_id;
     }
 
     const [items, total] = await Promise.all([
@@ -70,5 +74,20 @@ export class OrderService {
     }
     await this.prisma.order.delete({ where: { id } });
     return { message: 'Order deleted successfully' };
+  }
+
+  /** Customer: get their own orders */
+  async getMyOrders(customerId: number, page = 1, perPage = 10) {
+    const where = { user_id: customerId };
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { id: 'desc' },
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+    return { items, total };
   }
 }

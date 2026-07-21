@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../../middleware/validate.middleware';
+import { optionalAuthMiddleware } from '../../middleware/optionalAuth.middleware';
 import { addToCartSchema, updateQtySchema, checkoutSchema } from './cart.schema';
 import {
   getCart,
@@ -18,6 +19,6 @@ router.post('/add', validate(addToCartSchema), addToCart);
 router.patch('/:id/qty', validate(updateQtySchema), updateCartQty);
 router.delete('/:id', removeCartItem);
 router.delete('/', clearCart);
-router.post('/checkout', validate(checkoutSchema), checkoutCart);
+router.post('/checkout', optionalAuthMiddleware, validate(checkoutSchema), checkoutCart);
 
 export default router;

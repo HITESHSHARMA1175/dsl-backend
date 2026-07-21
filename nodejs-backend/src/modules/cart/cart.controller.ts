@@ -75,7 +75,12 @@ export async function clearCart(req: Request, res: Response, next: NextFunction)
 export async function checkoutCart(req: Request, res: Response, next: NextFunction) {
   try {
     const sessionKey = resolveSession(req);
-    const order = await cartService.checkout(sessionKey, req.body);
+    // If a customer is logged in, link the order to their account
+    const billingData = {
+      ...req.body,
+      user_id: (req as any).user?.role === 'customer' ? (req as any).user?.id : (req.body.user_id || null),
+    };
+    const order = await cartService.checkout(sessionKey, billingData);
     return res.status(201).json(successResponse(201, 'Order placed successfully', order));
   } catch (error) {
     next(error);
