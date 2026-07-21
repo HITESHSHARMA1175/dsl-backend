@@ -127,10 +127,16 @@ export class SkinConditionService {
       hero_badge: condition.hero_badge,
       short_description: condition.description,
       long_description: condition.description1,
-      // Unresolved - see method doc comment above. Raw filenames are on
-      // condition.image1 / condition.image2 in the DB if needed for debugging.
-      hero_image: null,
-      card_image: null,
+      hero_image: condition.image1
+        ? (condition.image1.startsWith('http') || condition.image1.startsWith('/')
+          ? condition.image1
+          : `/uploads/${condition.image1}`)
+        : null,
+      card_image: condition.image2
+        ? (condition.image2.startsWith('http') || condition.image2.startsWith('/')
+          ? condition.image2
+          : `/uploads/${condition.image2}`)
+        : null,
       treatment_stats: condition.treatment_stats ?? null,
       card_title: condition.card_title,
       card_description: condition.card_description,
