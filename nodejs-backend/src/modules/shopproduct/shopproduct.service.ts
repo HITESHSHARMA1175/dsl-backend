@@ -33,10 +33,24 @@ export class ShopProductService {
   /** Public: list all active products ordered by sort_order */
   async listPublic() {
     await this.ensureTable();
-    return this.prisma.shop_products.findMany({
-      where: { is_active: 1 },
-      orderBy: [{ sort_order: 'asc' }, { id: 'desc' }],
-    });
+    return this.prisma.$queryRawUnsafe(`
+      SELECT
+        id,
+        name,
+        description,
+        price,
+        image,
+        category,
+        type,
+        shopify_url,
+        is_active,
+        sort_order,
+        created_at,
+        updated_at
+      FROM shop_products
+      WHERE CAST(is_active AS UNSIGNED) = 1
+      ORDER BY sort_order ASC, id DESC
+    `);
   }
 
   /** Admin: list all products (active + inactive) with pagination */
