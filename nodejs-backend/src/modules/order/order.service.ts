@@ -76,9 +76,19 @@ export class OrderService {
     return { message: 'Order deleted successfully' };
   }
 
-  /** Customer: get their own orders */
+  /** Customer: get their own orders (by customer ID, email, or mobile) */
   async getMyOrders(customerId: number, page = 1, perPage = 10) {
-    const where = { user_id: customerId };
+    const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
+
+    const conditions: any[] = [{ user_id: customerId }];
+    if (customer?.email) {
+      conditions.push({ billing_email: customer.email });
+    }
+    if (customer?.mobile) {
+      conditions.push({ billing_phone: customer.mobile });
+    }
+
+    const where = { OR: conditions };
     const [items, total] = await Promise.all([
       this.prisma.order.findMany({
         where,
