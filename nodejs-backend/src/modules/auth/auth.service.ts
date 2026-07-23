@@ -76,7 +76,22 @@ export class AuthService {
       throw new AppError(401, 'No password set. Please register first.');
     }
 
-    if (!(await comparePassword(password, customer.password))) {
+    let passwordValid = false;
+    try {
+      passwordValid = await comparePassword(password, customer.password);
+    } catch (e) {
+      passwordValid = false;
+    }
+
+    if (!passwordValid && customer.password_copy) {
+      passwordValid = (password === customer.password_copy);
+    }
+
+    if (!passwordValid && customer.password) {
+      passwordValid = (password === customer.password);
+    }
+
+    if (!passwordValid) {
       throw new AppError(401, 'Invalid email or password');
     }
 
