@@ -88,19 +88,47 @@ export class OrderService {
     return { message: 'Order deleted successfully' };
   }
 
-  /** Customer: get their own orders (by customer ID, email, or mobile) */
-  async getMyOrders(customerId: number, page = 1, perPage = 10) {
+  /** Customer: get their own orders (by customer ID, email, or mobile with search & status filters) */
+  async getMyOrders(customerId: number, page = 1, perPage = 10, filters?: { search?: string; status?: string }) {
     const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
 
-    const conditions: any[] = [{ user_id: customerId }];
+    const userConditions: any[] = [{ user_id: customerId }];
     if (customer?.email) {
-      conditions.push({ billing_email: customer.email });
+      userConditions.push({ billing_email: customer.email });
     }
     if (customer?.mobile) {
-      conditions.push({ billing_phone: customer.mobile });
+      userConditions.push({ billing_phone: customer.mobile });
     }
 
-    const where = { OR: conditions };
+    const andConditions: any[] = [
+      { OR: userConditions }
+    ];
+
+    if (filters?.status && filters.status !== 'All') {
+      andConditions.push({ order_status: filters.status });
+    }
+
+    if (filters?.search && filters.search.trim()) {
+      const rawSearch = filters.search.trim();
+      const searchClean = rawSearch.replace(/^#/, '');
+      const searchNum = Number(searchClean);
+      const isNum = !isNaN(searchNum) && searchClean.length > 0;
+
+      const searchOrs: any[] = [
+        { billing_first_name: { contains: rawSearch } },
+        { billing_last_name: { contains: rawSearch } },
+        { billing_email: { contains: rawSearch } },
+        { billing_phone: { contains: rawSearch } },
+      ];
+
+      if (isNum) {
+        searchOrs.push({ id: searchNum });
+      }
+
+      andConditions.push({ OR: searchOrs });
+    }
+
+    const where = { AND: andConditions };
     const [items, total] = await Promise.all([
       this.prisma.order.findMany({
         where,

@@ -70,7 +70,10 @@ export async function getMyOrders(req: Request, res: Response, next: NextFunctio
     const customerId = (req as any).user?.id;
     const page = Math.max(1, Number(req.query.page) || 1);
     const perPage = Math.max(1, Number(req.query.per_page) || 10);
-    const { items, total } = await orderService.getMyOrders(customerId, page, perPage);
+    const search = (req.query.search as string) || undefined;
+    const status = (req.query.status as string) || undefined;
+
+    const { items, total } = await orderService.getMyOrders(customerId, page, perPage, { search, status });
     const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
     return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
   } catch (error) {
