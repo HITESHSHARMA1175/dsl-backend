@@ -15,6 +15,7 @@ import {
   adminRefresh,
   customerLogin,
   customerRegister,
+  checkCustomer,
   forgotPassword,
   resetPassword,
   changePassword,
@@ -29,6 +30,7 @@ router.post('/admin/login', validate(adminLoginSchema), adminLogin);
 router.post('/admin/refresh', validate(refreshTokenSchema), adminRefresh);
 
 // ===== Customer =====
+router.post('/customer/check', checkCustomer);
 router.post('/customer/register', validate(customerRegisterSchema), customerRegister);
 router.post('/customer/login', validate(customerLoginSchema), customerLogin);
 router.post('/customer/refresh', validate(refreshTokenSchema), customerRefresh);

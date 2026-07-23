@@ -29,6 +29,38 @@ export async function customerLogin(req: Request, res: Response, next: NextFunct
   }
 }
 
+export async function checkCustomer(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { identifier } = req.body;
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: 'Email or mobile is required' });
+    }
+
+    const customer = await (prisma as any).customer.findFirst({
+      where: {
+        OR: [
+          { email: identifier.trim() },
+          { mobile: identifier.trim() }
+        ]
+      }
+    });
+
+    const isRegistered = !!(customer && customer.password);
+    const email = customer?.email || (identifier.includes('@') ? identifier.trim() : '');
+    const mobile = customer?.mobile || (!identifier.includes('@') ? identifier.trim() : '');
+
+    return res.status(200).json(successResponse(200, 'Success', {
+      exists: !!customer,
+      isRegistered,
+      email,
+      mobile,
+      firstName: customer?.first_name || ''
+    }));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function customerRegister(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await authService.customerRegister(req.body);
