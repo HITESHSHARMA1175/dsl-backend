@@ -11,11 +11,11 @@ export const customerLoginSchema = z.object({
 });
 
 export const customerRegisterSchema = z.object({
-  first_name: z.string().min(1),
-  last_name: z.string().optional(),
-  email: z.string().email(),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().optional().nullable().or(z.literal('')),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  mobile: z.string().optional(),
+  mobile: z.string().optional().nullable().or(z.literal('')),
 });
 
 export const forgotPasswordSchema = z.object({
