@@ -3,6 +3,16 @@ import { AppError } from '../../shared/utils/appError';
 export class OrderService {
   constructor(private prisma: any) {}
 
+  private formatOrder(order: any) {
+    if (!order) return order;
+    return {
+      ...order,
+      id: Number(order.id),
+      user_id: order.user_id ? Number(order.user_id) : null,
+      order_amount: order.order_amount !== null && order.order_amount !== undefined ? Number(order.order_amount) : 0,
+    };
+  }
+
   async list(page = 1, perPage = 10, filters?: { search?: string; status?: string; user_id?: number }) {
     const where: any = {};
 
@@ -33,7 +43,7 @@ export class OrderService {
       this.prisma.order.count({ where }),
     ]);
 
-    return { items, total };
+    return { items: (items as any[]).map(i => this.formatOrder(i)), total };
   }
 
   async getById(id: number) {
@@ -41,7 +51,7 @@ export class OrderService {
     if (!order) {
       throw new AppError(404, 'Order not found');
     }
-    return order;
+    return this.formatOrder(order);
   }
 
   async updateStatus(id: number, orderStatus: string) {
@@ -49,10 +59,11 @@ export class OrderService {
     if (!existing) {
       throw new AppError(404, 'Order not found');
     }
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id },
       data: { order_status: orderStatus },
     });
+    return this.formatOrder(updated);
   }
 
   async toggleStatus(id: number) {
@@ -61,10 +72,11 @@ export class OrderService {
       throw new AppError(404, 'Order not found');
     }
     const newStatus = record.status === 1 ? 0 : 1;
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id },
       data: { status: newStatus },
     });
+    return this.formatOrder(updated);
   }
 
   async delete(id: number) {
@@ -98,6 +110,6 @@ export class OrderService {
       }),
       this.prisma.order.count({ where }),
     ]);
-    return { items, total };
+    return { items: (items as any[]).map(i => this.formatOrder(i)), total };
   }
 }

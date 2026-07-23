@@ -53,7 +53,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name },
+      user: { id: Number(user.id), email: user.email, first_name: user.first_name, last_name: user.last_name },
     };
   }
 
@@ -88,7 +88,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       customer: {
-        id: customer.id,
+        id: Number(customer.id),
         email: customer.email,
         first_name: customer.first_name,
         last_name: customer.last_name,
@@ -145,7 +145,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       customer: {
-        id: customer.id,
+        id: Number(customer.id),
         email: customer.email,
         first_name: customer.first_name,
         last_name: customer.last_name,
