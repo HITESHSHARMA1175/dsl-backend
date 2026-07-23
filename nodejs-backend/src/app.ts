@@ -110,6 +110,7 @@ app.use('/api/v1/treatments', treatmentRoutes);
 app.use('/api/v1/professionals', professionalRoutes);
 app.use('/api/v1/slots', slotRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/customer', customerRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/clinics', clinicRoutes);
