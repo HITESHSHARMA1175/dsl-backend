@@ -4,6 +4,15 @@ import { AppError } from '../../shared/utils/appError';
 export class CustomerService {
   constructor(private prisma: PrismaClient) {}
 
+  private formatCustomer(customer: any) {
+    if (!customer) return customer;
+    const { password, ...rest } = customer;
+    return {
+      ...rest,
+      id: Number(customer.id),
+    };
+  }
+
   async getProfile(customerId: number) {
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
@@ -11,7 +20,7 @@ export class CustomerService {
     if (!customer) {
       throw new AppError(404, 'Customer not found');
     }
-    return customer;
+    return this.formatCustomer(customer);
   }
 
   async updateProfile(customerId: number, data: {
@@ -35,16 +44,18 @@ export class CustomerService {
       }
     }
 
-    return this.prisma.customer.update({
+    const updated = await this.prisma.customer.update({
       where: { id: customerId },
       data,
     });
+    return this.formatCustomer(updated);
   }
 
   async listAddresses(customerId: number) {
-    return this.prisma.customerAddress.findMany({
+    const addresses = await this.prisma.customerAddress.findMany({
       where: { user_id: String(customerId) },
     });
+    return addresses.map((a: any) => ({ ...a, id: Number(a.id) }));
   }
 
   async createAddress(customerId: number, data: {
@@ -55,12 +66,13 @@ export class CustomerService {
     address: string;
     pincode?: string;
   }) {
-    return this.prisma.customerAddress.create({
+    const created = await this.prisma.customerAddress.create({
       data: {
         user_id: String(customerId),
         ...data,
       },
     });
+    return { ...created, id: Number(created.id) };
   }
 
   async updateAddress(customerId: number, addressId: number, data: {
@@ -79,10 +91,11 @@ export class CustomerService {
       throw new AppError(404, 'Address not found');
     }
 
-    return this.prisma.customerAddress.update({
+    const updated = await this.prisma.customerAddress.update({
       where: { id: addressId },
       data,
     });
+    return { ...updated, id: Number(updated.id) };
   }
 
   async getBookingHistory(customerId: number) {
@@ -141,6 +154,6 @@ export class CustomerService {
       }),
       (this.prisma as any).customer.count({ where }),
     ]);
-    return { items, total };
+    return { items: (items as any[]).map((i: any) => this.formatCustomer(i)), total };
   }
 }
