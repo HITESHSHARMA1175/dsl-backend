@@ -319,11 +319,13 @@ export class ContentService {
   }
 
   async publicBlogBySlug(slug: string) {
-    const blog = await (this.prisma as any).blog.findFirst({ where: { blog_slug: slug } });
+    let blog = await (this.prisma as any).blog.findFirst({ where: { blog_slug: slug } });
     if (blog) return blog;
-    // Fallback to numeric id lookup
-    const asId = Number(slug);
-    if (!Number.isNaN(asId)) {
+    
+    // Fallback to numeric id lookup (e.g. if slug is "81" or "blog-81")
+    const numericStr = String(slug || '').replace(/^blog-/, '');
+    const asId = Number(numericStr);
+    if (!Number.isNaN(asId) && asId > 0) {
       return (this.prisma as any).blog.findUnique({ where: { id: asId } });
     }
     return null;

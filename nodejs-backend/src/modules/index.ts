@@ -56,3 +56,5 @@ export { default as propertyRoutes } from './property/property.routes';
 export { default as agentRoutes } from './agent/agent.routes';
 export { default as storefrontRoutes } from './storefront/storefront.routes';
 export { default as shopProductRoutes } from './shopproduct/shopproduct.routes';
+export { default as offerRoutes } from './offer/offer.routes';
+
