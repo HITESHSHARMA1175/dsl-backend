@@ -26,4 +26,6 @@ export const checkoutSchema = z.object({
   payment_method: z.string().optional(),
   user_id: z.number().int().optional(),
   session: z.string().optional(),
+  appointment_date: z.string().optional(),
+  appointment_slot: z.string().optional(),
 });

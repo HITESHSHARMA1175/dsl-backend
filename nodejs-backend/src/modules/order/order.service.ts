@@ -5,11 +5,25 @@ export class OrderService {
 
   private formatOrder(order: any) {
     if (!order) return order;
+
+    let cartDetails = order.cart_details;
+    if (typeof cartDetails === 'string') {
+      try { cartDetails = JSON.parse(cartDetails); } catch { cartDetails = []; }
+    }
+
+    const items = Array.isArray(cartDetails) ? cartDetails : (cartDetails?.items || []);
+    const appointment_date = cartDetails?.appointment_date || null;
+    const appointment_slot = cartDetails?.appointment_slot || null;
+
     return {
       ...order,
       id: Number(order.id),
       user_id: order.user_id ? Number(order.user_id) : null,
       order_amount: order.order_amount !== null && order.order_amount !== undefined ? Number(order.order_amount) : 0,
+      cart_details: cartDetails,
+      items,
+      appointment_date,
+      appointment_slot,
     };
   }
 

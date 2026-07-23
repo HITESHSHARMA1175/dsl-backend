@@ -98,7 +98,11 @@ export class CartService {
         billing_country: billing.country || null,
         order_amount: Math.round(total),
         payment_method: billing.payment_method || 'cod',
-        cart_details: items,
+        cart_details: {
+          items,
+          appointment_date: billing.appointment_date || null,
+          appointment_slot: billing.appointment_slot || null,
+        },
         order_status: 'Pending',
         status: 1,
       },
