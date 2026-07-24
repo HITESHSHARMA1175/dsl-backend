@@ -148,11 +148,25 @@ export class SlotService {
   async toggleSlot(id: string): Promise<ClinicSlotItem> {
     await this.ensureTable();
     try {
-      const rows = await this.prisma.$queryRawUnsafe(`SELECT * FROM clinic_slots WHERE slot_key = ? OR id = ?`, id, id);
-      const row = (rows as any[])?.[0];
+      let rows: any[] = [];
+      try {
+        rows = (await this.prisma.$queryRawUnsafe(`SELECT * FROM clinic_slots WHERE slot_key = ?`, id)) as any[];
+      } catch {
+        rows = [];
+      }
+
+      if ((!rows || rows.length === 0) && /^\d+$/.test(id)) {
+        try {
+          rows = (await this.prisma.$queryRawUnsafe(`SELECT * FROM clinic_slots WHERE id = ?`, Number(id))) as any[];
+        } catch {
+          rows = [];
+        }
+      }
+
+      const row = rows?.[0];
       if (row) {
         const newActive = Number(row.is_active) === 1 ? 0 : 1;
-        await this.prisma.$executeRawUnsafe(`UPDATE clinic_slots SET is_active = ? WHERE slot_key = ? OR id = ?`, newActive, id, id);
+        await this.prisma.$executeRawUnsafe(`UPDATE clinic_slots SET is_active = ? WHERE id = ?`, newActive, row.id);
         
         const updatedItem: ClinicSlotItem = {
           id: String(row.slot_key || row.id),
@@ -161,9 +175,8 @@ export class SlotService {
           sort_order: Number(row.sort_order ?? 0)
         };
 
-        // Sync JSON
         const jsonList = this.ensureJsonFile();
-        const foundIndex = jsonList.findIndex(s => s.id === id);
+        const foundIndex = jsonList.findIndex(s => String(s.id) === String(id));
         if (foundIndex !== -1) {
           jsonList[foundIndex].active = newActive === 1;
           this.saveJsonFile(jsonList);
@@ -172,11 +185,11 @@ export class SlotService {
         return updatedItem;
       }
     } catch (e) {
-      // fallback
+      console.error('Error toggling slot in DB:', e);
     }
 
     const jsonList = this.ensureJsonFile();
-    const target = jsonList.find(s => s.id === id);
+    const target = jsonList.find(s => String(s.id) === String(id));
     if (!target) throw new AppError(404, 'Slot not found');
     target.active = !target.active;
     this.saveJsonFile(jsonList);
@@ -187,13 +200,16 @@ export class SlotService {
   async deleteSlot(id: string): Promise<{ message: string }> {
     await this.ensureTable();
     try {
-      await this.prisma.$executeRawUnsafe(`DELETE FROM clinic_slots WHERE slot_key = ? OR id = ?`, id, id);
+      await this.prisma.$executeRawUnsafe(`DELETE FROM clinic_slots WHERE slot_key = ?`, id);
+      if (/^\d+$/.test(id)) {
+        await this.prisma.$executeRawUnsafe(`DELETE FROM clinic_slots WHERE id = ?`, Number(id));
+      }
     } catch (e) {
-      // fallback
+      console.error('Error deleting slot in DB:', e);
     }
 
     const jsonList = this.ensureJsonFile();
-    const updated = jsonList.filter(s => s.id !== id);
+    const updated = jsonList.filter(s => String(s.id) !== String(id));
     this.saveJsonFile(updated);
 
     return { message: 'Slot deleted successfully' };
