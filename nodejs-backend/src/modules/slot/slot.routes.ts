@@ -1,9 +1,19 @@
 import { Router } from 'express';
-import { getAvailableSlots } from './slot.controller';
+import { 
+  listSlots, 
+  createSlot, 
+  toggleSlot, 
+  deleteSlot, 
+  bulkUpdateSlots 
+} from './slot.controller';
 
 const router = Router();
 
-// Public route — no auth required
-router.get('/', getAvailableSlots);
+// Public routes for slot management
+router.get('/', listSlots);
+router.post('/', createSlot);
+router.put('/bulk', bulkUpdateSlots);
+router.put('/:id/toggle', toggleSlot);
+router.delete('/:id', deleteSlot);
 
 export default router;
