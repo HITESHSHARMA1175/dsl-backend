@@ -36,25 +36,54 @@ export async function checkCustomer(req: Request, res: Response, next: NextFunct
       return res.status(400).json({ success: false, message: 'Email or mobile is required' });
     }
 
-    const customer = await (prisma as any).customer.findFirst({
+    const cleanIdentifier = identifier.trim();
+
+    // 1. First check customer table
+    let customer = await (prisma as any).customer.findFirst({
       where: {
         OR: [
-          { email: identifier.trim() },
-          { mobile: identifier.trim() }
+          { email: cleanIdentifier },
+          { mobile: cleanIdentifier }
         ]
       }
     });
 
-    const isRegistered = !!(customer && customer.password);
-    const email = customer?.email || (identifier.includes('@') ? identifier.trim() : '');
-    const mobile = customer?.mobile || (!identifier.includes('@') ? identifier.trim() : '');
+    let exists = !!customer;
+    let isRegistered = !!(customer && customer.password);
+    let email = customer?.email || (cleanIdentifier.includes('@') ? cleanIdentifier : '');
+    let mobile = customer?.mobile || (!cleanIdentifier.includes('@') ? cleanIdentifier : '');
+    let firstName = customer?.first_name || '';
+    let lastName = customer?.last_name || '';
+
+    // 2. If not found in customer table, search order table for guest checkout details
+    if (!customer) {
+      const order = await (prisma as any).order.findFirst({
+        where: {
+          OR: [
+            { billing_email: cleanIdentifier },
+            { billing_phone: cleanIdentifier }
+          ]
+        },
+        orderBy: { id: 'desc' }
+      });
+
+      if (order) {
+        exists = true;
+        isRegistered = false;
+        email = order.billing_email || email;
+        mobile = order.billing_phone || mobile;
+        firstName = order.billing_first_name || '';
+        lastName = order.billing_last_name || '';
+      }
+    }
 
     return res.status(200).json(successResponse(200, 'Success', {
-      exists: !!customer,
+      exists,
       isRegistered,
       email,
       mobile,
-      firstName: customer?.first_name || ''
+      firstName,
+      lastName
     }));
   } catch (error) {
     next(error);

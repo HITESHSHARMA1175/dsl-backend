@@ -19,6 +19,21 @@ const DEFAULT_SLOTS: ClinicSlotItem[] = [
   { id: 's6', time: '07:00 PM - 08:00 PM', active: true },
 ];
 
+function parseStartTimeToMinutes(timeStr: string): number {
+  if (!timeStr) return 0;
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return 0;
+
+  let hour = parseInt(match[1], 10);
+  const min = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+
+  if (period === 'PM' && hour < 12) hour += 12;
+  if (period === 'AM' && hour === 12) hour = 0;
+
+  return hour * 60 + min;
+}
+
 export class SlotService {
   private ensureTablePromise?: Promise<void>;
   private jsonFilePath = path.join(process.cwd(), 'uploads', 'clinic_slots.json');
@@ -90,25 +105,29 @@ export class SlotService {
     }
   }
 
-  /** GET ALL SLOTS */
+  /** GET ALL SLOTS SORTED BY TIME */
   async listSlots(): Promise<ClinicSlotItem[]> {
     await this.ensureTable();
+    let slots: ClinicSlotItem[] = [];
     try {
       const rows = await this.prisma.$queryRawUnsafe(`
-        SELECT * FROM clinic_slots ORDER BY sort_order ASC, id ASC
+        SELECT * FROM clinic_slots ORDER BY id ASC
       `);
       if (Array.isArray(rows) && rows.length > 0) {
-        return (rows as any[]).map(r => ({
+        slots = (rows as any[]).map(r => ({
           id: String(r.slot_key || r.id),
           time: String(r.time_range),
           active: Number(r.is_active) === 1,
           sort_order: Number(r.sort_order ?? 0)
         }));
+      } else {
+        slots = this.ensureJsonFile();
       }
     } catch (e) {
-      // fallback to JSON
+      slots = this.ensureJsonFile();
     }
-    return this.ensureJsonFile();
+
+    return slots.sort((a, b) => parseStartTimeToMinutes(a.time) - parseStartTimeToMinutes(b.time));
   }
 
   /** CREATE NEW SLOT */
