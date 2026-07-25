@@ -59,3 +59,33 @@ export async function addAppointmentLogs(req: Request, res: Response, next: Next
     next(error);
   }
 }
+
+export async function updateAppointmentStatus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await appointmentService.updateStatus(id, req.body.app_status);
+    return res.status(200).json(successResponse(200, 'Appointment status updated successfully', result));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rescheduleAppointment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await appointmentService.reschedule(id, req.body);
+    return res.status(200).json(successResponse(200, 'Appointment rescheduled successfully', result));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteAppointment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await appointmentService.delete(id);
+    return res.status(200).json(successResponse(200, result.message, null));
+  } catch (error) {
+    next(error);
+  }
+}

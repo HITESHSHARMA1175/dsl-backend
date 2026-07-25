@@ -26,7 +26,11 @@ export class CartService {
   async add(sessionKey: string, ipAddress: string, data: any) {
     // If product already in cart for this session, increment qty
     const existing = await this.prisma.guest_carts.findFirst({
-      where: { session: sessionKey, product_id: data.product_id },
+      where: {
+        session: sessionKey,
+        product_id: data.product_id,
+        type: data.type || null,
+      },
     });
 
     if (existing) {

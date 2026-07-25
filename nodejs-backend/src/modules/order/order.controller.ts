@@ -44,6 +44,16 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
   }
 }
 
+export async function updateOrderAppointment(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await orderService.updateAppointment(id, req.body);
+    return res.status(200).json(successResponse(200, 'Order appointment updated successfully', result));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function toggleOrderStatus(req: Request, res: Response, next: NextFunction) {
   try {
     const id = parseIdParam(req.params.id);

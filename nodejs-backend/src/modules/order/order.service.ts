@@ -80,6 +80,34 @@ export class OrderService {
     return this.formatOrder(updated);
   }
 
+  async updateAppointment(id: number, data: { appointment_date: string; appointment_slot: string }) {
+    const existing = await this.prisma.order.findUnique({ where: { id } });
+    if (!existing) {
+      throw new AppError(404, 'Order not found');
+    }
+
+    let cartDetails = existing.cart_details;
+    if (typeof cartDetails === 'string') {
+      try { cartDetails = JSON.parse(cartDetails); } catch { cartDetails = {}; }
+    }
+    if (!cartDetails || Array.isArray(cartDetails)) {
+      cartDetails = { items: Array.isArray(cartDetails) ? cartDetails : [] };
+    }
+
+    const updated = await this.prisma.order.update({
+      where: { id },
+      data: {
+        cart_details: {
+          ...cartDetails,
+          appointment_date: data.appointment_date,
+          appointment_slot: data.appointment_slot,
+        },
+        order_status: 'Confirmed',
+      },
+    });
+    return this.formatOrder(updated);
+  }
+
   async toggleStatus(id: number) {
     const record = await this.prisma.order.findUnique({ where: { id } });
     if (!record) {

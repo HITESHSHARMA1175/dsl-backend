@@ -115,4 +115,45 @@ export class AppointmentService {
       created_at: log.created_at,
     };
   }
+
+  async updateStatus(id: number, appStatus: string) {
+    const appointment = await this.prisma.appointments.findUnique({ where: { id } });
+    if (!appointment) {
+      throw new AppError(404, 'Appointment not found');
+    }
+
+    return this.prisma.appointments.update({
+      where: { id },
+      data: { app_status: appStatus },
+    });
+  }
+
+  async reschedule(id: number, data: { app_date: string; app_time_start?: string; app_time_end?: string }) {
+    const appointment = await this.prisma.appointments.findUnique({ where: { id } });
+    if (!appointment) {
+      throw new AppError(404, 'Appointment not found');
+    }
+
+    return this.prisma.appointments.update({
+      where: { id },
+      data: {
+        app_date: data.app_date,
+        app_time_start: data.app_time_start || null,
+        app_time_end: data.app_time_end || null,
+        app_status: 'Confirmed',
+      },
+    });
+  }
+
+  async delete(id: number) {
+    const appointment = await this.prisma.appointments.findUnique({ where: { id } });
+    if (!appointment) {
+      throw new AppError(404, 'Appointment not found');
+    }
+
+    await this.prisma.appointment_journeys.deleteMany({ where: { appointment: id } });
+    await this.prisma.appointment_logs.deleteMany({ where: { appointment: id } });
+    await this.prisma.appointments.delete({ where: { id } });
+    return { message: 'Appointment deleted successfully' };
+  }
 }

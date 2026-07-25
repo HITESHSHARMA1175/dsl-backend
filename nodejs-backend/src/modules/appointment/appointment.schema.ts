@@ -27,3 +27,13 @@ export const addNotesSchema = z.object({
 export const addLogsSchema = z.object({
   appointment_action: z.string().min(1, 'appointment_action is required'),
 });
+
+export const updateAppointmentStatusSchema = z.object({
+  app_status: z.string().min(1, 'Appointment status is required'),
+});
+
+export const rescheduleAppointmentSchema = z.object({
+  app_date: z.string().min(1, 'app_date is required'),
+  app_time_start: z.string().optional(),
+  app_time_end: z.string().optional(),
+});
