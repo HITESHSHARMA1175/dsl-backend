@@ -137,13 +137,31 @@ export class CustomerService {
 
   async getBuyerList(page = 1, perPage = 10, search?: string) {
     const where: any = {};
-    if (search) {
-      where.OR = [
-        { first_name: { contains: search } },
-        { last_name: { contains: search } },
-        { email: { contains: search } },
-        { mobile: { contains: search } },
+    if (search && search.trim()) {
+      const term = search.trim();
+      const orConditions: any[] = [
+        { first_name: { contains: term } },
+        { last_name: { contains: term } },
+        { email: { contains: term } },
+        { mobile: { contains: term } },
       ];
+
+      const numId = Number(term);
+      if (!isNaN(numId) && Number.isInteger(numId) && numId > 0) {
+        orConditions.push({ id: BigInt(numId) });
+      }
+
+      const words = term.split(/\s+/).filter(Boolean);
+      if (words.length > 1) {
+        words.forEach(w => {
+          orConditions.push(
+            { first_name: { contains: w } },
+            { last_name: { contains: w } }
+          );
+        });
+      }
+
+      where.OR = orConditions;
     }
     const [items, total] = await Promise.all([
       (this.prisma as any).customer.findMany({

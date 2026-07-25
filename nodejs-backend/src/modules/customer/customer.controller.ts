@@ -101,7 +101,7 @@ export async function getBuyerList(req: Request, res: Response, next: NextFuncti
   try {
     const page = Math.max(1, Number(req.query.page) || 1);
     const perPage = Math.max(1, Number(req.query.per_page) || 10);
-    const search = (req.query.search as string) || undefined;
+    const search = ((req.query.search || req.query.q || req.query.keyword) as string)?.trim() || undefined;
     const { items, total } = await customerService.getBuyerList(page, perPage, search);
     const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
     return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
