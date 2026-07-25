@@ -22,14 +22,14 @@ export class AuthService {
     }
 
     // Check if user is admin or sub-admin (enum values are 'Yes'/'No' after Prisma mapping, or check raw value)
-    const isAdmin = user.is_admin === 1 || user.is_admin === '1' || user.is_admin === true;
+    const isAdmin = user.is_admin === 'Yes' || user.is_admin === 1 || user.is_admin === '1' || user.is_admin === true;
     const isSubAdmin = user.is_sub_admin === 'Yes' || user.is_sub_admin === 1 || user.is_sub_admin === '1' || user.is_sub_admin === true;
 
     if (!isAdmin && !isSubAdmin) {
       throw new AppError(401, 'Invalid credentials');
     }
 
-    // Try bcrypt compare first, fallback to password_copy (plaintext) for legacy accounts
+    // Try bcrypt compare first, fallback to direct match / password_copy for legacy accounts
     let passwordValid = false;
     try {
       passwordValid = await comparePassword(password, user.password);
@@ -37,7 +37,12 @@ export class AuthService {
       passwordValid = false;
     }
 
-    // Fallback: check password_copy field (legacy plaintext passwords)
+    // Fallback 1: Direct plaintext password comparison
+    if (!passwordValid && user.password) {
+      passwordValid = (password === user.password);
+    }
+
+    // Fallback 2: check password_copy field (legacy plaintext passwords)
     if (!passwordValid && user.password_copy) {
       passwordValid = (password === user.password_copy);
     }
