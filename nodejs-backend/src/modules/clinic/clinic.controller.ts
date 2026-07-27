@@ -6,6 +6,25 @@ import { parseIdParam } from '../../shared/utils/parseId.util';
 
 const clinicService = new ClinicService(prisma);
 
+export async function getPublicClinics(req: Request, res: Response, next: NextFunction) {
+  try {
+    const clinics = await clinicService.getPublicClinics();
+    return res.status(200).json(successResponse(200, 'Success', clinics));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPublicClinicBySlugOrId(req: Request, res: Response, NextFunction: NextFunction) {
+  try {
+    const slugOrId = Array.isArray(req.params.slugOrId) ? req.params.slugOrId[0] : (req.params.slugOrId as string);
+    const clinic = await clinicService.getPublicClinicBySlugOrId(slugOrId);
+    return res.status(200).json(successResponse(200, 'Success', clinic));
+  } catch (error) {
+    NextFunction(error);
+  }
+}
+
 export async function listClinics(req: Request, res: Response, next: NextFunction) {
   try {
     const clinics = await clinicService.list();
@@ -15,10 +34,20 @@ export async function listClinics(req: Request, res: Response, next: NextFunctio
   }
 }
 
+export async function getClinicById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const clinic = await clinicService.getById(id);
+    return res.status(200).json(successResponse(200, 'Success', clinic));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function createClinic(req: Request, res: Response, next: NextFunction) {
   try {
     const clinic = await clinicService.create(req.body);
-    return res.status(201).json(successResponse(201, 'Clinic created', clinic));
+    return res.status(201).json(successResponse(201, 'Clinic created successfully', clinic));
   } catch (error) {
     next(error);
   }
@@ -28,7 +57,7 @@ export async function updateClinic(req: Request, res: Response, next: NextFuncti
   try {
     const id = parseIdParam(req.params.id);
     const clinic = await clinicService.update(id, req.body);
-    return res.status(200).json(successResponse(200, 'Clinic updated', clinic));
+    return res.status(200).json(successResponse(200, 'Clinic updated successfully', clinic));
   } catch (error) {
     next(error);
   }
@@ -48,7 +77,7 @@ export async function toggleClinicStatus(req: Request, res: Response, next: Next
   try {
     const id = parseIdParam(req.params.id);
     const clinic = await clinicService.toggleStatus(id);
-    return res.status(200).json(successResponse(200, 'Status toggled', clinic));
+    return res.status(200).json(successResponse(200, 'Clinic status updated', clinic));
   } catch (error) {
     next(error);
   }
