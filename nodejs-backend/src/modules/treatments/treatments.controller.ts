@@ -13,6 +13,15 @@ export async function getTreatmentsNavbar(req: Request, res: Response, next: Nex
   }
 }
 
+export async function updateTreatmentsNavbar(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await treatmentsService.updateNavbar(req.body.menu);
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function getTreatmentBySlug(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await treatmentsService.getBySlug(String(req.params.slug));

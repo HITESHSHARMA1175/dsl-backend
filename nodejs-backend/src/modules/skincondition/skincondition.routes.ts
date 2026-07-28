@@ -2,10 +2,12 @@ import { Router } from 'express';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { adminGuard } from '../../middleware/adminGuard.middleware';
 import { validate } from '../../middleware/validate.middleware';
-import { createConditionSchema, updateConditionSchema, sortingSchema, createSubConditionSchema, updateSubConditionSchema } from './skincondition.schema';
+import { createConditionSchema, updateConditionSchema, sortingSchema, createSubConditionSchema, updateSubConditionSchema, updateNavbarSchema } from './skincondition.schema';
 import {
   publicConditions,
   getConditionBySlug,
+  getSkinConditionsNavbar,
+  updateSkinConditionsNavbar,
   listConditions,
   createCondition,
   updateCondition,
@@ -22,6 +24,8 @@ const router = Router();
 
 // Public - literal paths first so they aren't swallowed by admin routes or the /:slug wildcard below.
 router.get('/public', publicConditions);
+router.get('/navbar', getSkinConditionsNavbar);
+router.put('/navbar', authMiddleware, adminGuard, validate(updateNavbarSchema), updateSkinConditionsNavbar);
 
 // Main conditions
 // GET / is intentionally not auth-gated - listConditions itself checks for a

@@ -19,11 +19,22 @@ const DETAIL_SELECT = {
   sorting_order: true,
   meta_title: true,
   meta_description: true,
+  meta_keywords: true,
   description: true,
   description1: true,
+  description3: true,
   icon: true,
+  icon_large: true,
   image1: true,
   image2: true,
+  image3: true,
+  image4: true,
+  category_name_cn: true,
+  description_cn: true,
+  description3_cn: true,
+  category_name_ar: true,
+  description_ar: true,
+  description3_ar: true,
   hero_badge: true,
   card_title: true,
   card_description: true,
@@ -37,7 +48,186 @@ const DETAIL_SELECT = {
 
 const ICON_BASE_URL = 'https://cdn.diamondskinlondon.com/icons/';
 
+interface NavItem {
+  id?: number;
+  name: string;
+  slug?: string;
+  path?: string;
+}
+
+interface NavColumn {
+  id?: number;
+  title: string;
+  subItems: NavItem[];
+}
+
+interface NavGroup {
+  id?: number;
+  name: string;
+  isMultiColumn: boolean;
+  subItems?: NavItem[];
+  columns?: NavColumn[];
+}
+
 export class SkinConditionService {
+  private slugify(name: string) {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+
+  private toNavItem(condition: any): NavItem {
+    const slug = condition.category_slug || this.slugify(condition.category_name || 'condition');
+    return {
+      id: Number(condition.id),
+      name: condition.category_name || slug,
+      slug,
+      path: `/conditions/${slug}`,
+    };
+  }
+
+  private getSlugFromItem(item: { name: string; slug?: string; path?: string }) {
+    const pathSlug = item.path?.trim().split('/').filter(Boolean).pop();
+    return this.slugify(item.slug || pathSlug || item.name);
+  }
+
+  private async upsertCondition(input: { id?: number; name: string; parentId: number; order: number }) {
+    const slug = this.slugify(input.name);
+    let existing: any = null;
+
+    if (input.id) {
+      existing = await (prisma as any).propertyCategory.findFirst({
+        where: { id: input.id, is_condition: 'Yes' },
+        select: PUBLIC_SELECT,
+      });
+    }
+
+    if (!existing) {
+      existing = await (prisma as any).propertyCategory.findFirst({
+        where: { category_slug: slug, parent_id: input.parentId, is_condition: 'Yes' },
+        select: PUBLIC_SELECT,
+      });
+    }
+
+    const data = {
+      is_condition: 'Yes',
+      is_top: 'No',
+      parent_id: input.parentId,
+      category_name: input.name,
+      category_slug: slug,
+      sorting_order: input.order,
+      status: 1,
+    };
+
+    if (existing) {
+      await (prisma as any).propertyCategory.updateMany({
+        where: { id: Number(existing.id) },
+        data,
+      });
+      return { ...existing, ...data, id: Number(existing.id) };
+    }
+
+    return (prisma as any).propertyCategory.create({ data, select: PUBLIC_SELECT });
+  }
+
+  async getNavbar(): Promise<NavGroup[]> {
+    const topLevel = await (prisma as any).propertyCategory.findMany({
+      where: { is_condition: 'Yes', parent_id: 0, status: 1 },
+      select: PUBLIC_SELECT,
+      orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+    });
+
+    return Promise.all(
+      topLevel.map(async (condition: any) => {
+        const conditionId = Number(condition.id);
+        const subConditions = await (prisma as any).propertyCategory.findMany({
+          where: { is_condition: 'Yes', parent_id: conditionId, status: 1 },
+          select: PUBLIC_SELECT,
+          orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
+        });
+
+        return {
+          id: conditionId,
+          name: condition.category_name || condition.category_slug || `Condition ${conditionId}`,
+          slug: condition.category_slug,
+          path: `/conditions/${condition.category_slug}`,
+          isMultiColumn: false,
+          subItems: subConditions.map((item: any) => this.toNavItem(item)),
+        };
+      })
+    );
+  }
+
+  async updateNavbar(menu: NavGroup[]) {
+    const activeTopIds = new Set<number>();
+    const activeSubIds = new Set<number>();
+
+    for (const [groupIndex, group] of menu.entries()) {
+      const top = await this.upsertCondition({
+        id: group.id && group.id > 0 ? group.id : undefined,
+        name: group.name,
+        parentId: 0,
+        order: groupIndex + 1,
+      });
+      const topId = Number(top.id);
+      activeTopIds.add(topId);
+
+      const subItems = group.isMultiColumn
+        ? (group.columns ?? []).flatMap((column) => column.subItems ?? [])
+        : group.subItems ?? [];
+
+      for (const [itemIndex, item] of subItems.entries()) {
+        const slug = this.getSlugFromItem(item);
+        const sub = await this.upsertCondition({
+          id: item.id && item.id > 0 ? item.id : undefined,
+          name: item.name,
+          parentId: topId,
+          order: itemIndex + 1,
+        });
+        await (prisma as any).propertyCategory.updateMany({
+          where: { id: Number(sub.id) },
+          data: { category_slug: slug },
+        });
+        activeSubIds.add(Number(sub.id));
+      }
+    }
+
+    const currentTopLevel = await (prisma as any).propertyCategory.findMany({
+      where: { is_condition: 'Yes', parent_id: 0, status: 1 },
+      select: { id: true },
+    });
+    const removedTopIds = currentTopLevel.map((c: any) => Number(c.id)).filter((id: number) => !activeTopIds.has(id));
+    if (removedTopIds.length > 0) {
+      await (prisma as any).propertyCategory.updateMany({
+        where: { id: { in: removedTopIds } },
+        data: { status: 0 },
+      });
+      await (prisma as any).propertyCategory.updateMany({
+        where: { parent_id: { in: removedTopIds }, is_condition: 'Yes' },
+        data: { status: 0 },
+      });
+    }
+
+    const touchedTopIds = Array.from(activeTopIds);
+    if (touchedTopIds.length > 0) {
+      const currentSubConditions = await (prisma as any).propertyCategory.findMany({
+        where: { is_condition: 'Yes', parent_id: { in: touchedTopIds }, status: 1 },
+        select: { id: true },
+      });
+      const removedSubIds = currentSubConditions.map((c: any) => Number(c.id)).filter((id: number) => !activeSubIds.has(id));
+      if (removedSubIds.length > 0) {
+        await (prisma as any).propertyCategory.updateMany({
+          where: { id: { in: removedSubIds } },
+          data: { status: 0 },
+        });
+      }
+    }
+
+    return this.getNavbar();
+  }
+
   // Main conditions (is_condition = 1, parent_id = 0)
   async list() {
     return (prisma as any).propertyCategory.findMany({
@@ -122,11 +312,20 @@ export class SkinConditionService {
       parent_id: condition.parent_id,
       sorting_order: condition.sorting_order,
       icon: condition.icon ? `${ICON_BASE_URL}${condition.icon}` : null,
+      icon_large: condition.icon_large,
       meta_title: condition.meta_title,
       meta_description: condition.meta_description,
+      meta_keywords: condition.meta_keywords,
       hero_badge: condition.hero_badge,
       short_description: condition.description,
       long_description: condition.description1,
+      detailed_html: condition.description3,
+      category_name_cn: condition.category_name_cn,
+      description_cn: condition.description_cn,
+      description3_cn: condition.description3_cn,
+      category_name_ar: condition.category_name_ar,
+      description_ar: condition.description_ar,
+      description3_ar: condition.description3_ar,
       hero_image: condition.image1
         ? (condition.image1.startsWith('http') || condition.image1.startsWith('/')
           ? condition.image1
@@ -136,6 +335,16 @@ export class SkinConditionService {
         ? (condition.image2.startsWith('http') || condition.image2.startsWith('/')
           ? condition.image2
           : `/uploads/${condition.image2}`)
+        : null,
+      extra_image_1: condition.image3
+        ? (condition.image3.startsWith('http') || condition.image3.startsWith('/')
+          ? condition.image3
+          : `/uploads/${condition.image3}`)
+        : null,
+      extra_image_2: condition.image4
+        ? (condition.image4.startsWith('http') || condition.image4.startsWith('/')
+          ? condition.image4
+          : `/uploads/${condition.image4}`)
         : null,
       treatment_stats: condition.treatment_stats ?? null,
       card_title: condition.card_title,

@@ -1,5 +1,37 @@
 import { z } from 'zod';
 
+const treatmentStatsSchema = z.object({
+  treatment_time: z.string().optional(),
+  num_sessions: z.string().optional(),
+  results_duration: z.string().optional(),
+  session_frequency: z.string().optional(),
+});
+
+const pricingPackageSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  name: z.string().optional(),
+  sessions: z.string().optional(),
+  original_price: z.union([z.string(), z.number()]).optional(),
+  price: z.union([z.string(), z.number()]).optional(),
+  popular: z.boolean().optional(),
+});
+
+const beforeAfterSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  before_image: z.string().optional(),
+  after_image: z.string().optional(),
+  caption: z.string().optional(),
+});
+
+const testimonialSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  name: z.string().optional(),
+  rating: z.union([z.string(), z.number()]).optional(),
+  source: z.string().optional(),
+  date: z.string().optional(),
+  text: z.string().optional(),
+});
+
 // Every field here maps to a real column on PropertyCategory. Previously this
 // schema only allowed category_name/description/image ("image" isn't even a
 // real column) - everything else the admin UI has fields for (icons, image1-4,
@@ -9,6 +41,7 @@ export const createConditionSchema = z.object({
   category_name: z.string().min(1, 'Name is required'),
   category_slug: z.string().optional(),
   description: z.string().optional(),
+  description1: z.string().optional(),
   description3: z.string().optional(),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
@@ -21,8 +54,19 @@ export const createConditionSchema = z.object({
   image4: z.string().optional(),
   category_name_cn: z.string().optional(),
   description_cn: z.string().optional(),
+  description3_cn: z.string().optional(),
   category_name_ar: z.string().optional(),
   description_ar: z.string().optional(),
+  description3_ar: z.string().optional(),
+  hero_badge: z.string().optional(),
+  card_title: z.string().optional(),
+  card_description: z.string().optional(),
+  card_badge: z.string().optional(),
+  card_trust_label: z.string().optional(),
+  treatment_stats: treatmentStatsSchema.optional(),
+  pricing: z.array(pricingPackageSchema).optional(),
+  before_after: z.array(beforeAfterSchema).optional(),
+  testimonials: z.array(testimonialSchema).optional(),
   status: z.number().int().optional(),
 });
 
@@ -56,9 +100,36 @@ export const createSubConditionSchema = z.object({
   image4: z.string().optional(),
   category_name_cn: z.string().optional(),
   description_cn: z.string().optional(),
+  description3_cn: z.string().optional(),
   category_name_ar: z.string().optional(),
   description_ar: z.string().optional(),
+  description3_ar: z.string().optional(),
   status: z.number().int().optional(),
 });
 
 export const updateSubConditionSchema = createSubConditionSchema.partial();
+
+const navbarItemSchema = z.object({
+  id: z.number().int().optional(),
+  name: z.string().min(1, 'link name is required'),
+  slug: z.string().optional(),
+  path: z.string().optional(),
+});
+
+const navbarColumnSchema = z.object({
+  id: z.number().int().optional(),
+  title: z.string().min(1, 'column title is required'),
+  subItems: z.array(navbarItemSchema).optional().default([]),
+});
+
+const navbarGroupSchema = z.object({
+  id: z.number().int().optional(),
+  name: z.string().min(1, 'category name is required'),
+  isMultiColumn: z.boolean().optional().default(false),
+  subItems: z.array(navbarItemSchema).optional().default([]),
+  columns: z.array(navbarColumnSchema).optional().default([]),
+});
+
+export const updateNavbarSchema = z.object({
+  menu: z.array(navbarGroupSchema),
+});

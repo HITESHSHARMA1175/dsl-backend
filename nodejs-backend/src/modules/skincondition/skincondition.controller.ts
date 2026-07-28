@@ -36,6 +36,24 @@ export async function getConditionBySlug(req: Request, res: Response, next: Next
   }
 }
 
+export async function getSkinConditionsNavbar(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await skinConditionService.getNavbar();
+    return res.status(200).json(successResponse(200, 'Success', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateSkinConditionsNavbar(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await skinConditionService.updateNavbar(req.body.menu);
+    return res.status(200).json(successResponse(200, 'Skin condition navbar updated', data));
+  } catch (error) {
+    next(error);
+  }
+}
+
 /**
  * No login required. Logged-in admins get the full unfiltered list (same as
  * before, for the admin panel's manage screen); everyone else gets the same

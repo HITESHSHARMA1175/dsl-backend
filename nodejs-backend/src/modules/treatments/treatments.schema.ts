@@ -58,8 +58,8 @@ const resultsSchema = z.object({
 });
 
 const faqSchema = z.object({
-  question: z.string().min(1, 'question is required'),
-  answer: z.string().min(1, 'answer is required'),
+  question: z.string().optional(),
+  answer: z.string().optional(),
 });
 
 const pageDataSchema = z.object({
@@ -75,6 +75,7 @@ const pageDataSchema = z.object({
 export const createTreatmentContractSchema = z.object({
   name: z.string().min(1, 'name is required'),
   slug: z.string().min(1, 'slug is required'),
+  type: z.string().optional(),
   category_id: z.number().int().optional(),
   sub_category_id: z.number().int().optional(),
   pageData: pageDataSchema.optional(),
@@ -83,7 +84,33 @@ export const createTreatmentContractSchema = z.object({
 export const updateTreatmentContractSchema = z.object({
   name: z.string().optional(),
   slug: z.string().optional(),
+  type: z.string().optional(),
   category_id: z.number().int().nullable().optional(),
   sub_category_id: z.number().int().nullable().optional(),
   pageData: pageDataSchema.optional(),
+});
+
+const navbarItemSchema = z.object({
+  id: z.number().int().optional(),
+  name: z.string().min(1, 'link name is required'),
+  slug: z.string().optional(),
+  path: z.string().optional(),
+});
+
+const navbarColumnSchema = z.object({
+  id: z.number().int().optional(),
+  title: z.string().min(1, 'column title is required'),
+  subItems: z.array(navbarItemSchema).optional().default([]),
+});
+
+const navbarGroupSchema = z.object({
+  id: z.number().int().optional(),
+  name: z.string().min(1, 'category name is required'),
+  isMultiColumn: z.boolean().optional().default(false),
+  subItems: z.array(navbarItemSchema).optional().default([]),
+  columns: z.array(navbarColumnSchema).optional().default([]),
+});
+
+export const updateNavbarSchema = z.object({
+  menu: z.array(navbarGroupSchema),
 });

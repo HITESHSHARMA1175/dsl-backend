@@ -2,9 +2,10 @@ import { Router } from 'express';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { adminGuard } from '../../middleware/adminGuard.middleware';
 import { validate } from '../../middleware/validate.middleware';
-import { createTreatmentContractSchema, updateTreatmentContractSchema } from './treatments.schema';
+import { createTreatmentContractSchema, updateNavbarSchema, updateTreatmentContractSchema } from './treatments.schema';
 import {
   getTreatmentsNavbar,
+  updateTreatmentsNavbar,
   getTreatmentBySlug,
   createTreatmentPage,
   updateTreatmentPage,
@@ -14,6 +15,7 @@ const router = Router();
 
 // Public - literal paths first so they aren't swallowed by the /:slug wildcard.
 router.get('/navbar', getTreatmentsNavbar);
+router.put('/navbar', authMiddleware, adminGuard, validate(updateNavbarSchema), updateTreatmentsNavbar);
 
 // Admin - full page content in the frontend's exact { name, slug, pageData } contract.
 // Mounted under /pages (not / or /:slug) to avoid colliding with the legacy
