@@ -46,7 +46,14 @@ const DETAIL_SELECT = {
   testimonials: true,
 } as const;
 
-const ICON_BASE_URL = 'https://cdn.diamondskinlondon.com/icons/';
+const resolveStoredImage = (value?: string | null) => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) return trimmed;
+  if (trimmed.startsWith('uploads/')) return `/${trimmed}`;
+  return `/uploads/${trimmed}`;
+};
 
 interface NavItem {
   id?: number;
@@ -132,14 +139,14 @@ export class SkinConditionService {
     return (prisma as any).propertyCategory.create({ data, select: PUBLIC_SELECT });
   }
 
-  async getNavbar(): Promise<NavGroup[]> {
+  async getNavbar(includeEmpty = false): Promise<NavGroup[]> {
     const topLevel = await (prisma as any).propertyCategory.findMany({
       where: { is_condition: 'Yes', parent_id: 0, status: 1 },
       select: PUBLIC_SELECT,
       orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
     });
 
-    return Promise.all(
+    const groups = await Promise.all(
       topLevel.map(async (condition: any) => {
         const conditionId = Number(condition.id);
         const subConditions = await (prisma as any).propertyCategory.findMany({
@@ -158,11 +165,15 @@ export class SkinConditionService {
         };
       })
     );
+
+    if (includeEmpty) return groups;
+    return groups.filter((group) => (group.subItems ?? []).length > 0);
   }
 
   async updateNavbar(menu: NavGroup[]) {
     const activeTopIds = new Set<number>();
     const activeSubIds = new Set<number>();
+    const subSyncTopIds = new Set<number>();
 
     for (const [groupIndex, group] of menu.entries()) {
       const top = await this.upsertCondition({
@@ -177,20 +188,24 @@ export class SkinConditionService {
       const subItems = group.isMultiColumn
         ? (group.columns ?? []).flatMap((column) => column.subItems ?? [])
         : group.subItems ?? [];
+      const shouldSyncSubItems = group.isMultiColumn || subItems.length > 0;
 
-      for (const [itemIndex, item] of subItems.entries()) {
-        const slug = this.getSlugFromItem(item);
-        const sub = await this.upsertCondition({
-          id: item.id && item.id > 0 ? item.id : undefined,
-          name: item.name,
-          parentId: topId,
-          order: itemIndex + 1,
-        });
-        await (prisma as any).propertyCategory.updateMany({
-          where: { id: Number(sub.id) },
-          data: { category_slug: slug },
-        });
-        activeSubIds.add(Number(sub.id));
+      if (shouldSyncSubItems) {
+        subSyncTopIds.add(topId);
+        for (const [itemIndex, item] of subItems.entries()) {
+          const slug = this.getSlugFromItem(item);
+          const sub = await this.upsertCondition({
+            id: item.id && item.id > 0 ? item.id : undefined,
+            name: item.name,
+            parentId: topId,
+            order: itemIndex + 1,
+          });
+          await (prisma as any).propertyCategory.updateMany({
+            where: { id: Number(sub.id) },
+            data: { category_slug: slug },
+          });
+          activeSubIds.add(Number(sub.id));
+        }
       }
     }
 
@@ -210,7 +225,7 @@ export class SkinConditionService {
       });
     }
 
-    const touchedTopIds = Array.from(activeTopIds);
+    const touchedTopIds = Array.from(subSyncTopIds);
     if (touchedTopIds.length > 0) {
       const currentSubConditions = await (prisma as any).propertyCategory.findMany({
         where: { is_condition: 'Yes', parent_id: { in: touchedTopIds }, status: 1 },
@@ -311,8 +326,8 @@ export class SkinConditionService {
       category_slug: condition.category_slug,
       parent_id: condition.parent_id,
       sorting_order: condition.sorting_order,
-      icon: condition.icon ? `${ICON_BASE_URL}${condition.icon}` : null,
-      icon_large: condition.icon_large,
+      icon: resolveStoredImage(condition.icon),
+      icon_large: resolveStoredImage(condition.icon_large),
       meta_title: condition.meta_title,
       meta_description: condition.meta_description,
       meta_keywords: condition.meta_keywords,
@@ -326,26 +341,10 @@ export class SkinConditionService {
       category_name_ar: condition.category_name_ar,
       description_ar: condition.description_ar,
       description3_ar: condition.description3_ar,
-      hero_image: condition.image1
-        ? (condition.image1.startsWith('http') || condition.image1.startsWith('/')
-          ? condition.image1
-          : `/uploads/${condition.image1}`)
-        : null,
-      card_image: condition.image2
-        ? (condition.image2.startsWith('http') || condition.image2.startsWith('/')
-          ? condition.image2
-          : `/uploads/${condition.image2}`)
-        : null,
-      extra_image_1: condition.image3
-        ? (condition.image3.startsWith('http') || condition.image3.startsWith('/')
-          ? condition.image3
-          : `/uploads/${condition.image3}`)
-        : null,
-      extra_image_2: condition.image4
-        ? (condition.image4.startsWith('http') || condition.image4.startsWith('/')
-          ? condition.image4
-          : `/uploads/${condition.image4}`)
-        : null,
+      hero_image: resolveStoredImage(condition.image1),
+      card_image: resolveStoredImage(condition.image2),
+      extra_image_1: resolveStoredImage(condition.image3),
+      extra_image_2: resolveStoredImage(condition.image4),
       treatment_stats: condition.treatment_stats ?? null,
       card_title: condition.card_title,
       card_description: condition.card_description,

@@ -2,15 +2,18 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
+import fs from 'fs';
 import { authMiddleware } from '../../middleware/auth.middleware';
 import { adminGuard } from '../../middleware/adminGuard.middleware';
 import { AppError } from '../../shared/utils/appError';
 import { uploadImage } from './upload.controller';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const uploadsDir = path.join(__dirname, '..', '..', '..', 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, 'uploads/'),
+  destination: (_req, _file, cb) => cb(null, uploadsDir),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     const unique = crypto.randomBytes(16).toString('hex');

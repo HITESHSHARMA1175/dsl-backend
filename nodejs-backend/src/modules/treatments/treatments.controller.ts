@@ -6,7 +6,7 @@ const treatmentsService = new TreatmentsService(prisma);
 
 export async function getTreatmentsNavbar(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await treatmentsService.getNavbar();
+    const data = await treatmentsService.getNavbar(req.query.includeEmpty === 'true');
     return res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);

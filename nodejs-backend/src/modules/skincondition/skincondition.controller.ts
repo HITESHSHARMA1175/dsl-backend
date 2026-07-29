@@ -38,7 +38,7 @@ export async function getConditionBySlug(req: Request, res: Response, next: Next
 
 export async function getSkinConditionsNavbar(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await skinConditionService.getNavbar();
+    const data = await skinConditionService.getNavbar(req.query.includeEmpty === 'true');
     return res.status(200).json(successResponse(200, 'Success', data));
   } catch (error) {
     next(error);

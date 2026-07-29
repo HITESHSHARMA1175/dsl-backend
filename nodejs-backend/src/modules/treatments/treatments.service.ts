@@ -106,9 +106,9 @@ export class TreatmentsService {
    * directly-tagged items form the first column (titled after the parent
    * itself) followed by one column per child category.
    */
-  async getNavbar(): Promise<NavGroup[]> {
+  async getNavbar(includeEmpty = false): Promise<NavGroup[]> {
     const topLevel = await (this.prisma as any).property_category_mains.findMany({
-      where: { parent_id: null, status: 1 },
+      where: includeEmpty ? { parent_id: null } : { parent_id: null, status: 1 },
       orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
     });
 
@@ -117,7 +117,7 @@ export class TreatmentsService {
     for (const category of topLevel) {
       const categoryId = Number(category.id);
       const children = await (this.prisma as any).property_category_mains.findMany({
-        where: { parent_id: categoryId },
+        where: includeEmpty ? { parent_id: categoryId } : { parent_id: categoryId, status: 1 },
         orderBy: [{ sorting_order: 'asc' }, { id: 'desc' }],
       });
 
@@ -170,11 +170,18 @@ export class TreatmentsService {
         });
       }
 
-      groups.push({ id: categoryId, name: category.category_name, isMultiColumn: true, columns: columns.filter((c) => c.subItems.length > 0) });
+      groups.push({
+        id: categoryId,
+        name: category.category_name,
+        isMultiColumn: true,
+        columns: includeEmpty ? columns : columns.filter((c) => c.subItems.length > 0),
+      });
     }
 
     // Drop nav groups with nothing in them (legacy categories that were never
     // part of the real navbar and have no treatment pages tagged to them).
+    if (includeEmpty) return groups;
+
     return groups.filter((group) => {
       const count = group.isMultiColumn
         ? (group.columns ?? []).reduce((sum, col) => sum + col.subItems.length, 0)
@@ -185,7 +192,6 @@ export class TreatmentsService {
 
   async updateNavbar(menu: NavGroup[]) {
     const activeCategoryIds = new Set<number>();
-    const activePageIds = new Set<number>();
     const touchedCategoryIds = new Set<number>();
 
     for (const [groupIndex, group] of menu.entries()) {
@@ -215,16 +221,6 @@ export class TreatmentsService {
             activeCategoryIds.add(subCategoryId);
             touchedCategoryIds.add(subCategoryId);
           }
-
-          for (const item of column.subItems ?? []) {
-            const page = await this.upsertNavItem(item, categoryId, subCategoryId);
-            activePageIds.add(page.id);
-          }
-        }
-      } else {
-        for (const item of group.subItems ?? []) {
-          const page = await this.upsertNavItem(item, categoryId, null);
-          activePageIds.add(page.id);
         }
       }
     }
@@ -241,10 +237,6 @@ export class TreatmentsService {
         where: { id: { in: removedTopLevelIds } },
         data: { status: 0 },
       });
-      await this.prisma.treatmentPage.updateMany({
-        where: { category_id: { in: removedTopLevelIds } },
-        data: { status: 2 },
-      });
     }
 
     const childCategories = await (this.prisma as any).property_category_mains.findMany({
@@ -258,25 +250,9 @@ export class TreatmentsService {
         where: { id: { in: removedChildIds } },
         data: { status: 0 },
       });
-      await this.prisma.treatmentPage.updateMany({
-        where: { sub_category_id: { in: removedChildIds } },
-        data: { status: 2 },
-      });
     }
 
-    const categoryScope = Array.from(activeCategoryIds);
-    if (categoryScope.length > 0) {
-      await this.prisma.treatmentPage.updateMany({
-        where: {
-          OR: [{ category_id: { in: categoryScope } }, { sub_category_id: { in: categoryScope } }],
-          id: { notIn: Array.from(activePageIds) },
-          status: { not: 2 },
-        },
-        data: { status: 2 },
-      });
-    }
-
-    return this.getNavbar();
+    return this.getNavbar(true);
   }
 
   /**
