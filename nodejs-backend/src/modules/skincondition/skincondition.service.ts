@@ -304,14 +304,22 @@ export class SkinConditionService {
     const id = Number(condition.id);
 
     const [faqs, subConditions] = await Promise.all([
-      // Not filtered by status: real FAQ content on this legacy table sits at
-      // status 0 (never flipped to "published" by whatever admin tool wrote
-      // it), and this is a single curated resource, not a bulk public list -
-      // showing it beats hiding real content behind a flag nothing sets.
+      // FAQ rows are editable from the skin condition form; only active rows
+      // should appear on the public condition detail page.
       (prisma as any).faq.findMany({
-        where: { category_id: id },
+        where: { category_id: id, status: 1 },
         orderBy: { sorting_order: 'asc' },
-        select: { id: true, question: true, answer: true },
+        select: {
+          id: true,
+          question: true,
+          answer: true,
+          question_cn: true,
+          answer_cn: true,
+          question_ar: true,
+          answer_ar: true,
+          sorting_order: true,
+          status: true,
+        },
       }),
       (prisma as any).propertyCategory.findMany({
         where: { is_condition: 'Yes', parent_id: id, status: 1 },
@@ -362,16 +370,45 @@ export class SkinConditionService {
   }
 
   async create(data: any) {
-    return (prisma as any).propertyCategory.create({
-      data: { ...data, is_condition: 'Yes', is_top: 'No', parent_id: 0 },
+    const { faqs, ...conditionData } = data;
+    const condition = await (prisma as any).propertyCategory.create({
+      data: { ...conditionData, is_condition: 'Yes', is_top: 'No', parent_id: 0 },
     });
+    await this.syncFaqs(Number(condition.id), faqs);
+    return condition;
   }
 
   async update(id: number, data: any) {
-    return (prisma as any).propertyCategory.update({
+    const { faqs, ...conditionData } = data;
+    const condition = await (prisma as any).propertyCategory.update({
       where: { id },
-      data,
+      data: conditionData,
     });
+    await this.syncFaqs(id, faqs);
+    return condition;
+  }
+
+  private async syncFaqs(conditionId: number, faqs?: any[]) {
+    if (!Array.isArray(faqs)) return;
+
+    const rows = faqs
+      .map((faq, index) => ({
+        category_id: conditionId,
+        question: faq.question?.trim() || null,
+        answer: faq.answer?.trim() || null,
+        question_cn: faq.question_cn?.trim() || null,
+        answer_cn: faq.answer_cn?.trim() || null,
+        question_ar: faq.question_ar?.trim() || null,
+        answer_ar: faq.answer_ar?.trim() || null,
+        sorting_order: Number(faq.sorting_order || index + 1),
+        status: Number(faq.status || 1),
+      }))
+      .filter((faq) => faq.question || faq.answer);
+
+    await (prisma as any).faq.deleteMany({ where: { category_id: conditionId } });
+    if (rows.length > 0) {
+      await (prisma as any).faq.createMany({ data: rows });
+    }
   }
 
   async delete(id: number) {

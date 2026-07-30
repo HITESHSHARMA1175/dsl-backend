@@ -32,6 +32,18 @@ const testimonialSchema = z.object({
   text: z.string().optional(),
 });
 
+const faqSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  question: z.string().optional(),
+  answer: z.string().optional(),
+  question_cn: z.string().optional(),
+  answer_cn: z.string().optional(),
+  question_ar: z.string().optional(),
+  answer_ar: z.string().optional(),
+  sorting_order: z.union([z.string(), z.number()]).optional(),
+  status: z.union([z.string(), z.number()]).optional(),
+});
+
 // Every field here maps to a real column on PropertyCategory. Previously this
 // schema only allowed category_name/description/image ("image" isn't even a
 // real column) - everything else the admin UI has fields for (icons, image1-4,
@@ -67,6 +79,7 @@ export const createConditionSchema = z.object({
   pricing: z.array(pricingPackageSchema).optional(),
   before_after: z.array(beforeAfterSchema).optional(),
   testimonials: z.array(testimonialSchema).optional(),
+  faqs: z.array(faqSchema).optional(),
   status: z.number().int().optional(),
 });
 
