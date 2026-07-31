@@ -115,8 +115,7 @@ export class CartService {
       },
     });
 
-    try {
-      await this.mailer.sendOrderConfirmation({
+    void this.mailer.sendOrderConfirmation({
         orderId: Number(order.id),
         customerName: [billing.first_name, billing.last_name].filter(Boolean).join(' ') || 'Customer',
         email: billing.email,
@@ -126,10 +125,10 @@ export class CartService {
         appointmentDate: billing.appointment_date || null,
         appointmentSlot: billing.appointment_slot || null,
         items,
-      });
-    } catch (error) {
+      })
+      .catch((error) => {
       console.error('[mail] Failed to send order confirmation email', error);
-    }
+      });
 
     // Empty the cart after creating the order
     await this.clear(sessionKey);
