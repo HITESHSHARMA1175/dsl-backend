@@ -44,6 +44,7 @@ const DETAIL_SELECT = {
   pricing: true,
   before_after: true,
   testimonials: true,
+  status: true,
 } as const;
 
 const resolveStoredImage = (value?: string | null) => {
@@ -293,8 +294,16 @@ export class SkinConditionService {
    * because that filename matched an example exactly.
    */
   async getBySlug(slug: string) {
+    const numericId = /^\d+$/.test(slug) ? Number(slug) : null;
     const condition = await (prisma as any).propertyCategory.findFirst({
-      where: { category_slug: slug, is_condition: 'Yes', status: 1 },
+      where: {
+        is_condition: 'Yes',
+        status: 1,
+        OR: [
+          { category_slug: slug },
+          ...(numericId ? [{ id: numericId }] : []),
+        ],
+      },
       select: DETAIL_SELECT,
     });
     if (!condition) {
@@ -334,12 +343,16 @@ export class SkinConditionService {
       category_slug: condition.category_slug,
       parent_id: condition.parent_id,
       sorting_order: condition.sorting_order,
+      status: condition.status,
       icon: resolveStoredImage(condition.icon),
       icon_large: resolveStoredImage(condition.icon_large),
       meta_title: condition.meta_title,
       meta_description: condition.meta_description,
       meta_keywords: condition.meta_keywords,
       hero_badge: condition.hero_badge,
+      description: condition.description,
+      description1: condition.description1,
+      description3: condition.description3,
       short_description: condition.description,
       long_description: condition.description1,
       detailed_html: condition.description3,
@@ -349,6 +362,10 @@ export class SkinConditionService {
       category_name_ar: condition.category_name_ar,
       description_ar: condition.description_ar,
       description3_ar: condition.description3_ar,
+      image1: resolveStoredImage(condition.image1),
+      image2: resolveStoredImage(condition.image2),
+      image3: resolveStoredImage(condition.image3),
+      image4: resolveStoredImage(condition.image4),
       hero_image: resolveStoredImage(condition.image1),
       card_image: resolveStoredImage(condition.image2),
       extra_image_1: resolveStoredImage(condition.image3),
