@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
+dotenv.config({ path: '../.env' });
 dotenv.config();
 
 const envSchema = z.object({
@@ -30,6 +31,15 @@ const envSchema = z.object({
   SENDGRID_API_KEY: z.string().default(''),
   SENDGRID_FROM_EMAIL: z.string().default('noreply@dslclinic.com'),
   SENDGRID_FROM_NAME: z.string().default('DSL Clinic'),
+
+  // SMTP / Nodemailer (order confirmation emails)
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM_EMAIL: z.string().default('noreply@diamondskinlondon.com'),
+  SMTP_FROM_NAME: z.string().default('Diamond Skin London'),
 
   // Twilio (future SMS OTP)
   TWILIO_ACCOUNT_SID: z.string().optional(),
