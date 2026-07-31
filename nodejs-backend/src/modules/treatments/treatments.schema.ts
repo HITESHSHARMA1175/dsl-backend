@@ -62,6 +62,8 @@ const faqSchema = z.object({
   answer: z.string().optional(),
 });
 
+const translationsSchema = z.record(z.any()).optional();
+
 const pageDataSchema = z.object({
   defaultOptionId: z.string().optional(),
   hero: heroSchema.optional(),
@@ -70,6 +72,7 @@ const pageDataSchema = z.object({
   stats: z.array(statSchema).optional(),
   results: resultsSchema.optional(),
   faqs: z.array(faqSchema).optional(),
+  translations: translationsSchema,
 });
 
 export const createTreatmentContractSchema = z.object({

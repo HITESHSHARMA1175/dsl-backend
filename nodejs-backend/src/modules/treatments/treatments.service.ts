@@ -306,6 +306,7 @@ export class TreatmentsService {
         items: page.before_after ?? [],
       },
       faqs: page.faqs.map((f) => ({ question: f.question, answer: f.answer })),
+      translations: page.sections ?? {},
     };
   }
 
@@ -387,6 +388,7 @@ export class TreatmentsService {
       };
       if (pageData.results.items !== undefined) data.before_after = pageData.results.items;
     }
+    if (pageData.translations !== undefined) data.sections = pageData.translations;
 
     return data;
   }
