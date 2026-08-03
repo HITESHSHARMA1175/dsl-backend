@@ -89,21 +89,20 @@ export class CartService {
   async checkout(sessionKey: string, billing: any) {
     let { items, total } = await this.list(sessionKey);
 
-    // Fallback: If DB cart for sessionKey is empty but items were passed in checkout payload
+    // Fallback: If DB cart for sessionKey is empty but items were passed in checkout payload,
+    // use them directly without inserting into guest_carts (avoids BigInt product_id issues).
     if ((!items || items.length === 0) && Array.isArray(billing?.items) && billing.items.length > 0) {
-      for (const item of billing.items) {
-        await this.add(sessionKey, '0.0.0.0', {
-          product_id: item.product_id || item.dbId || item.id || 1,
-          product_name: item.name || item.product_name || 'Item',
-          price: Number(item.price || item.priceNum || 0),
-          qty: Number(item.quantity || item.qty || 1),
-          type: item.type || 'Product',
-          image: item.image || null,
-        });
-      }
-      const reloaded = await this.list(sessionKey);
-      items = reloaded.items;
-      total = reloaded.total;
+      items = billing.items.map((item: any) => ({
+        id: item.id ?? null,
+        product_id: String(item.product_id || item.dbId || item.id || 0),
+        product_name: item.name || item.product_name || 'Item',
+        price: Number(item.price || item.priceNum || 0),
+        qty: Number(item.quantity || item.qty || 1),
+        type: item.type || 'Product',
+        image: item.image || null,
+        session: sessionKey,
+      }));
+      total = items.reduce((sum: number, item: any) => sum + Number(item.price) * Number(item.qty), 0);
     }
 
     if (!items || !items.length) {
