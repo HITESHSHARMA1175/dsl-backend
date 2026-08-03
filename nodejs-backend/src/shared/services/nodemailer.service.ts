@@ -3,7 +3,6 @@ import dns from 'dns';
 import { env } from '../../config/env';
 
 // Force IPv4 DNS resolution globally — Render free tier has no IPv6 outbound routing.
-// Without this, smtp.gmail.com sometimes resolves to IPv6 causing ENETUNREACH errors.
 dns.setDefaultResultOrder('ipv4first');
 
 type OrderEmailItem = {
@@ -35,18 +34,22 @@ function escapeHtml(value: unknown) {
 }
 
 export class NodemailerService {
-  private transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: Number(env.SMTP_PORT || 587),
-    secure: Number(env.SMTP_PORT || 587) === 465,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    family: 4, // Force IPv4 — Render free tier does not support IPv6 outbound
-    auth: env.SMTP_USER && env.SMTP_PASS
-      ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-      : undefined,
-  });
+  private createTransporter(port: number) {
+    return nodemailer.createTransport({
+      host: env.SMTP_HOST || 'smtp.gmail.com',
+      port,
+      secure: port === 465,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      lookup: (hostname: string, _options: any, callback: any) => {
+        dns.lookup(hostname, { family: 4 }, callback);
+      },
+      auth: env.SMTP_USER && env.SMTP_PASS
+        ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
+        : undefined,
+    } as any);
+  }
 
   private isConfigured() {
     return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS);
@@ -270,11 +273,31 @@ export class NodemailerService {
 </html>
     `;
 
-    await this.transporter.sendMail({
-      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
+    const mailOptions = {
+      from: `"${env.SMTP_FROM_NAME || 'Diamond Skin London'}" <${env.SMTP_FROM_EMAIL || env.SMTP_USER}>`,
       to: data.email,
-      subject: `Order Confirmation #${data.orderId} - ${env.SMTP_FROM_NAME}`,
+      subject: `Order Confirmation #${data.orderId} - ${env.SMTP_FROM_NAME || 'Diamond Skin London'}`,
       html,
-    });
+    };
+
+    const portsToTry = [465, Number(env.SMTP_PORT || 587)];
+    const uniquePorts = Array.from(new Set(portsToTry));
+    let lastError: any = null;
+
+    for (const port of uniquePorts) {
+      try {
+        const transporter = this.createTransporter(port);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`[mail] Order confirmation email sent successfully for Order #${data.orderId} via port ${port}. MessageId: ${info.messageId}`);
+        return;
+      } catch (err: any) {
+        console.warn(`[mail] Delivery attempt on port ${port} failed (${err?.code || err?.message}). Retrying if ports left...`);
+        lastError = err;
+      }
+    }
+
+    if (lastError) {
+      throw lastError;
+    }
   }
 }

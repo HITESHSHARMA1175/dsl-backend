@@ -8,7 +8,6 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const dns_1 = __importDefault(require("dns"));
 const env_1 = require("../../config/env");
 // Force IPv4 DNS resolution globally — Render free tier has no IPv6 outbound routing.
-// Without this, smtp.gmail.com sometimes resolves to IPv6 causing ENETUNREACH errors.
 dns_1.default.setDefaultResultOrder('ipv4first');
 function escapeHtml(value) {
     return String(value ?? '')
@@ -19,15 +18,17 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 class NodemailerService {
-    constructor() {
-        this.transporter = nodemailer_1.default.createTransport({
-            host: env_1.env.SMTP_HOST,
-            port: Number(env_1.env.SMTP_PORT || 587),
-            secure: Number(env_1.env.SMTP_PORT || 587) === 465,
+    createTransporter(port) {
+        return nodemailer_1.default.createTransport({
+            host: env_1.env.SMTP_HOST || 'smtp.gmail.com',
+            port,
+            secure: port === 465,
             connectionTimeout: 10000,
             greetingTimeout: 10000,
             socketTimeout: 15000,
-            family: 4, // Force IPv4 — Render free tier does not support IPv6 outbound
+            lookup: (hostname, _options, callback) => {
+                dns_1.default.lookup(hostname, { family: 4 }, callback);
+            },
             auth: env_1.env.SMTP_USER && env_1.env.SMTP_PASS
                 ? { user: env_1.env.SMTP_USER, pass: env_1.env.SMTP_PASS }
                 : undefined,
@@ -247,12 +248,30 @@ class NodemailerService {
 </body>
 </html>
     `;
-        await this.transporter.sendMail({
-            from: `"${env_1.env.SMTP_FROM_NAME}" <${env_1.env.SMTP_FROM_EMAIL}>`,
+        const mailOptions = {
+            from: `"${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}" <${env_1.env.SMTP_FROM_EMAIL || env_1.env.SMTP_USER}>`,
             to: data.email,
-            subject: `Order Confirmation #${data.orderId} - ${env_1.env.SMTP_FROM_NAME}`,
+            subject: `Order Confirmation #${data.orderId} - ${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}`,
             html,
-        });
+        };
+        const portsToTry = [465, Number(env_1.env.SMTP_PORT || 587)];
+        const uniquePorts = Array.from(new Set(portsToTry));
+        let lastError = null;
+        for (const port of uniquePorts) {
+            try {
+                const transporter = this.createTransporter(port);
+                const info = await transporter.sendMail(mailOptions);
+                console.log(`[mail] Order confirmation email sent successfully for Order #${data.orderId} via port ${port}. MessageId: ${info.messageId}`);
+                return;
+            }
+            catch (err) {
+                console.warn(`[mail] Delivery attempt on port ${port} failed (${err?.code || err?.message}). Retrying if ports left...`);
+                lastError = err;
+            }
+        }
+        if (lastError) {
+            throw lastError;
+        }
     }
 }
 exports.NodemailerService = NodemailerService;
