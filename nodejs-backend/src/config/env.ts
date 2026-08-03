@@ -35,7 +35,7 @@ const envSchema = z.object({
   // SMTP / Nodemailer (order confirmation emails)
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
-  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_SECURE: z.preprocess((val) => val === 'true' || val === '1' || val === true, z.boolean()).default(false),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().default('noreply@diamondskinlondon.com'),
