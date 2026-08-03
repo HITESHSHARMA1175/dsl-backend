@@ -34,9 +34,17 @@ function escapeHtml(value: unknown) {
 }
 
 export class NodemailerService {
+  private getSmtpConfig() {
+    const host = env.SMTP_HOST || 'smtp.gmail.com';
+    const user = env.SMTP_USER || 'Devolyt.developer@gmail.com';
+    const pass = env.SMTP_PASS || 'mkbeesmbwxidtlud';
+    return { host, user, pass };
+  }
+
   private createTransporter(port: number) {
+    const { host, user, pass } = this.getSmtpConfig();
     return nodemailer.createTransport({
-      host: env.SMTP_HOST || 'smtp.gmail.com',
+      host,
       port,
       secure: port === 465,
       connectionTimeout: 10000,
@@ -45,14 +53,13 @@ export class NodemailerService {
       lookup: (hostname: string, _options: any, callback: any) => {
         dns.lookup(hostname, { family: 4 }, callback);
       },
-      auth: env.SMTP_USER && env.SMTP_PASS
-        ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-        : undefined,
+      auth: user && pass ? { user, pass } : undefined,
     } as any);
   }
 
   private isConfigured() {
-    return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS);
+    const { host, user, pass } = this.getSmtpConfig();
+    return Boolean(host && user && pass);
   }
 
   async sendOrderConfirmation(data: OrderConfirmationEmailData) {

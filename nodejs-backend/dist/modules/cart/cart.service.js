@@ -122,20 +122,22 @@ class CartService {
                 status: 1,
             },
         });
-        void this.mailer.sendOrderConfirmation({
-            orderId: Number(order.id),
-            customerName: [billing.first_name, billing.last_name].filter(Boolean).join(' ') || 'Customer',
-            email: billing.email,
-            phone: billing.phone || null,
-            amount: Number(order.order_amount || total || 0),
-            paymentMethod: order.payment_method,
-            appointmentDate: billing.appointment_date || null,
-            appointmentSlot: billing.appointment_slot || null,
-            items,
-        })
-            .catch((error) => {
+        try {
+            await this.mailer.sendOrderConfirmation({
+                orderId: Number(order.id),
+                customerName: [billing.first_name, billing.last_name].filter(Boolean).join(' ') || 'Customer',
+                email: billing.email,
+                phone: billing.phone || null,
+                amount: Number(order.order_amount || total || 0),
+                paymentMethod: order.payment_method,
+                appointmentDate: billing.appointment_date || null,
+                appointmentSlot: billing.appointment_slot || null,
+                items,
+            });
+        }
+        catch (error) {
             console.error('[mail] Failed to send order confirmation email', error);
-        });
+        }
         // Empty the cart after creating the order
         await this.clear(sessionKey);
         return order;

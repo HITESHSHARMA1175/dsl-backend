@@ -18,9 +18,16 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 class NodemailerService {
+    getSmtpConfig() {
+        const host = env_1.env.SMTP_HOST || 'smtp.gmail.com';
+        const user = env_1.env.SMTP_USER || 'Devolyt.developer@gmail.com';
+        const pass = env_1.env.SMTP_PASS || 'mkbeesmbwxidtlud';
+        return { host, user, pass };
+    }
     createTransporter(port) {
+        const { host, user, pass } = this.getSmtpConfig();
         return nodemailer_1.default.createTransport({
-            host: env_1.env.SMTP_HOST || 'smtp.gmail.com',
+            host,
             port,
             secure: port === 465,
             connectionTimeout: 10000,
@@ -29,13 +36,12 @@ class NodemailerService {
             lookup: (hostname, _options, callback) => {
                 dns_1.default.lookup(hostname, { family: 4 }, callback);
             },
-            auth: env_1.env.SMTP_USER && env_1.env.SMTP_PASS
-                ? { user: env_1.env.SMTP_USER, pass: env_1.env.SMTP_PASS }
-                : undefined,
+            auth: user && pass ? { user, pass } : undefined,
         });
     }
     isConfigured() {
-        return Boolean(env_1.env.SMTP_HOST && env_1.env.SMTP_USER && env_1.env.SMTP_PASS);
+        const { host, user, pass } = this.getSmtpConfig();
+        return Boolean(host && user && pass);
     }
     async sendOrderConfirmation(data) {
         if (!this.isConfigured()) {
