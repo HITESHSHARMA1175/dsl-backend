@@ -32,8 +32,8 @@ function escapeHtml(value: unknown) {
 export class NodemailerService {
   private transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465 || env.SMTP_SECURE === true,
+    port: Number(env.SMTP_PORT || 587),
+    secure: Number(env.SMTP_PORT || 587) === 465,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
