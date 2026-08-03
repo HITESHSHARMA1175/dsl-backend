@@ -254,8 +254,10 @@ class NodemailerService {
 </body>
 </html>
     `;
+        const { user } = this.getSmtpConfig();
+        const fromEmail = env_1.env.SMTP_USER || user;
         const mailOptions = {
-            from: `"${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}" <${env_1.env.SMTP_FROM_EMAIL || env_1.env.SMTP_USER}>`,
+            from: `"${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}" <${fromEmail}>`,
             to: data.email,
             subject: `Order Confirmation #${data.orderId} - ${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}`,
             html,
