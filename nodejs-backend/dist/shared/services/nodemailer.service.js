@@ -5,7 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodemailerService = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const dns_1 = __importDefault(require("dns"));
 const env_1 = require("../../config/env");
+// Force IPv4 DNS resolution globally — Render free tier has no IPv6 outbound routing.
+// Without this, smtp.gmail.com sometimes resolves to IPv6 causing ENETUNREACH errors.
+dns_1.default.setDefaultResultOrder('ipv4first');
 function escapeHtml(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')

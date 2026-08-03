@@ -1,5 +1,10 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 import { env } from '../../config/env';
+
+// Force IPv4 DNS resolution globally — Render free tier has no IPv6 outbound routing.
+// Without this, smtp.gmail.com sometimes resolves to IPv6 causing ENETUNREACH errors.
+dns.setDefaultResultOrder('ipv4first');
 
 type OrderEmailItem = {
   product_name?: string | null;
