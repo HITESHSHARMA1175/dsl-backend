@@ -87,8 +87,26 @@ export class CartService {
    * Convert the current cart into an order record.
    */
   async checkout(sessionKey: string, billing: any) {
-    const { items, total } = await this.list(sessionKey);
-    if (!items.length) {
+    let { items, total } = await this.list(sessionKey);
+
+    // Fallback: If DB cart for sessionKey is empty but items were passed in checkout payload
+    if ((!items || items.length === 0) && Array.isArray(billing?.items) && billing.items.length > 0) {
+      for (const item of billing.items) {
+        await this.add(sessionKey, '0.0.0.0', {
+          product_id: item.product_id || item.dbId || item.id || 1,
+          product_name: item.name || item.product_name || 'Item',
+          price: Number(item.price || item.priceNum || 0),
+          qty: Number(item.quantity || item.qty || 1),
+          type: item.type || 'Product',
+          image: item.image || null,
+        });
+      }
+      const reloaded = await this.list(sessionKey);
+      items = reloaded.items;
+      total = reloaded.total;
+    }
+
+    if (!items || !items.length) {
       throw new AppError(400, 'Cart is empty');
     }
 
@@ -127,7 +145,7 @@ export class CartService {
         items,
       })
       .catch((error) => {
-      console.error('[mail] Failed to send order confirmation email', error);
+        console.error('[mail] Failed to send order confirmation email', error);
       });
 
     // Empty the cart after creating the order
