@@ -89,9 +89,12 @@ export class CartService {
   async checkout(sessionKey: string, billing: any) {
     let { items, total } = await this.list(sessionKey);
 
+    console.log('[checkout] sessionKey:', sessionKey, '| DB items count:', items?.length ?? 0, '| billing.items count:', billing?.items?.length ?? 'none');
+
     // Fallback: If DB cart for sessionKey is empty but items were passed in checkout payload,
     // use them directly without inserting into guest_carts (avoids BigInt product_id issues).
     if ((!items || items.length === 0) && Array.isArray(billing?.items) && billing.items.length > 0) {
+      console.log('[checkout] Using fallback items from payload:', JSON.stringify(billing.items));
       items = billing.items.map((item: any) => ({
         id: item.id ?? null,
         product_id: String(item.product_id || item.dbId || item.id || 0),
@@ -103,9 +106,11 @@ export class CartService {
         session: sessionKey,
       }));
       total = items.reduce((sum: number, item: any) => sum + Number(item.price) * Number(item.qty), 0);
+      console.log('[checkout] Fallback items built, count:', items.length, '| total:', total);
     }
 
     if (!items || !items.length) {
+      console.log('[checkout] THROWING Cart is empty — no DB items and no fallback items');
       throw new AppError(400, 'Cart is empty');
     }
 
