@@ -28,4 +28,17 @@ export const checkoutSchema = z.object({
   session: z.string().optional(),
   appointment_date: z.string().optional(),
   appointment_slot: z.string().optional(),
+  // Cart items array — used as fallback when DB session cart is empty
+  items: z.array(z.object({
+    id: z.union([z.string(), z.number()]).optional(),
+    product_id: z.union([z.string(), z.number()]).optional(),
+    name: z.string().optional(),
+    product_name: z.string().optional(),
+    price: z.number().optional(),
+    priceNum: z.number().optional(),
+    quantity: z.number().optional(),
+    qty: z.number().optional(),
+    type: z.string().optional(),
+    image: z.string().optional().nullable(),
+  })).optional(),
 });

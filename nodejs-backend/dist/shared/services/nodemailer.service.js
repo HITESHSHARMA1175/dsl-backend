@@ -1,77 +1,59 @@
-import nodemailer from 'nodemailer';
-import { env } from '../../config/env';
-
-type OrderEmailItem = {
-  product_name?: string | null;
-  type?: string | null;
-  qty?: number | null;
-  price?: number | string | null;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-
-type OrderConfirmationEmailData = {
-  orderId: number;
-  customerName: string;
-  email: string;
-  phone?: string | null;
-  amount: number;
-  paymentMethod?: string | null;
-  appointmentDate?: string | null;
-  appointmentSlot?: string | null;
-  items: OrderEmailItem[];
-};
-
-function escapeHtml(value: unknown) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NodemailerService = void 0;
+const nodemailer_1 = __importDefault(require("nodemailer"));
+const env_1 = require("../../config/env");
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
-
-export class NodemailerService {
-  private transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: Number(env.SMTP_PORT || 587),
-    secure: Number(env.SMTP_PORT || 587) === 465,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    family: 4, // Force IPv4 — Render free tier does not support IPv6 outbound
-    auth: env.SMTP_USER && env.SMTP_PASS
-      ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-      : undefined,
-  });
-
-  private isConfigured() {
-    return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS);
-  }
-
-  async sendOrderConfirmation(data: OrderConfirmationEmailData) {
-    if (!this.isConfigured()) {
-      console.warn('[mail] SMTP not configured. Skipping order confirmation email.');
-      return;
+class NodemailerService {
+    constructor() {
+        this.transporter = nodemailer_1.default.createTransport({
+            host: env_1.env.SMTP_HOST,
+            port: Number(env_1.env.SMTP_PORT || 587),
+            secure: Number(env_1.env.SMTP_PORT || 587) === 465,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000,
+            family: 4, // Force IPv4 — Render free tier does not support IPv6 outbound
+            auth: env_1.env.SMTP_USER && env_1.env.SMTP_PASS
+                ? { user: env_1.env.SMTP_USER, pass: env_1.env.SMTP_PASS }
+                : undefined,
+        });
     }
-
-    const brandName = env.SMTP_FROM_NAME || 'Diamond Skin London';
-    const customerName = escapeHtml(data.customerName || 'Valued Customer');
-    const orderId = data.orderId;
-    const paymentMethod = escapeHtml(data.paymentMethod || 'Pending');
-    const totalAmount = Number(data.amount || 0).toFixed(2);
-    const currentDate = new Date().toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    const itemRows = data.items
-      .map((item, index) => {
-        const qty = Number(item.qty || 1);
-        const price = Number(item.price || 0);
-        const lineTotal = qty * price;
-        const bg = index % 2 === 0 ? '#111A33' : '#15203D';
-
-        return `
+    isConfigured() {
+        return Boolean(env_1.env.SMTP_HOST && env_1.env.SMTP_USER && env_1.env.SMTP_PASS);
+    }
+    async sendOrderConfirmation(data) {
+        if (!this.isConfigured()) {
+            console.warn('[mail] SMTP not configured. Skipping order confirmation email.');
+            return;
+        }
+        const brandName = env_1.env.SMTP_FROM_NAME || 'Diamond Skin London';
+        const customerName = escapeHtml(data.customerName || 'Valued Customer');
+        const orderId = data.orderId;
+        const paymentMethod = escapeHtml(data.paymentMethod || 'Pending');
+        const totalAmount = Number(data.amount || 0).toFixed(2);
+        const currentDate = new Date().toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        });
+        const itemRows = data.items
+            .map((item, index) => {
+            const qty = Number(item.qty || 1);
+            const price = Number(item.price || 0);
+            const lineTotal = qty * price;
+            const bg = index % 2 === 0 ? '#111A33' : '#15203D';
+            return `
           <tr style="background-color: ${bg};">
             <td style="padding: 14px 16px; border-bottom: 1px solid #1F2D54; color: #FFFFFF; font-size: 13px; font-weight: 600;">
               ${escapeHtml(item.product_name || 'Item')}
@@ -87,12 +69,10 @@ export class NodemailerService {
             </td>
           </tr>
         `;
-      })
-      .join('');
-
-    const appointmentHtml =
-      data.appointmentDate || data.appointmentSlot
-        ? `
+        })
+            .join('');
+        const appointmentHtml = data.appointmentDate || data.appointmentSlot
+            ? `
           <div style="margin-top: 24px; padding: 18px 20px; background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 8px;">
             <table width="100%" cellspacing="0" cellpadding="0" border="0">
               <tr>
@@ -109,9 +89,8 @@ export class NodemailerService {
             </table>
           </div>
         `
-        : '';
-
-    const html = `
+            : '';
+        const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -234,7 +213,7 @@ export class NodemailerService {
 
               <!-- Support Note -->
               <p style="margin: 28px 0 0 0; color: #94A3B8; font-size: 13px; line-height: 1.6; border-top: 1px solid #1F2D54; padding-top: 20px;">
-                If you have any questions about your order or need to reschedule your appointment, please contact our clinic team at <a href="mailto:${escapeHtml(env.SMTP_FROM_EMAIL)}" style="color: #D4AF37; text-decoration: none; font-weight: 600;">${escapeHtml(env.SMTP_FROM_EMAIL)}</a>.
+                If you have any questions about your order or need to reschedule your appointment, please contact our clinic team at <a href="mailto:${escapeHtml(env_1.env.SMTP_FROM_EMAIL)}" style="color: #D4AF37; text-decoration: none; font-weight: 600;">${escapeHtml(env_1.env.SMTP_FROM_EMAIL)}</a>.
               </p>
 
             </td>
@@ -264,12 +243,13 @@ export class NodemailerService {
 </body>
 </html>
     `;
-
-    await this.transporter.sendMail({
-      from: `"${env.SMTP_FROM_NAME}" <${env.SMTP_FROM_EMAIL}>`,
-      to: data.email,
-      subject: `Order Confirmation #${data.orderId} - ${env.SMTP_FROM_NAME}`,
-      html,
-    });
-  }
+        await this.transporter.sendMail({
+            from: `"${env_1.env.SMTP_FROM_NAME}" <${env_1.env.SMTP_FROM_EMAIL}>`,
+            to: data.email,
+            subject: `Order Confirmation #${data.orderId} - ${env_1.env.SMTP_FROM_NAME}`,
+            html,
+        });
+    }
 }
+exports.NodemailerService = NodemailerService;
+//# sourceMappingURL=nodemailer.service.js.map
