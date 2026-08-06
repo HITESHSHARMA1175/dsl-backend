@@ -4,7 +4,10 @@ import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
 import { parseIdParam } from '../../shared/utils/parseId.util';
 
+import { NodemailerService } from '../../shared/services/nodemailer.service';
+
 const orderService = new OrderService(prisma);
+const mailer = new NodemailerService();
 
 export async function listOrders(req: Request, res: Response, next: NextFunction) {
   try {
@@ -77,6 +80,30 @@ export async function deleteOrder(req: Request, res: Response, next: NextFunctio
 /** Customer: get their own orders */
 export async function getMyOrders(req: Request, res: Response, next: NextFunction) {
   try {
+
+export async function toggleOrderStatus(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await orderService.toggleStatus(id);
+    return res.status(200).json(successResponse(200, 'Order status toggled successfully', result));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteOrder(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = parseIdParam(req.params.id);
+    const result = await orderService.delete(id);
+    return res.status(200).json(successResponse(200, result.message, null));
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Customer: get their own orders */
+export async function getMyOrders(req: Request, res: Response, next: NextFunction) {
+  try {
     const customerId = (req as any).user?.id;
     const page = Math.max(1, Number(req.query.page) || 1);
     const perPage = Math.max(1, Number(req.query.per_page) || 10);
@@ -86,6 +113,27 @@ export async function getMyOrders(req: Request, res: Response, next: NextFunctio
     const { items, total } = await orderService.getMyOrders(customerId, page, perPage, { search, status });
     const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
     return res.status(200).json(paginatedResponse(items, total, page, perPage, baseUrl));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function sendCustomEmail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { to, subject, message, patientName, bookingRef } = req.body;
+    if (!to || !message) {
+      return res.status(400).json({ status: false, message: 'Recipient email and message body are required' });
+    }
+
+    await mailer.sendAdminCustomEmail({
+      to,
+      subject: subject || 'Notice - Diamond Skin London',
+      message,
+      patientName,
+      bookingRef,
+    });
+
+    return res.status(200).json(successResponse(200, `Email sent successfully to ${to}`, null));
   } catch (error) {
     next(error);
   }

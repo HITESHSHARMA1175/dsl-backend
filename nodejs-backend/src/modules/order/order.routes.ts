@@ -12,6 +12,7 @@ import {
   toggleOrderStatus,
   deleteOrder,
   getMyOrders,
+  sendCustomEmail,
 } from './order.controller';
 
 const router = Router();
@@ -19,7 +20,8 @@ const router = Router();
 // ── Customer: own orders ────────────────────────────────────────────────────
 router.get('/my-orders', authMiddleware, customerGuard, getMyOrders);
 
-// ── Admin: all orders ───────────────────────────────────────────────────────
+// ── Admin: all orders & custom email ───────────────────────────────────────
+router.post('/send-custom-email', authMiddleware, adminGuard, sendCustomEmail);
 router.get('/', authMiddleware, adminGuard, listOrders);
 router.get('/:id', authMiddleware, adminGuard, getOrderById);
 router.patch('/:id/status', authMiddleware, adminGuard, validate(updateOrderStatusSchema), updateOrderStatus);
