@@ -3,7 +3,6 @@ import { OrderService } from './order.service';
 import { prisma } from '../../config/database';
 import { successResponse, paginatedResponse } from '../../shared/utils/response.util';
 import { parseIdParam } from '../../shared/utils/parseId.util';
-
 import { NodemailerService } from '../../shared/services/nodemailer.service';
 
 const orderService = new OrderService(prisma);
@@ -56,30 +55,6 @@ export async function updateOrderAppointment(req: Request, res: Response, next: 
     next(error);
   }
 }
-
-export async function toggleOrderStatus(req: Request, res: Response, next: NextFunction) {
-  try {
-    const id = parseIdParam(req.params.id);
-    const result = await orderService.toggleStatus(id);
-    return res.status(200).json(successResponse(200, 'Order status toggled successfully', result));
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function deleteOrder(req: Request, res: Response, next: NextFunction) {
-  try {
-    const id = parseIdParam(req.params.id);
-    const result = await orderService.delete(id);
-    return res.status(200).json(successResponse(200, result.message, null));
-  } catch (error) {
-    next(error);
-  }
-}
-
-/** Customer: get their own orders */
-export async function getMyOrders(req: Request, res: Response, next: NextFunction) {
-  try {
 
 export async function toggleOrderStatus(req: Request, res: Response, next: NextFunction) {
   try {
