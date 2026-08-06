@@ -49,15 +49,39 @@ export class NodemailerService {
     return { host, user, pass };
   }
 
-  private createTransporter(port: number) {
-    const { host, user, pass } = this.getSmtpConfig();
+  // Returns ordered list of host+port combos to try.
+  // smtp-relay.gmail.com is the GSuite SMTP relay that works from cloud IPs.
+  // smtp.gmail.com is the standard Gmail SMTP (blocked by some cloud providers).
+  private getSmtpAttempts() {
+    const { user, pass } = this.getSmtpConfig();
+    const isGsuite = user.includes('@') && !user.toLowerCase().includes('@gmail.com');
+    const attempts: Array<{ host: string; port: number }> = [];
+    if (isGsuite) {
+      // GSuite custom domain: try relay first (cloud-IP friendly), then standard
+      attempts.push(
+        { host: 'smtp-relay.gmail.com', port: 465 },
+        { host: 'smtp-relay.gmail.com', port: 587 },
+        { host: 'smtp.gmail.com', port: 465 },
+        { host: 'smtp.gmail.com', port: 587 },
+      );
+    } else {
+      attempts.push(
+        { host: 'smtp.gmail.com', port: 465 },
+        { host: 'smtp.gmail.com', port: 587 },
+      );
+    }
+    return attempts;
+  }
+
+  private createTransporter(host: string, port: number) {
+    const { user, pass } = this.getSmtpConfig();
     return nodemailer.createTransport({
       host,
       port,
       secure: port === 465,
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 18000,
       lookup: (hostname: string, _options: any, callback: any) => {
         dns.lookup(hostname, { family: 4 }, callback);
       },
@@ -298,18 +322,17 @@ export class NodemailerService {
       html,
     };
 
-    const portsToTry = [465, Number(env.SMTP_PORT || 587)];
-    const uniquePorts = Array.from(new Set(portsToTry));
+    const attempts = this.getSmtpAttempts();
     let lastError: any = null;
 
-    for (const port of uniquePorts) {
+    for (const { host, port } of attempts) {
       try {
-        const transporter = this.createTransporter(port);
+        const transporter = this.createTransporter(host, port);
         const info = await transporter.sendMail(mailOptions);
-        console.log(`[mail] Order confirmation email sent successfully for Order #${data.orderId} via port ${port}. MessageId: ${info.messageId}`);
+        console.log(`[mail] Order confirmation sent for Order #${data.orderId} via ${host}:${port}. MessageId: ${info.messageId}`);
         return;
       } catch (err: any) {
-        console.warn(`[mail] Delivery attempt on port ${port} failed (${err?.code || err?.message}). Retrying if ports left...`);
+        console.warn(`[mail] Attempt ${host}:${port} failed — ${err?.code || err?.message}`);
         lastError = err;
       }
     }
@@ -399,24 +422,24 @@ export class NodemailerService {
       html,
     };
 
-    const portsToTry = [465, Number(env.SMTP_PORT || 587)];
-    const uniquePorts = Array.from(new Set(portsToTry));
+    const attempts = this.getSmtpAttempts();
     let lastError: any = null;
 
-    for (const port of uniquePorts) {
+    for (const { host, port } of attempts) {
       try {
-        const transporter = this.createTransporter(port);
+        const transporter = this.createTransporter(host, port);
         const info = await transporter.sendMail(mailOptions);
-        console.log(`[mail] Admin custom email sent successfully to ${data.to} via port ${port}. MessageId: ${info.messageId}`);
+        console.log(`[mail] Admin custom email sent to ${data.to} via ${host}:${port}. MessageId: ${info.messageId}`);
         return;
       } catch (err: any) {
-        console.warn(`[mail] Custom email delivery attempt on port ${port} failed (${err?.code || err?.message}).`);
+        console.warn(`[mail] Attempt ${host}:${port} failed — ${err?.code || err?.message}`);
         lastError = err;
       }
     }
 
     if (lastError) {
-      throw lastError;
+      console.error('[mail] All SMTP attempts failed for admin custom email:', lastError?.message);
+      throw new Error(`Email delivery failed: ${lastError?.code || lastError?.message || 'SMTP connection error'}`);
     }
   }
 }
