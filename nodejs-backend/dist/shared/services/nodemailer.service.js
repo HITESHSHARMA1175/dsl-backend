@@ -24,15 +24,31 @@ class NodemailerService {
         const pass = env_1.env.SMTP_PASS || 'mkbeesmbwxidtlud';
         return { host, user, pass };
     }
-    createTransporter(port) {
-        const { host, user, pass } = this.getSmtpConfig();
+    // Returns ordered list of host+port combos to try.
+    // smtp-relay.gmail.com is the GSuite SMTP relay that works from cloud IPs.
+    // smtp.gmail.com is the standard Gmail SMTP (blocked by some cloud providers).
+    getSmtpAttempts() {
+        const { user, pass } = this.getSmtpConfig();
+        const isGsuite = user.includes('@') && !user.toLowerCase().includes('@gmail.com');
+        const attempts = [];
+        if (isGsuite) {
+            // GSuite custom domain: try relay first (cloud-IP friendly), then standard
+            attempts.push({ host: 'smtp-relay.gmail.com', port: 465 }, { host: 'smtp-relay.gmail.com', port: 587 }, { host: 'smtp.gmail.com', port: 465 }, { host: 'smtp.gmail.com', port: 587 });
+        }
+        else {
+            attempts.push({ host: 'smtp.gmail.com', port: 465 }, { host: 'smtp.gmail.com', port: 587 });
+        }
+        return attempts;
+    }
+    createTransporter(host, port) {
+        const { user, pass } = this.getSmtpConfig();
         return nodemailer_1.default.createTransport({
             host,
             port,
             secure: port === 465,
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 15000,
+            connectionTimeout: 12000,
+            greetingTimeout: 12000,
+            socketTimeout: 18000,
             lookup: (hostname, _options, callback) => {
                 dns_1.default.lookup(hostname, { family: 4 }, callback);
             },
@@ -262,23 +278,116 @@ class NodemailerService {
             subject: `Order Confirmation #${data.orderId} - ${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}`,
             html,
         };
-        const portsToTry = [465, Number(env_1.env.SMTP_PORT || 587)];
-        const uniquePorts = Array.from(new Set(portsToTry));
+        const attempts = this.getSmtpAttempts();
         let lastError = null;
-        for (const port of uniquePorts) {
+        for (const { host, port } of attempts) {
             try {
-                const transporter = this.createTransporter(port);
+                const transporter = this.createTransporter(host, port);
                 const info = await transporter.sendMail(mailOptions);
-                console.log(`[mail] Order confirmation email sent successfully for Order #${data.orderId} via port ${port}. MessageId: ${info.messageId}`);
+                console.log(`[mail] Order confirmation sent for Order #${data.orderId} via ${host}:${port}. MessageId: ${info.messageId}`);
                 return;
             }
             catch (err) {
-                console.warn(`[mail] Delivery attempt on port ${port} failed (${err?.code || err?.message}). Retrying if ports left...`);
+                console.warn(`[mail] Attempt ${host}:${port} failed — ${err?.code || err?.message}`);
                 lastError = err;
             }
         }
         if (lastError) {
             throw lastError;
+        }
+    }
+    async sendAdminCustomEmail(data) {
+        if (!this.isConfigured()) {
+            console.warn('[mail] SMTP not configured. Skipping custom email.');
+            return;
+        }
+        const brandName = env_1.env.SMTP_FROM_NAME || 'Diamond Skin London';
+        const recipientName = escapeHtml(data.patientName || 'Valued Patient');
+        const customSubject = data.subject.trim() || `Notification - ${brandName}`;
+        const formattedMessage = escapeHtml(data.message).replace(/\n/g, '<br/>');
+        const bookingRefText = data.bookingRef ? `Reference: ${escapeHtml(data.bookingRef)}` : '';
+        const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(customSubject)}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #070C18; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #070C18; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #111A33; border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);">
+          <tr>
+            <td align="center" style="background-color: #0B132B; padding: 32px 24px; border-bottom: 2px solid #D4AF37;">
+              <h1 style="margin: 0; color: #D4AF37; font-size: 22px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">
+                DIAMOND SKIN LONDON
+              </h1>
+              <p style="margin: 6px 0 0 0; color: #94A3B8; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;">
+                Aesthetic & Medical Clinic
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px 28px;">
+              <h2 style="margin: 0 0 16px 0; color: #FFFFFF; font-size: 18px; font-weight: 700;">
+                Dear ${recipientName},
+              </h2>
+              ${bookingRefText ? `<p style="margin: 0 0 16px 0; color: #D4AF37; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${bookingRefText}</p>` : ''}
+              <div style="color: #E2E8F0; font-size: 14px; line-height: 1.7; background-color: #0B132B; border: 1px solid #1F2D54; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                ${formattedMessage}
+              </div>
+              <p style="margin: 24px 0 0 0; color: #94A3B8; font-size: 13px; line-height: 1.6; border-top: 1px solid #1F2D54; padding-top: 20px;">
+                If you have any questions or need to get in touch with our team, please reply to this email or contact us at <a href="mailto:${escapeHtml(env_1.env.SMTP_USER)}" style="color: #D4AF37; text-decoration: none; font-weight: 600;">${escapeHtml(env_1.env.SMTP_USER)}</a>.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="background-color: #0B132B; padding: 24px; border-top: 1px solid #1F2D54;">
+              <p style="margin: 0; color: #D4AF37; font-size: 13px; font-weight: 700;">
+                ${escapeHtml(brandName)}
+              </p>
+              <p style="margin: 6px 0 0 0; color: #64748B; font-size: 11px;">
+                Premium Skin & Aesthetic Treatments in London
+              </p>
+              <p style="margin: 12px 0 0 0; color: #475569; font-size: 10px;">
+                © ${new Date().getFullYear()} ${escapeHtml(brandName)}. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+        const { user } = this.getSmtpConfig();
+        const fromEmail = env_1.env.SMTP_USER || user;
+        const mailOptions = {
+            from: `"${env_1.env.SMTP_FROM_NAME || 'Diamond Skin London'}" <${fromEmail}>`,
+            to: data.to,
+            subject: customSubject,
+            html,
+        };
+        const attempts = this.getSmtpAttempts();
+        let lastError = null;
+        for (const { host, port } of attempts) {
+            try {
+                const transporter = this.createTransporter(host, port);
+                const info = await transporter.sendMail(mailOptions);
+                console.log(`[mail] Admin custom email sent to ${data.to} via ${host}:${port}. MessageId: ${info.messageId}`);
+                return;
+            }
+            catch (err) {
+                console.warn(`[mail] Attempt ${host}:${port} failed — ${err?.code || err?.message}`);
+                lastError = err;
+            }
+        }
+        if (lastError) {
+            console.error('[mail] All SMTP attempts failed for admin custom email:', lastError?.message);
+            throw new Error(`Email delivery failed: ${lastError?.code || lastError?.message || 'SMTP connection error'}`);
         }
     }
 }
