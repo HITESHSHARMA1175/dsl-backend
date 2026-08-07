@@ -11,11 +11,32 @@ export class CartService {
 
   constructor(private prisma: any) {}
 
+  private parseBigIntId(id: any): bigint {
+    if (typeof id === 'bigint') return id;
+    if (typeof id === 'number') return BigInt(Math.max(0, Math.floor(id)));
+    const str = String(id || '0').trim();
+    if (/^\d+$/.test(str)) {
+      try { return BigInt(str); } catch { return BigInt(0); }
+    }
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return BigInt(Math.abs(hash) || 1);
+  }
+
   async list(sessionKey: string) {
-    const items = await this.prisma.guest_carts.findMany({
+    const rawItems = await this.prisma.guest_carts.findMany({
       where: { session: sessionKey },
       orderBy: { id: 'desc' },
     });
+
+    const items = rawItems.map((item: any) => ({
+      ...item,
+      id: Number(item.id),
+      product_id: item.product_id ? item.product_id.toString() : '0',
+    }));
 
     const total = items.reduce(
       (sum: number, item: any) => sum + Number(item.price) * item.qty,
@@ -27,11 +48,13 @@ export class CartService {
   }
 
   async add(sessionKey: string, ipAddress: string, data: any) {
+    const safeProductId = this.parseBigIntId(data.product_id);
+
     // If product already in cart for this session, increment qty
     const existing = await this.prisma.guest_carts.findFirst({
       where: {
         session: sessionKey,
-        product_id: data.product_id,
+        product_id: safeProductId,
         type: data.type || null,
       },
     });
@@ -47,7 +70,7 @@ export class CartService {
       data: {
         session: sessionKey,
         ip_address: ipAddress,
-        product_id: data.product_id,
+        product_id: safeProductId,
         product_name: data.product_name,
         price: data.price ?? 0,
         qty: data.qty || 1,
